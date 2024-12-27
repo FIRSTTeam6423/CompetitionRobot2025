@@ -1,2 +1,4 @@
-# 2025-Competition-Robot
-6423's code for FRC 2025 competition
+# FRC Team 6423's 2025 Codebase
+###### Robot code for reefscape
+
+
