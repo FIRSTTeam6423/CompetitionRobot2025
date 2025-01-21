@@ -106,10 +106,11 @@ tasks.withType(JavaCompile) {
 }
 
 // Build Constants generation
+project.compileJava.dependsOn(createVersionFile)
 gversion {
     srcDir = "src/main/java/"
 
-    classPackage = ROBOT_MAIN_CLASS
+    classPackage = "org.frc6423.frc2025"
     className = "BuildConstants"
     dateFormat = "yyyy-MM-dd HH:mm:ss z"
     timeZone = "UTC"
