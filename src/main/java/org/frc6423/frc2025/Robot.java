@@ -8,16 +8,15 @@ package org.frc6423.frc2025;
 
 import static org.frc6423.frc2025.Constants.*;
 
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Threads;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends LoggedRobot {
 
@@ -39,7 +38,7 @@ public class Robot extends LoggedRobot {
         setUseTiming(false);
         String logPath = LogFileUtil.findReplayLog();
         Logger.setReplaySource(new WPILOGReader(logPath));
-        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); 
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
         break;
     }
 
@@ -57,19 +56,17 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
 
     // Return to normal thread priority
-    Threads.setCurrentThreadPriority(false, 10);    
+    Threads.setCurrentThreadPriority(false, 10);
   }
 
   @Override
-  public void autonomousInit() {
-  }
+  public void autonomousInit() {}
 
   @Override
   public void autonomousPeriodic() {}
 
   @Override
-  public void teleopInit() {
-  }
+  public void teleopInit() {}
 
   @Override
   public void testInit() {

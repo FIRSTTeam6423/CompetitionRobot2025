@@ -40,9 +40,9 @@ public class Constants {
 
   /** Get selected robot type */
   public static RobotType getRobot() {
-    if(Robot.isReal() && m_robotType == RobotType.SIMULATED) {
-        new Alert("Simulated robot type selected; Defaulting to devbot", AlertType.kError);
-        return RobotType.DEVBOT;
+    if (Robot.isReal() && m_robotType == RobotType.SIMULATED) {
+      new Alert("Simulated robot type selected; Defaulting to devbot", AlertType.kError);
+      return RobotType.DEVBOT;
     }
     return m_robotType;
   }
