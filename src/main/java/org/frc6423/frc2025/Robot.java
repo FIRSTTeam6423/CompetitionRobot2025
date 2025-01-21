@@ -22,7 +22,12 @@ public class Robot extends LoggedRobot {
 
   public Robot() {
     // AKit init
-    Logger.recordMetadata("ProjectName", "FRCWMIronPatriots2025");
+    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
+    Logger.recordMetadata("Version", BuildConstants.VERSION);
+    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
+    Logger.recordMetadata("Dirty", String.valueOf(BuildConstants.DIRTY));
+    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
 
     switch (getDeployMode()) {
       case SIMULATION:
