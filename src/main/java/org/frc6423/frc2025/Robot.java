@@ -6,69 +6,73 @@
 
 package org.frc6423.frc2025;
 
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj2.command.Command;
+import static org.frc6423.frc2025.Constants.*;
+
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
-
-  private final RobotContainer m_robotContainer;
+public class Robot extends LoggedRobot {
 
   public Robot() {
-    m_robotContainer = new RobotContainer();
+    // AKit init
+    Logger.recordMetadata("ProjectName", "FRCWMIronPatriots2025");
+
+    switch (getDeployMode()) {
+      case SIMULATION:
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case REAL:
+        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case REPLAY:
+        setUseTiming(false);
+        String logPath = LogFileUtil.findReplayLog();
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); 
+        break;
+    }
+
+    Logger.start();
+
+    RobotController.setBrownoutVoltage(6.0);
   }
 
   @Override
   public void robotPeriodic() {
+    // Switch thread to high priority to improve loop timing
+    Threads.setCurrentThreadPriority(true, 99);
+
+    // Run command scheduler
     CommandScheduler.getInstance().run();
+
+    // Return to normal thread priority
+    Threads.setCurrentThreadPriority(false, 10);    
   }
 
   @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void disabledExit() {}
-
-  @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
   }
 
   @Override
   public void autonomousPeriodic() {}
 
   @Override
-  public void autonomousExit() {}
-
-  @Override
   public void teleopInit() {
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
   }
-
-  @Override
-  public void teleopPeriodic() {}
-
-  @Override
-  public void teleopExit() {}
 
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
   }
-
-  @Override
-  public void testPeriodic() {}
-
-  @Override
-  public void testExit() {}
 }
