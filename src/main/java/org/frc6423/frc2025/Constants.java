@@ -6,8 +6,13 @@
 
 package org.frc6423.frc2025;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import org.frc6423.frc2025.subsystems.swerve.module.ModuleIO;
+import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSpark;
 
 public class Constants {
 
@@ -53,5 +58,61 @@ public class Constants {
       case COMPBOT, DEVBOT -> Robot.isReal() ? DeployMode.REAL : DeployMode.REPLAY;
       case SIMULATED -> Robot.isReal() ? DeployMode.REAL : DeployMode.SIMULATION;
     };
+  }
+
+  // * SUBSYSTEM CONSTANTS
+
+  public class KDriveConstants {
+    public static final Translation2d[] kDevModuleLocs = new Translation2d[] {};
+
+    public static final Translation2d[] kCompModuleLocs = new Translation2d[] {};
+
+    // Devbot module configs
+    public static final ModuleConfig[] kDevModuleConfigs =
+        new ModuleConfig[] {
+          new ModuleConfig(RobotType.DEVBOT, 0, 0, 0, new Rotation2d(), false),
+          new ModuleConfig(RobotType.DEVBOT, 0, 0, 0, new Rotation2d(), false),
+          new ModuleConfig(RobotType.DEVBOT, 0, 0, 0, new Rotation2d(), false),
+          new ModuleConfig(RobotType.DEVBOT, 0, 0, 0, new Rotation2d(), false)
+        };
+
+    // Comp module configs
+    public static final ModuleConfig[] kCompModuleConfigs =
+        new ModuleConfig[] {
+          new ModuleConfig(RobotType.COMPBOT, 0, 0, 0, new Rotation2d(), false),
+          new ModuleConfig(RobotType.COMPBOT, 0, 0, 0, new Rotation2d(), false),
+          new ModuleConfig(RobotType.COMPBOT, 0, 0, 0, new Rotation2d(), false),
+          new ModuleConfig(RobotType.COMPBOT, 0, 0, 0, new Rotation2d(), false)
+        };
+
+    // Dev IOs
+    public static final ModuleIO[] kDevModuleIOs =
+        new ModuleIO[] {
+          new ModuleIOSpark(kDevModuleConfigs[0]),
+          new ModuleIOSpark(kDevModuleConfigs[0]),
+          new ModuleIOSpark(kDevModuleConfigs[0]),
+          new ModuleIOSpark(kDevModuleConfigs[0])
+        };
+
+    public static final double kPivotReduction = 5 / 1; // ! these values are wrong; check later
+    public static final double kDriveReduction = 5 / 1;
+
+    public static final double kWheelRadius = Units.inchesToMeters(4);
+
+    public static final double kPivotP = 0;
+    public static final double kPivotI = 0;
+    public static final double kPivotD = 0;
+
+    public static final double kDriveP = 0;
+    public static final double kDriveI = 0;
+    public static final double kDriveD = 0;
+
+    public record ModuleConfig(
+        RobotType type,
+        int pivotID,
+        int driveID,
+        int pivotABSID,
+        Rotation2d pivotOffset,
+        boolean inverted) {}
   }
 }
