@@ -94,8 +94,16 @@ public class Constants {
           new ModuleIOSpark(kDevModuleConfigs[0])
         };
 
+    public static enum kDriveControlMode {
+      OPENLOOP,
+      CLOSEDLOOP
+    }
+
     public static final double kPivotReduction = 5 / 1; // ! these values are wrong; check later
     public static final double kDriveReduction = 5 / 1;
+
+    public static final double kVoltageCompensation = 12.0;
+    public static final int kSmartCurrentLimit = 40;
 
     public static final double kWheelRadius = Units.inchesToMeters(4);
 
