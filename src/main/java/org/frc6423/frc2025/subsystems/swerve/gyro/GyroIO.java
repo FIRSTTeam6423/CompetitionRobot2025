@@ -6,4 +6,15 @@
 
 package org.frc6423.frc2025.subsystems.swerve.gyro;
 
-public class GyroIO {}
+import edu.wpi.first.math.geometry.Rotation3d;
+import org.littletonrobotics.junction.AutoLog;
+
+public interface GyroIO {
+  @AutoLog
+  public class GyroIOInputs {
+    public Rotation3d orientation = new Rotation3d();
+    public double omegaRadsPerSec = 0.0;
+  }
+
+  public void updateInputs(GyroIOInputs inputs);
+}

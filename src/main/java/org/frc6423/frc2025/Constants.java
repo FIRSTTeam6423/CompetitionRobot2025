@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.frc6423.frc2025.subsystems.swerve.module.ModuleIO;
 import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSpark;
 
+/** A class */
 public class Constants {
 
   // * Select which robot to initalize
@@ -61,7 +62,6 @@ public class Constants {
   }
 
   // * SUBSYSTEM CONSTANTS
-
   public class KDriveConstants {
     public static final Translation2d[] kDevModuleLocs = new Translation2d[] {};
 
@@ -94,7 +94,7 @@ public class Constants {
           new ModuleIOSpark(kDevModuleConfigs[0])
         };
 
-    public static enum kDriveControlMode {
+    public static enum DriveControlMode {
       OPENLOOP,
       CLOSEDLOOP
     }

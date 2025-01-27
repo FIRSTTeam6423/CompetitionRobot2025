@@ -8,99 +8,110 @@ package org.frc6423.frc2025.subsystems.swerve.module;
 
 import static org.frc6423.frc2025.Constants.KDriveConstants.*;
 
-import java.math.MathContext;
-
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
-
-import org.frc6423.frc2025.Constants.KDriveConstants.ModuleConfig;
-
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import org.frc6423.frc2025.Constants.KDriveConstants.ModuleConfig;
 
 public class ModuleIOSpark implements ModuleIO {
 
   private final SparkMax m_pivotMotor, m_driveMotor;
-  private final SparkMaxConfig m_pivotConfig, m_driveConfig;
-
+  private SparkMaxConfig m_pivotConfig, m_driveConfig;
   private final RelativeEncoder m_pivotRelativeEncoder, m_driveEncoder;
-  private final DutyCycleEncoder m_pivotEncoder;
+  private final AbsoluteEncoder m_pivotEncoder;
 
   private final SparkClosedLoopController m_pivotFeedback, m_driveFeedback;
-  private final SimpleMotorFeedforward m_driveFeedforward;
 
   public ModuleIOSpark(ModuleConfig config) {
     // Pivot init
-
     m_pivotMotor = new SparkMax(config.pivotID(), MotorType.kBrushless);
     m_pivotRelativeEncoder = m_pivotMotor.getEncoder();
-    m_pivotEncoder = new DutyCycleEncoder(config.pivotABSID());
+    m_pivotEncoder = m_pivotMotor.getAbsoluteEncoder();
 
     m_pivotFeedback = m_pivotMotor.getClosedLoopController();
     m_pivotConfig = new SparkMaxConfig();
 
     m_pivotConfig
-      .idleMode(IdleMode.kBrake)
-      .voltageCompensation(kVoltageCompensation)
-      .smartCurrentLimit(kSmartCurrentLimit);
-    
-    m_pivotConfig
-      .encoder
-      .inverted(true)
-      .positionConversionFactor(0.0)
-      .velocityConversionFactor(0.0) // ! Add conversion factors
-      .uvwAverageDepth(2);
+        .idleMode(IdleMode.kBrake)
+        .voltageCompensation(kVoltageCompensation)
+        .smartCurrentLimit(kSmartCurrentLimit);
 
     m_pivotConfig
-      .closedLoop
-      .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
-      .pid(kPivotP, kPivotI, kPivotD)
-      .positionWrappingEnabled(true)
-      .positionWrappingInputRange(-Math.PI, Math.PI);
+        .encoder
+        .inverted(true)
+        .positionConversionFactor(0.0)
+        .velocityConversionFactor(0.0) // ! Add conversion factors
+        .uvwAverageDepth(2);
 
-    m_pivotMotor.configure(m_pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_pivotConfig.absoluteEncoder.zeroOffset(config.pivotOffset().getRotations());
+
+    m_pivotConfig
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
+        .pid(kPivotP, kPivotI, kPivotD)
+        .positionWrappingEnabled(true)
+        .positionWrappingInputRange(-Math.PI, Math.PI);
+
+    m_pivotMotor.configure(
+        m_pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     // Drive init
-
     m_driveMotor = new SparkMax(config.driveID(), MotorType.kBrushless);
     m_driveEncoder = m_driveMotor.getEncoder();
-    
+
     m_driveFeedback = m_driveMotor.getClosedLoopController();
-    m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
     m_driveConfig = new SparkMaxConfig();
 
     m_driveConfig
-      .idleMode(IdleMode.kBrake)
-      .voltageCompensation(kVoltageCompensation)
-      .smartCurrentLimit(kSmartCurrentLimit);
+        .idleMode(IdleMode.kBrake)
+        .voltageCompensation(kVoltageCompensation)
+        .smartCurrentLimit(kSmartCurrentLimit);
 
     m_driveConfig
-      .encoder
-      .positionConversionFactor(0.0)
-      .positionConversionFactor(0.0) // ! Add conversion factors
-      .uvwAverageDepth(16)
-      .uvwMeasurementPeriod(32);
+        .encoder
+        .positionConversionFactor(0.0)
+        .positionConversionFactor(0.0) // ! Add conversion factors
+        .uvwAverageDepth(16)
+        .uvwMeasurementPeriod(32);
 
     m_driveConfig
-      .closedLoop
-      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .pid(kDriveP, kDriveI, kDriveD);
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .pid(kDriveP, kDriveI, kDriveD);
 
-    m_driveMotor.configure(m_driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_driveMotor.configure(
+        m_driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
-  public void updateInputs(ModuleIOInputs inputs) {}
+  public void updateInputs(ModuleIOInputs inputs) {
+    inputs.pivotEnabled = true; // !
+    inputs.driveEnabled = true;
+
+    inputs.pivotABSPose = Rotation2d.fromRotations(m_pivotEncoder.getPosition());
+    inputs.pivotPose = Rotation2d.fromRotations(m_pivotRelativeEncoder.getPosition());
+    inputs.pivotVelRadsPerSec =
+        Units.rotationsPerMinuteToRadiansPerSecond(m_pivotRelativeEncoder.getVelocity());
+    inputs.pivotAppliedVolts = m_pivotMotor.getAppliedOutput() * m_pivotMotor.getBusVoltage();
+    inputs.pivotSupplyCurrent = m_pivotMotor.getOutputCurrent();
+
+    inputs.drivePose = m_driveEncoder.getPosition();
+    inputs.driveVelRadsPerSec =
+        Units.rotationsPerMinuteToRadiansPerSecond(m_driveEncoder.getVelocity());
+    inputs.driveAppliedVolts = m_driveMotor.getAppliedOutput() * m_driveMotor.getBusVoltage();
+    inputs.driveSupplyCurrent = m_driveMotor.getOutputCurrent();
+  }
 
   @Override
   public void periodic() {}
@@ -121,20 +132,27 @@ public class ModuleIOSpark implements ModuleIO {
   }
 
   @Override
-  public void setDriveVelocity(double velMetersPerSec) {
-    m_driveFeedback.setReference(
-      velMetersPerSec, 
-      ControlType.kVelocity, 
-      ClosedLoopSlot.kSlot0, 
-      m_driveFeedforward.calculate(velMetersPerSec)
-    );
+  public void setDriveVelocity(double velMetersPerSec, double ff) {
+    m_driveFeedback.setReference(velMetersPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, ff);
   }
 
   @Override
-  public void setPivotCoastMode(boolean enabled) {}
+  public void setPivotCoastMode(boolean enabled) {
+    m_pivotConfig = new SparkMaxConfig();
+    m_pivotConfig.idleMode(enabled ? IdleMode.kCoast : IdleMode.kBrake);
+
+    m_pivotMotor.configure(
+        m_pivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+  }
 
   @Override
-  public void setDriveCoastMode(boolean enabled) {}
+  public void setDriveCoastMode(boolean enabled) {
+    m_driveConfig = new SparkMaxConfig();
+    m_driveConfig.idleMode(enabled ? IdleMode.kCoast : IdleMode.kBrake);
+
+    m_driveMotor.configure(
+        m_driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+  }
 
   @Override
   public void stop() {

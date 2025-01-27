@@ -8,6 +8,7 @@ package org.frc6423.frc2025.subsystems.swerve.module;
 
 import static org.frc6423.frc2025.Constants.KDriveConstants.*;
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -23,6 +24,8 @@ public class Module {
 
   private SwerveModuleState m_goalState;
 
+  private final SimpleMotorFeedforward m_driveFeedforward;
+
   private final Alert m_pivotConnectionAlert;
   private final Alert m_driveConnectionAlert;
 
@@ -31,12 +34,15 @@ public class Module {
     this.io = io;
     this.inputs = new ModuleIOInputsAutoLogged();
 
+    m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0); // ! Add constants later
+
     m_pivotConnectionAlert = new Alert(index + " pivot disconnected", AlertType.kWarning);
     m_driveConnectionAlert = new Alert(index + " drive disconnected", AlertType.kWarning);
   }
 
   /** Update Module */
   public void periodic() {
+    io.periodic();
     io.updateInputs(inputs);
     Logger.processInputs("Swerve/Module" + index, inputs);
 
@@ -45,16 +51,23 @@ public class Module {
   }
 
   /** Set swerve state goal */
-  public void setDesiredSate(SwerveModuleState goalState) {
-    m_goalState = goalState;
+  public void setDesiredSate(SwerveModuleState goalState, DriveControlMode controlMode) {
     Rotation2d currentAngle = getCurrentState().angle;
 
-    m_goalState.optimize(currentAngle);
-    // Decreases speed based on how far the module angle is from goal
-    m_goalState.cosineScale(currentAngle);
+    goalState.optimize(currentAngle);
+    // Scaless speed based on how far the module angle is from goal angle
+    goalState.speedMetersPerSecond *= goalState.angle.minus(currentAngle).getCos();
 
-    io.setPivotAngle(m_goalState.angle);
-    io.setDriveVelocity(m_goalState.speedMetersPerSecond); // / kDriveReduction);
+    io.setPivotAngle(goalState.angle);
+
+    if (controlMode == DriveControlMode.CLOSEDLOOP) {
+      io.setDriveVelocity(
+          goalState.speedMetersPerSecond,
+          m_driveFeedforward.calculate(goalState.speedMetersPerSecond)); // Closed loop control
+    } else {
+      io.setDriveVolts(
+          m_driveFeedforward.calculate(goalState.speedMetersPerSecond)); // Open Loop control
+    }
   }
 
   /** Enable or Disable module coast */
@@ -81,5 +94,10 @@ public class Module {
   /** Get current swerve module pose {@link SwerveModulePosition} */
   public SwerveModulePosition getCurrentPose() {
     return new SwerveModulePosition(inputs.drivePose, inputs.pivotPose);
+  }
+
+  /** Get module index */
+  public int getIndex() {
+    return index;
   }
 }
