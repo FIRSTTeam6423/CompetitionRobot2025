@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.frc6423.frc2025.subsystems.swerve.module.ModuleIO;
 import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSpark;
 
+import com.fasterxml.jackson.databind.Module;
+
 /** A class */
 public class Constants {
 
@@ -63,37 +65,33 @@ public class Constants {
 
   // * SUBSYSTEM CONSTANTS
   public class KDriveConstants {
+    // Swerve Constants
+    public static final double kSwerveRotationalP = 0.0;
+    public static final double kSwerveRotationalI = 0.0;
+    public static final double kSwerveRotationalD = 0.0;
+
+    // Module Constants
     public static final Translation2d[] kDevModuleLocs = new Translation2d[] {};
 
     public static final Translation2d[] kCompModuleLocs = new Translation2d[] {};
 
-    // Devbot module configs
-    public static final ModuleConfig[] kDevModuleConfigs =
-        new ModuleConfig[] {
-          new ModuleConfig(RobotType.DEVBOT, 0, 0, 0, new Rotation2d(), false),
-          new ModuleConfig(RobotType.DEVBOT, 0, 0, 0, new Rotation2d(), false),
-          new ModuleConfig(RobotType.DEVBOT, 0, 0, 0, new Rotation2d(), false),
-          new ModuleConfig(RobotType.DEVBOT, 0, 0, 0, new Rotation2d(), false)
-        };
+    public static ModuleConfig[] kDevBotConfigs = 
+      new ModuleConfig[] {
+        new ModuleConfig(1, 2, 0, Rotation2d.fromRadians(0), true),
+        new ModuleConfig(3, 4, 1, Rotation2d.fromRadians(0), true),
+        new ModuleConfig(5, 6, 2, Rotation2d.fromRadians(0), true),
+        new ModuleConfig(7, 8, 3, Rotation2d.fromRadians(0), true)
+      };
 
-    // Comp module configs
-    public static final ModuleConfig[] kCompModuleConfigs =
-        new ModuleConfig[] {
-          new ModuleConfig(RobotType.COMPBOT, 0, 0, 0, new Rotation2d(), false),
-          new ModuleConfig(RobotType.COMPBOT, 0, 0, 0, new Rotation2d(), false),
-          new ModuleConfig(RobotType.COMPBOT, 0, 0, 0, new Rotation2d(), false),
-          new ModuleConfig(RobotType.COMPBOT, 0, 0, 0, new Rotation2d(), false)
-        };
+    public static ModuleConfig[] kCompBotConfigs = 
+      new ModuleConfig[] {
+        new ModuleConfig(1, 2, 9, Rotation2d.fromRadians(0), true),
+        new ModuleConfig(3, 4, 10, Rotation2d.fromRadians(0), true),
+        new ModuleConfig(5, 6, 11, Rotation2d.fromRadians(0), true),
+        new ModuleConfig(7, 8, 12, Rotation2d.fromRadians(0), true)
+      };
 
-    // Dev IOs
-    public static final ModuleIO[] kDevModuleIOs =
-        new ModuleIO[] {
-          new ModuleIOSpark(kDevModuleConfigs[0]),
-          new ModuleIOSpark(kDevModuleConfigs[0]),
-          new ModuleIOSpark(kDevModuleConfigs[0]),
-          new ModuleIOSpark(kDevModuleConfigs[0])
-        };
-
+    // Global Module Constants (Same for all modules)
     public static enum DriveControlMode {
       OPENLOOP,
       CLOSEDLOOP
@@ -114,9 +112,8 @@ public class Constants {
     public static final double kDriveP = 0;
     public static final double kDriveI = 0;
     public static final double kDriveD = 0;
-
+    
     public record ModuleConfig(
-        RobotType type,
         int pivotID,
         int driveID,
         int pivotABSID,
