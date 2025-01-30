@@ -18,13 +18,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
-import java.util.function.DoubleSupplier;
-
-import org.frc6423.frc2025.Robot;
 import org.frc6423.frc2025.Constants.KDriveConstants.DriveControlMode;
+import org.frc6423.frc2025.Robot;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIO;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIONavX;
@@ -60,17 +57,16 @@ public class SwerveSubsystem extends SubsystemBase {
         new SwerveDrivePoseEstimator(
             m_swerveKinematics, new Rotation2d(), getModulePoses(), new Pose2d());
 
-    m_rotationalVelocityFeedback = new PIDController(
-      0, 
-      0, 
-      0); // !
+    m_rotationalVelocityFeedback = new PIDController(1, 0, 0); // !
   }
 
   @Override
   public void periodic() {
     // gyro update
-    if (Robot.isReal()) m_gryo.updateInputs(m_gyroInputs); 
-    else m_simulationHeading.rotateBy(Rotation2d.fromRadians(getSetpointVelocity().omegaRadiansPerSecond)); 
+    if (Robot.isReal()) m_gryo.updateInputs(m_gyroInputs);
+    else
+      m_simulationHeading.rotateBy(
+          Rotation2d.fromRadians(getSetpointVelocity().omegaRadiansPerSecond));
 
     Arrays.stream(m_modules).forEach(Module::periodic); // Update each module
 
@@ -82,68 +78,74 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /**
    * Drives Robot based on input velocities
-   * 
+   *
    * @param velXMetersPerSec X translation velocity supplier
    * @param velYMetersPerSec Y translation velocity supplier
    * @param velOmegaRadsPerSec Omega rotation velocity supplier
    * @return {@link Command}
    */
-  public Command drive(DoubleSupplier velXMetersPerSec, DoubleSupplier velYMetersPerSec, DoubleSupplier velOmegaRadsPerSec) {
-    return Commands.run(
-      () -> setSetpointVelocities(
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                velXMetersPerSec.getAsDouble(), 
-                velYMetersPerSec.getAsDouble(), 
-                velOmegaRadsPerSec.getAsDouble(), 
-                DriverStation.getAlliance().get() == Alliance.Blue 
-                  ? getHeading()
-                  : getHeading().minus(Rotation2d.fromRotations(0.5))),
-              DriveControlMode.OPENLOOP));
+  public Command drive(
+      double velXMetersPerSec, double velYMetersPerSec, double velOmegaRadsPerSec) {
+    return this.run(
+        () ->
+            setSetpointVelocities(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    velXMetersPerSec,
+                    velYMetersPerSec,
+                    velOmegaRadsPerSec,
+                    DriverStation.getAlliance().get() == Alliance.Blue
+                        ? getHeading()
+                        : getHeading().minus(Rotation2d.fromRotations(0.5))),
+                DriveControlMode.OPENLOOP));
   }
 
   /**
    * Drives Robot based on input velocities and desired heading
-   * 
+   *
    * @param velXMetersPerSec X translation velocity supplier
    * @param velYMetersPerSec Y translation velocity supplier
    * @param desiredHeading Desired robot orientation
    * @return {@link Command}
    */
-  public Command drive(DoubleSupplier velXMetersPerSec, DoubleSupplier velYMetersPerSec, Rotation2d desiredHeading) {
-    return Commands.run(
-      () -> setSetpointVelocities(
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                velXMetersPerSec.getAsDouble(), 
-                velYMetersPerSec.getAsDouble(), 
-                m_rotationalVelocityFeedback.calculate(getHeading().getRadians(), desiredHeading.getRadians()),
-                getHeading()), 
-              DriveControlMode.OPENLOOP));
+  public Command drive(
+      double velXMetersPerSec, double velYMetersPerSec, Rotation2d desiredHeading) {
+    return this.run(
+        () ->
+            setSetpointVelocities(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    velXMetersPerSec,
+                    velYMetersPerSec,
+                    m_rotationalVelocityFeedback.calculate(
+                        getHeading().getRadians(), desiredHeading.getRadians()),
+                    getHeading()),
+                DriveControlMode.OPENLOOP));
   }
 
   /** Set setpoint velocities */
   public void setSetpointVelocities(ChassisSpeeds desiredSpeeds, DriveControlMode controlMode) {
-    m_setpointVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(desiredSpeeds, getHeading()); // converts to field relative speeds
+    m_setpointVelocity =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            desiredSpeeds, getHeading()); // converts to field relative speeds
     setModuleStates(
-      m_swerveKinematics.toSwerveModuleStates(
-        ChassisSpeeds.discretize(m_setpointVelocity, 0.02)), 
-      controlMode
-    );
+        m_swerveKinematics.toSwerveModuleStates(ChassisSpeeds.discretize(m_setpointVelocity, 0.02)),
+        controlMode);
   }
 
   /** Set swerve module setpoints */
   public void setModuleStates(SwerveModuleState[] states, DriveControlMode mode) {
-    Arrays.stream(m_modules)
-      .forEach((m) -> m.setDesiredSate(states[m.getIndex()], mode));
+    Arrays.stream(m_modules).forEach((m) -> m.setDesiredSate(states[m.getIndex()], mode));
   }
 
-  /** Returns desired chassis velocities */ // !
+  /** Returns desired chassis velocities */
+  // !
   public ChassisSpeeds getSetpointVelocity() {
     return new ChassisSpeeds();
   }
 
   /** Get current velocity */
   public ChassisSpeeds getVelocity() {
-    return ChassisSpeeds.fromRobotRelativeSpeeds(m_swerveKinematics.toChassisSpeeds(getModuleStates()), getHeading());
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+        m_swerveKinematics.toChassisSpeeds(getModuleStates()), getHeading());
   }
 
   /** Get current heading */
@@ -160,8 +162,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Get Swerve Module States */
   public SwerveModuleState[] getModuleStates() {
-    return Arrays.stream(m_modules)
-        .map(Module::getCurrentState)
-        .toArray(SwerveModuleState[]::new);
+    return Arrays.stream(m_modules).map(Module::getCurrentState).toArray(SwerveModuleState[]::new);
   }
 }

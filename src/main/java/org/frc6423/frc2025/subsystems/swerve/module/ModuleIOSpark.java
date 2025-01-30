@@ -106,7 +106,7 @@ public class ModuleIOSpark implements ModuleIO {
     inputs.pivotAppliedVolts = m_pivotMotor.getAppliedOutput() * m_pivotMotor.getBusVoltage();
     inputs.pivotSupplyCurrent = m_pivotMotor.getOutputCurrent();
 
-    inputs.drivePose = m_driveEncoder.getPosition();
+    inputs.drivePoseRads = m_driveEncoder.getPosition();
     inputs.driveVelRadsPerSec =
         Units.rotationsPerMinuteToRadiansPerSecond(m_driveEncoder.getVelocity());
     inputs.driveAppliedVolts = m_driveMotor.getAppliedOutput() * m_driveMotor.getBusVoltage();

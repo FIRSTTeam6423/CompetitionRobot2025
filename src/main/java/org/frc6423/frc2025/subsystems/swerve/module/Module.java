@@ -34,7 +34,7 @@ public class Module {
     this.io = io;
     this.inputs = new ModuleIOInputsAutoLogged();
 
-    m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0); // ! Add constants later
+    m_driveFeedforward = new SimpleMotorFeedforward(0.088468, 2.1314); // ! Add constants later
 
     m_pivotConnectionAlert = new Alert(index + " pivot disconnected", AlertType.kWarning);
     m_driveConnectionAlert = new Alert(index + " drive disconnected", AlertType.kWarning);
@@ -93,7 +93,7 @@ public class Module {
 
   /** Get current swerve module pose {@link SwerveModulePosition} */
   public SwerveModulePosition getCurrentPose() {
-    return new SwerveModulePosition(inputs.drivePose, inputs.pivotPose);
+    return new SwerveModulePosition(inputs.drivePoseRads, inputs.pivotPose);
   }
 
   /** Get module index */

@@ -23,7 +23,7 @@ public interface ModuleIO {
     public double pivotSupplyCurrent = 0.0;
     public double pivotTorqueCurrent = 0.0;
 
-    public double drivePose = 0.0;
+    public double drivePoseRads = 0.0;
     public double driveVelRadsPerSec = 0.0;
     public double driveAppliedVolts = 0.0;
     public double driveSupplyCurrent = 0.0;

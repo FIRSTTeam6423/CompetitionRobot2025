@@ -11,10 +11,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import org.frc6423.frc2025.subsystems.swerve.module.ModuleIO;
-import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSpark;
-
-import com.fasterxml.jackson.databind.Module;
 
 /** A class */
 public class Constants {
@@ -66,30 +62,50 @@ public class Constants {
   // * SUBSYSTEM CONSTANTS
   public class KDriveConstants {
     // Swerve Constants
+    public static final double kDriveBaseWidth = Units.inchesToMeters(25.0);
+    public static final double kDriveBaseLength = Units.inchesToMeters(25.0);
+    public static final double kDriveBaseRadius =
+        Math.hypot(kDriveBaseWidth / 2.0, kDriveBaseLength / 2.0);
+
+    public static final double kMaxLinearSpeed = Units.feetToMeters(16);
+    public static final double kMaxAngularSpeed = kMaxLinearSpeed / kDriveBaseRadius;
+
     public static final double kSwerveRotationalP = 0.0;
     public static final double kSwerveRotationalI = 0.0;
     public static final double kSwerveRotationalD = 0.0;
 
     // Module Constants
-    public static final Translation2d[] kDevModuleLocs = new Translation2d[] {};
+    public static final Translation2d[] kDevModuleLocs =
+        new Translation2d[] {
+          new Translation2d(0.381, 0.381),
+          new Translation2d(0.381, -0.381),
+          new Translation2d(-0.381, 0.381),
+          new Translation2d(-0.381, -0.381)
+        };
 
-    public static final Translation2d[] kCompModuleLocs = new Translation2d[] {};
+    public static final Translation2d[] kCompModuleLocs =
+        new Translation2d[] {
+          new Translation2d(0.381, 0.381),
+          new Translation2d(0.381, -0.381),
+          new Translation2d(-0.381, 0.381),
+          new Translation2d(-0.381, -0.381)
+        };
 
-    public static ModuleConfig[] kDevBotConfigs = 
-      new ModuleConfig[] {
-        new ModuleConfig(1, 2, 0, Rotation2d.fromRadians(0), true),
-        new ModuleConfig(3, 4, 1, Rotation2d.fromRadians(0), true),
-        new ModuleConfig(5, 6, 2, Rotation2d.fromRadians(0), true),
-        new ModuleConfig(7, 8, 3, Rotation2d.fromRadians(0), true)
-      };
+    public static ModuleConfig[] kDevBotConfigs =
+        new ModuleConfig[] {
+          new ModuleConfig(1, 1, 2, 0, Rotation2d.fromRadians(0), true),
+          new ModuleConfig(2, 3, 4, 1, Rotation2d.fromRadians(0), true),
+          new ModuleConfig(3, 5, 6, 2, Rotation2d.fromRadians(0), true),
+          new ModuleConfig(4, 7, 8, 3, Rotation2d.fromRadians(0), true)
+        };
 
-    public static ModuleConfig[] kCompBotConfigs = 
-      new ModuleConfig[] {
-        new ModuleConfig(1, 2, 9, Rotation2d.fromRadians(0), true),
-        new ModuleConfig(3, 4, 10, Rotation2d.fromRadians(0), true),
-        new ModuleConfig(5, 6, 11, Rotation2d.fromRadians(0), true),
-        new ModuleConfig(7, 8, 12, Rotation2d.fromRadians(0), true)
-      };
+    public static ModuleConfig[] kCompBotConfigs =
+        new ModuleConfig[] {
+          new ModuleConfig(1, 1, 2, 9, Rotation2d.fromRadians(0), true),
+          new ModuleConfig(2, 3, 4, 10, Rotation2d.fromRadians(0), true),
+          new ModuleConfig(3, 5, 6, 11, Rotation2d.fromRadians(0), true),
+          new ModuleConfig(4, 7, 8, 12, Rotation2d.fromRadians(0), true)
+        };
 
     // Global Module Constants (Same for all modules)
     public static enum DriveControlMode {
@@ -105,15 +121,16 @@ public class Constants {
 
     public static final double kWheelRadius = Units.inchesToMeters(4);
 
-    public static final double kPivotP = 0;
+    public static final double kPivotP = 1;
     public static final double kPivotI = 0;
     public static final double kPivotD = 0;
 
-    public static final double kDriveP = 0;
+    public static final double kDriveP = 1;
     public static final double kDriveI = 0;
     public static final double kDriveD = 0;
-    
+
     public record ModuleConfig(
+        int index,
         int pivotID,
         int driveID,
         int pivotABSID,

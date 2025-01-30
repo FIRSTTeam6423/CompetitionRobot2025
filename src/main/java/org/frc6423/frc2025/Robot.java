@@ -7,10 +7,20 @@
 package org.frc6423.frc2025;
 
 import static org.frc6423.frc2025.Constants.*;
+import static org.frc6423.frc2025.Constants.KDriveConstants.kMaxLinearSpeed;
+import static org.frc6423.frc2025.util.ControllerUtil.*;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import java.util.Arrays;
+import org.frc6423.frc2025.Constants.KDriveConstants;
+import org.frc6423.frc2025.subsystems.swerve.SwerveSubsystem;
+import org.frc6423.frc2025.subsystems.swerve.module.ModuleIO;
+import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSim;
+import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSpark;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -19,6 +29,10 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
+
+  private final XboxController m_DriverController;
+
+  private final SwerveSubsystem m_swerveSubsystem;
 
   public Robot() {
     // AKit init
@@ -31,6 +45,7 @@ public class Robot extends LoggedRobot {
 
     switch (getDeployMode()) {
       case SIMULATION:
+        Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -50,6 +65,45 @@ public class Robot extends LoggedRobot {
     Logger.start();
 
     RobotController.setBrownoutVoltage(6.0);
+
+    m_DriverController = new XboxController(0);
+
+    // Subsystem init
+    ModuleIO[] moduleIos;
+    Translation2d[] moduleLocs;
+    switch (getRobot()) {
+      case SIMULATED:
+        // Swerve init
+        moduleLocs = KDriveConstants.kCompModuleLocs;
+        moduleIos = new ModuleIO[KDriveConstants.kCompBotConfigs.length];
+        Arrays.stream(KDriveConstants.kCompBotConfigs)
+            .forEach((c) -> moduleIos[c.index() - 1] = new ModuleIOSim(c));
+        m_swerveSubsystem = new SwerveSubsystem(moduleIos, moduleLocs);
+        break;
+      case DEVBOT:
+        // Swerve init
+        moduleLocs = KDriveConstants.kDevModuleLocs;
+        moduleIos = new ModuleIO[KDriveConstants.kDevBotConfigs.length];
+        Arrays.stream(KDriveConstants.kDevBotConfigs)
+            .forEach((c) -> moduleIos[c.index() - 1] = new ModuleIOSpark(c));
+        m_swerveSubsystem = new SwerveSubsystem(moduleIos, moduleLocs);
+        break;
+      default: // Compbot
+        // Swerve init
+        moduleLocs = KDriveConstants.kCompModuleLocs;
+        moduleIos = new ModuleIO[KDriveConstants.kCompBotConfigs.length];
+        Arrays.stream(KDriveConstants.kCompBotConfigs)
+            .forEach((c) -> moduleIos[c.index() - 1] = new ModuleIOSpark(c));
+        m_swerveSubsystem = new SwerveSubsystem(moduleIos, moduleLocs);
+        break;
+    }
+
+    // Default Commands
+    m_swerveSubsystem.setDefaultCommand(
+        m_swerveSubsystem.drive(
+            applyDeadband(m_DriverController::getLeftY) * kMaxLinearSpeed,
+            applyDeadband(m_DriverController::getLeftX) * kMaxLinearSpeed,
+            applyDeadband(m_DriverController::getRightX) * kMaxLinearSpeed));
   }
 
   @Override
