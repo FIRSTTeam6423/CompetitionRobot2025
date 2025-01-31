@@ -1,6 +1,6 @@
 ## Mechanical Mapping
 ---
-### CANivore 
+### CANivore loop
 | ID | Note |
 |----|------|
 | 0 | Pigeon |
@@ -19,3 +19,8 @@
 | 13 | Elevator 1 |
 | 14 | Elevator 2 |
 | 15 | Arm Pivot |
+
+---
+### RIO loop
+| ID | Note |
+|----|------|
