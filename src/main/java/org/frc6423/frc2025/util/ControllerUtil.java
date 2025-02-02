@@ -6,9 +6,8 @@
 
 package org.frc6423.frc2025.util;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.math.MathUtil;
+import java.util.function.DoubleSupplier;
 
 public class ControllerUtil {
   public static double applyDeadband(DoubleSupplier axis) {

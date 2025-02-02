@@ -8,6 +8,8 @@ package org.frc6423.frc2025.subsystems.swerve.module;
 
 import static org.frc6423.frc2025.Constants.KDriveConstants.*;
 
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
+
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -22,7 +24,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import org.frc6423.frc2025.Constants.KDriveConstants.ModuleConfig;
 
 public class ModuleIOSpark implements ModuleIO {
 
@@ -35,7 +36,7 @@ public class ModuleIOSpark implements ModuleIO {
 
   public ModuleIOSpark(ModuleConfig config) {
     // Pivot init
-    m_pivotMotor = new SparkMax(config.pivotID(), MotorType.kBrushless);
+    m_pivotMotor = new SparkMax(config.kPivotID, MotorType.kBrushless);
     m_pivotRelativeEncoder = m_pivotMotor.getEncoder();
     m_pivotEncoder = m_pivotMotor.getAbsoluteEncoder();
 
@@ -54,7 +55,7 @@ public class ModuleIOSpark implements ModuleIO {
         .velocityConversionFactor(0.0) // ! Add conversion factors
         .uvwAverageDepth(2);
 
-    m_pivotConfig.absoluteEncoder.zeroOffset(config.pivotOffset().getRotations());
+    m_pivotConfig.absoluteEncoder.zeroOffset(config.kPivotOffset.getRotations());
 
     m_pivotConfig
         .closedLoop
@@ -67,7 +68,7 @@ public class ModuleIOSpark implements ModuleIO {
         m_pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     // Drive init
-    m_driveMotor = new SparkMax(config.driveID(), MotorType.kBrushless);
+    m_driveMotor = new SparkMax(config.kDriveID, MotorType.kBrushless);
     m_driveEncoder = m_driveMotor.getEncoder();
 
     m_driveFeedback = m_driveMotor.getClosedLoopController();

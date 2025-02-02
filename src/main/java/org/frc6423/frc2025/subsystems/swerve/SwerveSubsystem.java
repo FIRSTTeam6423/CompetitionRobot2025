@@ -17,6 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
@@ -27,6 +28,9 @@ import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIONavX;
 import org.frc6423.frc2025.subsystems.swerve.module.Module;
 import org.frc6423.frc2025.subsystems.swerve.module.ModuleIO;
+import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSpark;
+import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -43,16 +47,24 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private final PIDController m_rotationalVelocityFeedback;
 
-  public SwerveSubsystem(ModuleIO[] ios, Translation2d[] locs) {
-    m_gryo = new GyroIONavX();
+  public SwerveSubsystem(SwerveConfig config) {
+    m_gryo = config.kGyroID == 100 ? new GyroIONavX() : new GyroIONavX(); // ! Add pigeon gyro
     m_gyroInputs = new GyroIOInputsAutoLogged();
     m_simulationHeading = new Rotation2d();
-    m_modules = new Module[ios.length];
-    for (int i = 0; i < ios.length; i++) {
-      m_modules[i] = new Module(ios[i], i);
-    }
+    m_modules = new Module[config.kModuleConfigs.length];
 
-    m_swerveKinematics = new SwerveDriveKinematics(locs);
+    Arrays.stream(config.kModuleConfigs)
+      .forEach((moduleConfig) -> {
+        int index = moduleConfig.kIndex - 1;
+
+        m_modules[index] = new Module(
+          (moduleConfig.kModuletype == moduleType.SPARKMAX) 
+            ? new ModuleIOSpark(moduleConfig) 
+            : new ModuleIOSpark(moduleConfig), // ! Add talonfx module 
+          index);
+      });
+
+    m_swerveKinematics = new SwerveDriveKinematics(config.kModuleLocs);
     m_swerveOdometry =
         new SwerveDrivePoseEstimator(
             m_swerveKinematics, new Rotation2d(), getModulePoses(), new Pose2d());

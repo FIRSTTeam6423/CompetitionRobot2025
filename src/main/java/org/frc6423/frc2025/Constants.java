@@ -6,6 +6,10 @@
 
 package org.frc6423.frc2025;
 
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
+import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -61,6 +65,30 @@ public class Constants {
 
   // * SUBSYSTEM CONSTANTS
   public class KDriveConstants {
+    // Swerve Configs
+    public static final SwerveConfig kDevBotConfig = new SwerveConfig(
+      new ModuleConfig[] {
+        new ModuleConfig(1, moduleType.SPARKMAX, 1, 2, 0, Rotation2d.fromRadians(0), true),
+        new ModuleConfig(2, moduleType.SPARKMAX,  3, 4, 1, Rotation2d.fromRadians(0), true),
+        new ModuleConfig(3, moduleType.SPARKMAX, 5, 6, 2, Rotation2d.fromRadians(0), true),
+        new ModuleConfig(4, moduleType.SPARKMAX, 7, 8, 3, Rotation2d.fromRadians(0), true)
+      }, 
+      new Translation2d[] {
+        new Translation2d(0.381, 0.381),
+        new Translation2d(0.381, -0.381),
+        new Translation2d(-0.381, 0.381),
+        new Translation2d(-0.381, -0.381)
+      },
+      23.47,
+      23.47,
+      2, 
+      2, 
+      56, // ! 
+      Units.feetToMeters(16), 
+      Units.feetToMeters(16), 
+      100
+    );
+
     // Swerve Constants
     public static final double kDriveBaseWidth = Units.inchesToMeters(25.0);
     public static final double kDriveBaseLength = Units.inchesToMeters(25.0);
@@ -73,39 +101,6 @@ public class Constants {
     public static final double kSwerveRotationalP = 0.0;
     public static final double kSwerveRotationalI = 0.0;
     public static final double kSwerveRotationalD = 0.0;
-
-    // Module Constants
-    public static final Translation2d[] kDevModuleLocs =
-        new Translation2d[] {
-          new Translation2d(0.381, 0.381),
-          new Translation2d(0.381, -0.381),
-          new Translation2d(-0.381, 0.381),
-          new Translation2d(-0.381, -0.381)
-        };
-
-    public static final Translation2d[] kCompModuleLocs =
-        new Translation2d[] {
-          new Translation2d(0.381, 0.381),
-          new Translation2d(0.381, -0.381),
-          new Translation2d(-0.381, 0.381),
-          new Translation2d(-0.381, -0.381)
-        };
-
-    public static ModuleConfig[] kDevBotConfigs =
-        new ModuleConfig[] {
-          new ModuleConfig(1, 1, 2, 0, Rotation2d.fromRadians(0), true),
-          new ModuleConfig(2, 3, 4, 1, Rotation2d.fromRadians(0), true),
-          new ModuleConfig(3, 5, 6, 2, Rotation2d.fromRadians(0), true),
-          new ModuleConfig(4, 7, 8, 3, Rotation2d.fromRadians(0), true)
-        };
-
-    public static ModuleConfig[] kCompBotConfigs =
-        new ModuleConfig[] {
-          new ModuleConfig(1, 1, 2, 9, Rotation2d.fromRadians(0), true),
-          new ModuleConfig(2, 3, 4, 10, Rotation2d.fromRadians(0), true),
-          new ModuleConfig(3, 5, 6, 11, Rotation2d.fromRadians(0), true),
-          new ModuleConfig(4, 7, 8, 12, Rotation2d.fromRadians(0), true)
-        };
 
     // Global Module Constants (Same for all modules)
     public static enum DriveControlMode {
@@ -128,13 +123,5 @@ public class Constants {
     public static final double kDriveP = 1;
     public static final double kDriveI = 0;
     public static final double kDriveD = 0;
-
-    public record ModuleConfig(
-        int index,
-        int pivotID,
-        int driveID,
-        int pivotABSID,
-        Rotation2d pivotOffset,
-        boolean inverted) {}
   }
 }

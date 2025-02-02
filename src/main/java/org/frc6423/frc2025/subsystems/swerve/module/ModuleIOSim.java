@@ -8,12 +8,13 @@ package org.frc6423.frc2025.subsystems.swerve.module;
 
 import static org.frc6423.frc2025.Constants.KDriveConstants.*;
 
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import org.frc6423.frc2025.Constants.KDriveConstants.ModuleConfig;
 
 public class ModuleIOSim implements ModuleIO {
 
