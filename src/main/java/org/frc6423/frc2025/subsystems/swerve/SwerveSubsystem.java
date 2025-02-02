@@ -10,14 +10,12 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
@@ -27,7 +25,6 @@ import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIO;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIONavX;
 import org.frc6423.frc2025.subsystems.swerve.module.Module;
-import org.frc6423.frc2025.subsystems.swerve.module.ModuleIO;
 import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSpark;
 import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
@@ -149,7 +146,6 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /** Returns desired chassis velocities */
-  // !
   public ChassisSpeeds getSetpointVelocity() {
     return new ChassisSpeeds();
   }
