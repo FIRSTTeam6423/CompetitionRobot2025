@@ -48,12 +48,9 @@ public interface ModuleIO {
   /** Set Module velocity goal */
   public void setDriveVelocity(double velMetersPerSec, double ff);
 
-  /** Enable or Disable module coast (Pivot) */
-  public void setPivotCoastMode(boolean enabled);
-
-  /** Enable or Disable module coast (Drive) */
-  public void setDriveCoastMode(boolean enabled);
-
-  /** Set all motor input to 0 */
-  public void stop();
+  /** Stop all motor inputs */
+  public default void stop() {
+    setPivotVolts(0);
+    setDriveVolts(0);
+  };
 }

@@ -70,12 +70,6 @@ public class Module {
     }
   }
 
-  /** Enable or Disable module coast */
-  public void setCoastMode(boolean enabled) {
-    io.setPivotCoastMode(enabled);
-    io.setDriveCoastMode(enabled);
-  }
-
   /** Set all Module motor input to 0 */
   public void stopModuleInputs() {
     io.stop();

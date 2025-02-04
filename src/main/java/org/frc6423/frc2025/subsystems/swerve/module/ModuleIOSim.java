@@ -8,29 +8,47 @@ package org.frc6423.frc2025.subsystems.swerve.module;
 
 import static org.frc6423.frc2025.Constants.KDriveConstants.*;
 
-import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
-
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
+
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.ChassisReference;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
 public class ModuleIOSim implements ModuleIO {
-
   private final DCMotorSim m_pivotSim, m_driveSim;
-  private final PIDController m_pivotFeedback, m_driveFeedback;
+  private final TalonFX m_driveMotor;
+  private final VoltageOut m_driveVoltage;
+  private final VelocityTorqueCurrentFOC m_driveVelocityControl;
+
+  private final PIDController m_pivotFeedback;
+
+  private double pivotAppliedVolts;
 
   public ModuleIOSim(ModuleConfig config) {
+    DCMotor pivotMotor = DCMotor.getKrakenX60(1);
+    DCMotor driveMotor = DCMotor.getKrakenX60(1);
+
+    // ! Apply talon config
+    m_driveMotor = new TalonFX(config.kDriveID);
+    m_driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
+    m_driveVelocityControl = new VelocityTorqueCurrentFOC(0.0).withSlot(0);
+
     m_pivotSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(2.1314, 0.33291), DCMotor.getKrakenX60(1));
+            LinearSystemId.createDCMotorSystem(pivotMotor, 0.004, kPivotReduction), pivotMotor);
     m_driveSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(2.1314, 0.33291), DCMotor.getKrakenX60(1));
+            LinearSystemId.createDCMotorSystem(driveMotor, 0.025, kDriveReduction), driveMotor);
 
     m_pivotFeedback = new PIDController(kPivotP, kPivotI, kPivotD);
-    m_driveFeedback = new PIDController(kDriveP, kDriveI, kDriveD);
 
     m_pivotFeedback.enableContinuousInput(-Math.PI, Math.PI);
   }
@@ -53,19 +71,28 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    TalonFXSimState driveSimState = m_driveMotor.getSimState();
+    driveSimState.Orientation = ChassisReference.Clockwise_Positive;
+
+    m_driveSim.setInput(driveSimState.getMotorVoltage());
+      
+    m_pivotSim.update(0.02);
+    m_driveSim.update(0.02);
+    driveSimState.setRotorVelocity(
+      (m_driveSim.getAngularVelocityRPM() / 60) * kDriveReduction
+    );
+  }
 
   @Override
   public void setPivotVolts(double volts) {
-    // System.out.println(volts);
-    m_pivotSim.setInputVoltage(volts);
-    m_pivotSim.update(0.02);
+    pivotAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0); 
+    m_pivotSim.setInputVoltage(pivotAppliedVolts);
   }
 
   @Override
   public void setDriveVolts(double volts) {
-    m_driveSim.setInputVoltage(volts);
-    m_driveSim.update(0.02);
+    m_driveMotor.setControl(m_driveVoltage.withOutput(volts).withEnableFOC(true));    
   }
 
   @Override
@@ -77,16 +104,8 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public void setDriveVelocity(double velMetersPerSec, double ff) {
-    setDriveVolts(
-        m_driveFeedback.calculate(
-            m_driveSim.getAngularVelocityRadPerSec(), velMetersPerSec / kWheelRadius));
+    m_driveMotor.setControl(m_driveVelocityControl.withVelocity(velMetersPerSec).withFeedForward(ff)); // !
   }
-
-  @Override
-  public void setPivotCoastMode(boolean enabled) {}
-
-  @Override
-  public void setDriveCoastMode(boolean enabled) {}
 
   @Override
   public void stop() {

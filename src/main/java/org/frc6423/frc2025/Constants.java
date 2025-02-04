@@ -6,15 +6,14 @@
 
 package org.frc6423.frc2025;
 
-import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
-import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
-import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
+import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
 
 /** A class */
 public class Constants {
@@ -66,28 +65,28 @@ public class Constants {
   // * SUBSYSTEM CONSTANTS
   public class KDriveConstants {
     // Swerve Configs
-    public static final SwerveConfig kDevBotConfig = new SwerveConfig(
-      new ModuleConfig[] {
-        new ModuleConfig(1, moduleType.SPARKMAX, 1, 2, 0, Rotation2d.fromRadians(0), true),
-        new ModuleConfig(2, moduleType.SPARKMAX,  3, 4, 1, Rotation2d.fromRadians(0), true),
-        new ModuleConfig(3, moduleType.SPARKMAX, 5, 6, 2, Rotation2d.fromRadians(0), true),
-        new ModuleConfig(4, moduleType.SPARKMAX, 7, 8, 3, Rotation2d.fromRadians(0), true)
-      }, 
-      new Translation2d[] {
-        new Translation2d(0.381, 0.381),
-        new Translation2d(0.381, -0.381),
-        new Translation2d(-0.381, 0.381),
-        new Translation2d(-0.381, -0.381)
-      },
-      23.47,
-      23.47,
-      2, 
-      2, 
-      56, // ! 
-      Units.feetToMeters(16), 
-      Units.feetToMeters(16), 
-      100
-    );
+    public static final SwerveConfig kDevBotConfig =
+        new SwerveConfig(
+            new ModuleConfig[] {
+              new ModuleConfig(1, moduleType.SPARKMAX, 1, 2, 0, Rotation2d.fromRadians(0), true),
+              new ModuleConfig(2, moduleType.SPARKMAX, 3, 4, 1, Rotation2d.fromRadians(0), true),
+              new ModuleConfig(3, moduleType.SPARKMAX, 5, 6, 2, Rotation2d.fromRadians(0), true),
+              new ModuleConfig(4, moduleType.SPARKMAX, 7, 8, 3, Rotation2d.fromRadians(0), true)
+            },
+            new Translation2d[] {
+              new Translation2d(0.381, 0.381),
+              new Translation2d(0.381, -0.381),
+              new Translation2d(-0.381, 0.381),
+              new Translation2d(-0.381, -0.381)
+            },
+            23.47,
+            23.47,
+            2,
+            2,
+            56, // !
+            Units.feetToMeters(16),
+            Units.feetToMeters(16),
+            100);
 
     // Swerve Constants
     public static final double kDriveBaseWidth = Units.inchesToMeters(25.0);

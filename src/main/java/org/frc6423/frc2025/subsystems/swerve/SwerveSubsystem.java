@@ -26,8 +26,8 @@ import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIONavX;
 import org.frc6423.frc2025.subsystems.swerve.module.Module;
 import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSpark;
-import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
+import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -39,7 +39,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private Rotation2d m_simulationHeading;
 
   private final SwerveDriveKinematics m_swerveKinematics;
-  private final SwerveDrivePoseEstimator m_swerveOdometry;
+  private final SwerveDrivePoseEstimator m_swervePoseEstimator;
   private ChassisSpeeds m_setpointVelocity;
 
   private final PIDController m_rotationalVelocityFeedback;
@@ -51,18 +51,20 @@ public class SwerveSubsystem extends SubsystemBase {
     m_modules = new Module[config.kModuleConfigs.length];
 
     Arrays.stream(config.kModuleConfigs)
-      .forEach((moduleConfig) -> {
-        int index = moduleConfig.kIndex - 1;
+        .forEach(
+            (moduleConfig) -> {
+              int index = moduleConfig.kIndex - 1;
 
-        m_modules[index] = new Module(
-          (moduleConfig.kModuletype == moduleType.SPARKMAX) 
-            ? new ModuleIOSpark(moduleConfig) 
-            : new ModuleIOSpark(moduleConfig), // ! Add talonfx module 
-          index);
-      });
+              m_modules[index] =
+                  new Module(
+                      (moduleConfig.kModuletype == moduleType.SPARKMAX)
+                          ? new ModuleIOSpark(moduleConfig)
+                          : new ModuleIOSpark(moduleConfig), // ! Add talonfx module
+                      index);
+            });
 
     m_swerveKinematics = new SwerveDriveKinematics(config.kModuleLocs);
-    m_swerveOdometry =
+    m_swervePoseEstimator =
         new SwerveDrivePoseEstimator(
             m_swerveKinematics, new Rotation2d(), getModulePoses(), new Pose2d());
 

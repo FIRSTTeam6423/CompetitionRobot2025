@@ -8,8 +8,6 @@ package org.frc6423.frc2025.subsystems.swerve.module;
 
 import static org.frc6423.frc2025.Constants.KDriveConstants.*;
 
-import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
-
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -24,6 +22,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 
 public class ModuleIOSpark implements ModuleIO {
 
@@ -135,24 +134,6 @@ public class ModuleIOSpark implements ModuleIO {
   @Override
   public void setDriveVelocity(double velMetersPerSec, double ff) {
     m_driveFeedback.setReference(velMetersPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, ff);
-  }
-
-  @Override
-  public void setPivotCoastMode(boolean enabled) {
-    m_pivotConfig = new SparkMaxConfig();
-    m_pivotConfig.idleMode(enabled ? IdleMode.kCoast : IdleMode.kBrake);
-
-    m_pivotMotor.configure(
-        m_pivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-  }
-
-  @Override
-  public void setDriveCoastMode(boolean enabled) {
-    m_driveConfig = new SparkMaxConfig();
-    m_driveConfig.idleMode(enabled ? IdleMode.kCoast : IdleMode.kBrake);
-
-    m_driveMotor.configure(
-        m_driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   @Override

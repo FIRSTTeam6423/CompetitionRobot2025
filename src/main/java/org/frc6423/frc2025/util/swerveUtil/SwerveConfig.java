@@ -26,7 +26,7 @@ public class SwerveConfig {
 
   /**
    * Creates a new Swerve config
-   * 
+   *
    * @param moduleConfigs
    * @param moduleLocs
    * @param trackWidthY Distance between center of wheels (inches)
