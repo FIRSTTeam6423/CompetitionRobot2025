@@ -13,6 +13,9 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+
 import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
 
 /** A class */
@@ -64,6 +67,10 @@ public class Constants {
 
   // * SUBSYSTEM CONSTANTS
   public class KDriveConstants {
+
+    private static final TalonFXConfiguration kPivotMotorConfig = new TalonFXConfiguration()
+      .
+
     // Swerve Configs
     public static final SwerveConfig kDevBotConfig =
         new SwerveConfig(

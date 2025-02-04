@@ -8,6 +8,11 @@ package org.frc6423.frc2025.subsystems.swerve.module;
 
 import static org.frc6423.frc2025.Constants.KDriveConstants.*;
 
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.ChassisReference;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,12 +20,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
-
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.sim.ChassisReference;
-import com.ctre.phoenix6.sim.TalonFXSimState;
 
 public class ModuleIOSim implements ModuleIO {
   private final DCMotorSim m_pivotSim, m_driveSim;
@@ -76,23 +75,21 @@ public class ModuleIOSim implements ModuleIO {
     driveSimState.Orientation = ChassisReference.Clockwise_Positive;
 
     m_driveSim.setInput(driveSimState.getMotorVoltage());
-      
+
     m_pivotSim.update(0.02);
     m_driveSim.update(0.02);
-    driveSimState.setRotorVelocity(
-      (m_driveSim.getAngularVelocityRPM() / 60) * kDriveReduction
-    );
+    driveSimState.setRotorVelocity((m_driveSim.getAngularVelocityRPM() / 60) * kDriveReduction);
   }
 
   @Override
   public void setPivotVolts(double volts) {
-    pivotAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0); 
+    pivotAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
     m_pivotSim.setInputVoltage(pivotAppliedVolts);
   }
 
   @Override
   public void setDriveVolts(double volts) {
-    m_driveMotor.setControl(m_driveVoltage.withOutput(volts).withEnableFOC(true));    
+    m_driveMotor.setControl(m_driveVoltage.withOutput(volts).withEnableFOC(true));
   }
 
   @Override
@@ -104,7 +101,8 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public void setDriveVelocity(double velMetersPerSec, double ff) {
-    m_driveMotor.setControl(m_driveVelocityControl.withVelocity(velMetersPerSec).withFeedForward(ff)); // !
+    m_driveMotor.setControl(
+        m_driveVelocityControl.withVelocity(velMetersPerSec).withFeedForward(ff)); // !
   }
 
   @Override

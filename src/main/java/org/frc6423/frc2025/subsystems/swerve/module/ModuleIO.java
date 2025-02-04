@@ -52,5 +52,6 @@ public interface ModuleIO {
   public default void stop() {
     setPivotVolts(0);
     setDriveVolts(0);
-  };
+  }
+  ;
 }
