@@ -14,7 +14,11 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
 
@@ -66,12 +70,31 @@ public class Constants {
   }
 
   // * SUBSYSTEM CONSTANTS
-  public class KDriveConstants {
-
-    private static final TalonFXConfiguration kPivotMotorConfig = new TalonFXConfiguration()
-      .
-
+  public class KDriveConstants {    
     // Swerve Configs
+    public static final SwerveConfig kCompBotConfig =
+        new SwerveConfig(
+            new ModuleConfig[] {
+              new ModuleConfig(1, moduleType.TALONFX, 1, 2, 0, Rotation2d.fromRadians(0), true, getPivotConfig(), getDriveConfig(), getCANcoderConfig()),
+              new ModuleConfig(2, moduleType.TALONFX, 3, 4, 1, Rotation2d.fromRadians(0), true, getPivotConfig(), getDriveConfig(), getCANcoderConfig()),
+              new ModuleConfig(3, moduleType.TALONFX, 5, 6, 2, Rotation2d.fromRadians(0), true, getPivotConfig(), getDriveConfig(), getCANcoderConfig()),
+              new ModuleConfig(4, moduleType.TALONFX, 7, 8, 3, Rotation2d.fromRadians(0), true, getPivotConfig(), getDriveConfig(), getCANcoderConfig())
+            },
+            new Translation2d[] {
+              new Translation2d(0.381, 0.381),
+              new Translation2d(0.381, -0.381),
+              new Translation2d(-0.381, 0.381),
+              new Translation2d(-0.381, -0.381)
+            },
+            23.47,
+            23.47,
+            2,
+            2,
+            56, // !
+            Units.feetToMeters(16),
+            Units.feetToMeters(16),
+            100);
+
     public static final SwerveConfig kDevBotConfig =
         new SwerveConfig(
             new ModuleConfig[] {
@@ -118,7 +141,8 @@ public class Constants {
     public static final double kDriveReduction = 5 / 1;
 
     public static final double kVoltageCompensation = 12.0;
-    public static final int kSmartCurrentLimit = 40;
+    public static final int kPivotCurrentLimitAmps = 40;
+    public static final int kDriveCurrentLimitAmps = 40;
 
     public static final double kWheelRadius = Units.inchesToMeters(4);
 
@@ -129,5 +153,46 @@ public class Constants {
     public static final double kDriveP = 1;
     public static final double kDriveI = 0;
     public static final double kDriveD = 0;
+
+    private static TalonFXConfiguration getPivotConfig() {
+      TalonFXConfiguration config = new TalonFXConfiguration();
+
+      config.Audio.BeepOnBoot = true; // boop
+
+      config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+      config.CurrentLimits.StatorCurrentLimit = kPivotCurrentLimitAmps;
+      config.CurrentLimits.StatorCurrentLimitEnable = true;
+
+      // Torque
+      config.TorqueCurrent.PeakForwardTorqueCurrent = kPivotCurrentLimitAmps;
+      config.TorqueCurrent.PeakReverseTorqueCurrent = -kPivotCurrentLimitAmps;
+      
+      // Feedback config
+      config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+      config.Feedback.RotorToSensorRatio = kPivotReduction;
+      config.Feedback.SensorToMechanismRatio = 1.0;
+      config.Feedback.FeedbackRotorOffset = 0.0;
+      config.ClosedLoopGeneral.ContinuousWrap = true; // Takes the shortest path
+
+      // Gains
+      config.Slot0.kP = 0.0;
+      config.Slot0.kI = 0.0;
+      config.Slot0.kD = 0.0;
+
+      config.Slot0.kV = 0.0;
+      config.Slot0.kA = 0.0;
+      config.Slot0.kS = 0.0;
+
+      config.MotionMagic.MotionMagicCruiseVelocity = 0;
+      config.MotionMagic.MotionMagicAcceleration = 0;
+      config.MotionMagic.MotionMagicJerk = 0;
+
+      return config;
+    }
+
+    private static TalonFXConfiguration getDriveConfig() {}
+
+    private static CANcoderConfiguration getCANcoderConfig() {}
   }
 }

@@ -35,8 +35,9 @@ public class ModuleIOSim implements ModuleIO {
     DCMotor pivotMotor = DCMotor.getKrakenX60(1);
     DCMotor driveMotor = DCMotor.getKrakenX60(1);
 
-    // ! Apply talon config
     m_driveMotor = new TalonFX(config.kDriveID);
+    m_driveMotor.getConfigurator().apply(config.kDriveConfig);
+
     m_driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
     m_driveVelocityControl = new VelocityTorqueCurrentFOC(0.0).withSlot(0);
 
