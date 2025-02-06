@@ -6,8 +6,6 @@
 
 package org.frc6423.frc2025.subsystems.swerve.module;
 
-import static org.frc6423.frc2025.Constants.KDriveConstants.*;
-
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -30,25 +28,27 @@ public class ModuleIOSim implements ModuleIO {
   private final PIDController m_pivotFeedback;
 
   private double pivotAppliedVolts;
+  private double driveReduction;
 
   public ModuleIOSim(ModuleConfig config) {
     DCMotor pivotMotor = DCMotor.getKrakenX60(1);
     DCMotor driveMotor = DCMotor.getKrakenX60(1);
 
     m_driveMotor = new TalonFX(config.kDriveID);
-    m_driveMotor.getConfigurator().apply(config.kDriveConfig);
+    m_driveMotor.getConfigurator().apply(config.kDriveConfigTalonFX);
 
     m_driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
     m_driveVelocityControl = new VelocityTorqueCurrentFOC(0.0).withSlot(0);
 
     m_pivotSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(pivotMotor, 0.004, kPivotReduction), pivotMotor);
+            LinearSystemId.createDCMotorSystem(pivotMotor, 0.004, config.kPivotConfigTalonFX.Feedback.SensorToMechanismRatio), pivotMotor);
+    driveReduction = config.kDriveConfigTalonFX.Feedback.SensorToMechanismRatio;
     m_driveSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(driveMotor, 0.025, kDriveReduction), driveMotor);
+            LinearSystemId.createDCMotorSystem(driveMotor, 0.025, driveReduction), driveMotor);
 
-    m_pivotFeedback = new PIDController(kPivotP, kPivotI, kPivotD);
+    m_pivotFeedback = new PIDController(config.kPivotConfigTalonFX.Slot0.kP, config.kPivotConfigTalonFX.Slot0.kI, config.kPivotConfigTalonFX.Slot0.kD);
 
     m_pivotFeedback.enableContinuousInput(-Math.PI, Math.PI);
   }
@@ -79,7 +79,7 @@ public class ModuleIOSim implements ModuleIO {
 
     m_pivotSim.update(0.02);
     m_driveSim.update(0.02);
-    driveSimState.setRotorVelocity((m_driveSim.getAngularVelocityRPM() / 60) * kDriveReduction);
+    driveSimState.setRotorVelocity((m_driveSim.getAngularVelocityRPM() / 60) * driveReduction);
   }
 
   @Override

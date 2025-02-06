@@ -19,14 +19,15 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
-import org.frc6423.frc2025.Constants.KDriveConstants.DriveControlMode;
 import org.frc6423.frc2025.Robot;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIO;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIONavX;
 import org.frc6423.frc2025.subsystems.swerve.module.Module;
+import org.frc6423.frc2025.subsystems.swerve.module.Module.DriveControlMode;
 import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOSpark;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
+import org.frc6423.frc2025.util.swerveUtil.SwerveConfig.GyroType;
 import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
 import org.littletonrobotics.junction.Logger;
 
@@ -45,12 +46,17 @@ public class SwerveSubsystem extends SubsystemBase {
   private final PIDController m_rotationalVelocityFeedback;
 
   public SwerveSubsystem(SwerveConfig config) {
-    m_gryo = config.kGyroID == 100 ? new GyroIONavX() : new GyroIONavX(); // ! Add pigeon gyro
+    m_gryo = 
+      (config.getGyroType() == GyroType.NAVX) 
+        ? new GyroIONavX() 
+        : new GyroIONavX(); // ! Add pigeon gyro
     m_gyroInputs = new GyroIOInputsAutoLogged();
     m_simulationHeading = new Rotation2d();
-    m_modules = new Module[config.kModuleConfigs.length];
 
-    Arrays.stream(config.kModuleConfigs)
+    var moduleConfigs = config.getModuleConfigs();
+    m_modules = new Module[moduleConfigs.length];
+
+    Arrays.stream(moduleConfigs)
         .forEach(
             (moduleConfig) -> {
               int index = moduleConfig.kIndex - 1;
@@ -63,7 +69,7 @@ public class SwerveSubsystem extends SubsystemBase {
                       index);
             });
 
-    m_swerveKinematics = new SwerveDriveKinematics(config.kModuleLocs);
+    m_swerveKinematics = new SwerveDriveKinematics(config.getModuleLocs());
     m_swervePoseEstimator =
         new SwerveDrivePoseEstimator(
             m_swerveKinematics, new Rotation2d(), getModulePoses(), new Pose2d());

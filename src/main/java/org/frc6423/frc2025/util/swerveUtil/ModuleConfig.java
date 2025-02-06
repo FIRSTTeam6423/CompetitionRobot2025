@@ -8,10 +8,10 @@ package org.frc6423.frc2025.util.swerveUtil;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class ModuleConfig {
@@ -25,17 +25,14 @@ public class ModuleConfig {
   public Rotation2d kPivotOffset;
   public boolean kPivotInverted;
 
-  public TalonFXConfiguration kPivotConfig, kDriveConfig;
+  public TalonFXConfiguration kPivotConfigTalonFX, kDriveConfigTalonFX;
   public CANcoderConfiguration kCANcoderConfig;
 
-  public static enum moduleType {
-    SPARKMAX,
-    TALONFX
-  }
+  public SparkMaxConfig kPivotConfigSparkMax, kDriveConfigSparkMax;
 
+  /** Create a new TalonFX modul */
   public ModuleConfig(
       int index,
-      moduleType type,
       int pivotID,
       int driveID,
       int pivotABSID,
@@ -45,7 +42,7 @@ public class ModuleConfig {
       TalonFXConfiguration driveConfig,
       CANcoderConfiguration CANcoderConfig) {
     this.kIndex = index;
-    this.kModuletype = type;
+    this.kModuletype = moduleType.TALONFX;
     this.kPivotID = pivotID;
     this.kDriveID = driveID;
     this.kPivotABSID = pivotABSID;
@@ -58,26 +55,34 @@ public class ModuleConfig {
 
     pivotConfig.Feedback.FeedbackRemoteSensorID = kPivotABSID;
 
-    this.kPivotConfig = pivotConfig;
-    this.kDriveConfig = driveConfig;
+    this.kPivotConfigTalonFX = pivotConfig;
+    this.kDriveConfigTalonFX = driveConfig;
     this.kCANcoderConfig = CANcoderConfig;
-
   }
 
+  /** Create a new SparkMax module */
   public ModuleConfig(
       int index,
-      moduleType type,
       int pivotID,
       int driveID,
       int pivotABSID,
       Rotation2d pivotOffset,
-      boolean pivotInverted) {
+      boolean pivotInverted,
+      SparkMaxConfig pivotConfig,
+      SparkMaxConfig driveConfig) {
     this.kIndex = index;
-    this.kModuletype = type;
+    this.kModuletype = moduleType.SPARKMAX;
     this.kPivotID = pivotID;
     this.kDriveID = driveID;
     this.kPivotABSID = pivotABSID;
     this.kPivotOffset = pivotOffset;
     this.kPivotInverted = pivotInverted;
+    this.kPivotConfigSparkMax = pivotConfig;
+    this.kDriveConfigSparkMax = driveConfig;
+  }
+
+  public static enum moduleType {
+    SPARKMAX,
+    TALONFX
   }
 }

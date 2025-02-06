@@ -6,8 +6,6 @@
 
 package org.frc6423.frc2025.subsystems.swerve.module;
 
-import static org.frc6423.frc2025.Constants.KDriveConstants.*;
-
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -17,8 +15,6 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -40,28 +36,7 @@ public class ModuleIOSpark implements ModuleIO {
     m_pivotEncoder = m_pivotMotor.getAbsoluteEncoder();
 
     m_pivotFeedback = m_pivotMotor.getClosedLoopController();
-    m_pivotConfig = new SparkMaxConfig();
-
-    m_pivotConfig
-        .idleMode(IdleMode.kBrake)
-        .voltageCompensation(kVoltageCompensation)
-        .smartCurrentLimit(kSmartCurrentLimit);
-
-    m_pivotConfig
-        .encoder
-        .inverted(true)
-        .positionConversionFactor(0.0)
-        .velocityConversionFactor(0.0) // ! Add conversion factors
-        .uvwAverageDepth(2);
-
-    m_pivotConfig.absoluteEncoder.zeroOffset(config.kPivotOffset.getRotations());
-
-    m_pivotConfig
-        .closedLoop
-        .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
-        .pid(kPivotP, kPivotI, kPivotD)
-        .positionWrappingEnabled(true)
-        .positionWrappingInputRange(-Math.PI, Math.PI);
+    m_pivotConfig = config.kPivotConfigSparkMax;
 
     m_pivotMotor.configure(
         m_pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -71,24 +46,7 @@ public class ModuleIOSpark implements ModuleIO {
     m_driveEncoder = m_driveMotor.getEncoder();
 
     m_driveFeedback = m_driveMotor.getClosedLoopController();
-    m_driveConfig = new SparkMaxConfig();
-
-    m_driveConfig
-        .idleMode(IdleMode.kBrake)
-        .voltageCompensation(kVoltageCompensation)
-        .smartCurrentLimit(kSmartCurrentLimit);
-
-    m_driveConfig
-        .encoder
-        .positionConversionFactor(0.0)
-        .positionConversionFactor(0.0) // ! Add conversion factors
-        .uvwAverageDepth(16)
-        .uvwMeasurementPeriod(32);
-
-    m_driveConfig
-        .closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pid(kDriveP, kDriveI, kDriveD);
+    m_driveConfig = config.kDriveConfigSparkMax;
 
     m_driveMotor.configure(
         m_driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

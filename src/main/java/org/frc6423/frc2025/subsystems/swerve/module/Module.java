@@ -6,7 +6,7 @@
 
 package org.frc6423.frc2025.subsystems.swerve.module;
 
-import static org.frc6423.frc2025.Constants.KDriveConstants.*;
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
-
   private final int index;
   private final ModuleIO io;
   private final ModuleIOInputsAutoLogged inputs;
@@ -82,7 +81,7 @@ public class Module {
 
   /** Get current swerve module state {@link SwerveModuleState} */
   public SwerveModuleState getCurrentState() {
-    return new SwerveModuleState(inputs.driveVelRadsPerSec * kWheelRadius, inputs.pivotABSPose);
+    return new SwerveModuleState(inputs.driveVelRadsPerSec, inputs.pivotABSPose);
   }
 
   /** Get current swerve module pose {@link SwerveModulePosition} */
@@ -93,5 +92,10 @@ public class Module {
   /** Get module index */
   public int getIndex() {
     return index;
+  }
+  
+  public static enum DriveControlMode {
+      OPENLOOP,
+      CLOSEDLOOP
   }
 }
