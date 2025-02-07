@@ -36,9 +36,13 @@ public interface ModuleIO {
   /** Update module hardware */
   public void periodic();
 
-  public void setPivotVolts(double volts, boolean focEnabled);
+  public default void setPivotVolts(double volts, boolean focEnabled) {
+    setPivotVolts(volts);
+  }
 
-  public void setDriveVolts(double volts, boolean focEnabled);
+  public default void setDriveVolts(double volts, boolean focEnabled) {
+    setDriveVolts(volts);
+  }
 
   /** Set Pivot motor voltage */
   public default void setPivotVolts(double volts) {
