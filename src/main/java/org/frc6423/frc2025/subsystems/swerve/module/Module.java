@@ -5,7 +5,9 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 
 public class Module {
     private final ModuleIO m_IO;
@@ -35,13 +37,13 @@ public class Module {
 
     /** Periodically ran logic */
     public void periodic() {
-        Logger.processInputs("Swerve/Module" + m_index, m_inputs);
+        Logger.processInputs("Swerve/Module" + getModuleIndex(), m_inputs);
     }
 
     /** Run SwerveModuleState setpoint */
     public SwerveModuleState runSetpoint(SwerveModuleState setpointState) {
         setpointState.optimize(getPivotAngle());
-        setpointState.speedMetersPerSecond *= setpointState.angle.minus(getPivotAngle()).getCos();
+        setpointState.speedMetersPerSecond *= Math.cos(setpointState.angle.minus(getPivotAngle()).getRadians());
 
         double speedMPS = setpointState.speedMetersPerSecond;
         m_IO.setPivotAngle(setpointState.angle);
@@ -56,9 +58,11 @@ public class Module {
     }
 
     /** Runs SwerveModuleState setpoint but runs drive in open loop mode */
-    public SwerveModuleState runSetpointOpenloop(SwerveModuleState setpointState, boolean FOCEnabled) {
+    public SwerveModuleState runSetpointOpenloop(double voltage, Rotation2d angle, boolean FOCEnabled) {
+        SwerveModuleState setpointState = new SwerveModuleState(voltage, angle);
+
         setpointState.optimize(getPivotAngle());
-        setpointState.speedMetersPerSecond *= setpointState.angle.minus(getPivotAngle()).getCos();
+        setpointState.speedMetersPerSecond *= Math.cos(setpointState.angle.minus(getPivotAngle()).getRadians());
 
         double speedMPS = setpointState.speedMetersPerSecond;
         m_IO.setPivotAngle(setpointState.angle);
@@ -92,8 +96,33 @@ public class Module {
         return m_index;
     }
 
+    /** Get Module config */
+    public ModuleConfig getModuleConfig() {
+        return m_config;
+    }
+
+    /** Gets Drive Speed in MPS */
+    public double getVelMetersPerSec() {
+        return m_inputs.driveVelRadsPerSec * m_config.kWheelRadiusMeters;
+    }
+
     /** returns current module angle */
     public Rotation2d getPivotAngle() {
         return m_inputs.pivotABSPose;
+    }
+
+    /** Returns drive pose in meters */
+    public double getPoseMeters() {
+        return m_inputs.drivePoseRads * m_config.kWheelRadiusMeters; 
+    }
+
+    /** Returns swerve field pose */
+    public SwerveModulePosition getModulePose() {
+        return new SwerveModulePosition(getPoseMeters(), getPivotAngle());
+    }
+    
+    /** Returns Module state */
+    public SwerveModuleState getModuleState() {
+        return new SwerveModuleState(getVelMetersPerSec(), getPivotAngle());
     }
 }

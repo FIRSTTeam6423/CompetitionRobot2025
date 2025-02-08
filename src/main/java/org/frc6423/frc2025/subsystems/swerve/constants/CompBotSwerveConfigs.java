@@ -1,5 +1,7 @@
 package org.frc6423.frc2025.subsystems.swerve.constants;
 
+import java.util.Arrays;
+
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
 
@@ -94,7 +96,7 @@ public class CompBotSwerveConfigs extends SwerveConfig {
 
     @Override
     public ModuleConfig[] getModuleConfigs() {
-        return new ModuleConfig[] {
+        var configs = new ModuleConfig[] {
             new ModuleConfig(
                 1, 
                 1, 
@@ -132,6 +134,11 @@ public class CompBotSwerveConfigs extends SwerveConfig {
                 getPivotConfigSparkMax(), 
                 getDriveConfigSparkMax()),
         };
+
+        Arrays.stream(configs)
+            .forEach((c) -> c.kWheelRadiusMeters = Units.inchesToMeters(getWheelRadiusInches())); // Shut up
+
+        return configs;
     }
 
     // Gains

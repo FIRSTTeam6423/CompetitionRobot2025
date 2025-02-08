@@ -12,6 +12,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 
 public class ModuleConfig {
   public int kIndex;
@@ -28,6 +29,8 @@ public class ModuleConfig {
   public CANcoderConfiguration kCANcoderConfig;
 
   public SparkMaxConfig kPivotConfigSparkMax, kDriveConfigSparkMax;
+
+  public double kWheelRadiusMeters = Units.inchesToMeters(2);
 
   /** Create a new TalonFX modul */
   public ModuleConfig(
