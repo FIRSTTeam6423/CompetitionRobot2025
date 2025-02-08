@@ -104,6 +104,9 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
+  public void enableCoast(boolean enabled) {}
+
+  @Override
   public void stop() {
     m_pivotSim.setInputVoltage(0);
     m_driveSim.setInputVoltage(0);

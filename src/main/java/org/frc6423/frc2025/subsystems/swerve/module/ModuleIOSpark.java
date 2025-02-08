@@ -16,6 +16,8 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
@@ -89,6 +91,16 @@ public class ModuleIOSpark implements ModuleIO {
   @Override
   public void setDriveVelocity(double velMetersPerSec, double ff) {
     m_driveFeedback.setReference(velMetersPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, ff);
+  }
+
+  @Override
+  public void enableCoast(boolean enabled) {
+    IdleMode idleMode = enabled ? IdleMode.kCoast : IdleMode.kBrake;
+    m_pivotConfig.idleMode(idleMode);
+    m_driveConfig.idleMode(idleMode);
+
+    m_pivotMotor.configure(m_pivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_driveMotor.configure(m_driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   @Override

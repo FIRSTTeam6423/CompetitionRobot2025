@@ -4,12 +4,14 @@ import org.frc6423.frc2025.util.motorUtil.TalonFXUtil;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -18,6 +20,8 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     private final TalonFX m_pivotMotor, m_driveMotor;
     private final CANcoder m_pivotCANcoder;
+
+    private final TalonFXConfiguration m_pivotConfig, m_driveConfig;
 
     // Control Requests
     private final VoltageOut m_voltReq;
@@ -32,6 +36,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     public ModuleIOTalonFX(ModuleConfig config) {
         m_pivotMotor = new TalonFX(config.kPivotID);
         m_driveMotor = new TalonFX(config.kDriveID);
+
+        m_pivotConfig = config.kPivotConfigTalonFX;
+        m_driveConfig = config.kDriveConfigTalonFX;
 
         TalonFXUtil.registerMotor(m_pivotMotor);
         TalonFXUtil.registerMotor(m_driveMotor);
@@ -141,6 +148,16 @@ public class ModuleIOTalonFX implements ModuleIO {
                 .withVelocity(velMetersPerSec)
                 .withFeedForward(ff)
         );
+    }
+
+    @Override
+    public void enableCoast(boolean enabled) {
+        NeutralModeValue idleMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
+        m_pivotConfig.MotorOutput.NeutralMode = idleMode;
+        m_driveConfig.MotorOutput.NeutralMode = idleMode;
+
+        m_pivotMotor.getConfigurator().apply(m_pivotConfig);
+        m_driveMotor.getConfigurator().apply(m_driveConfig);
     }
 
     @Override

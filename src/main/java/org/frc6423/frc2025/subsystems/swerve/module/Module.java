@@ -76,15 +76,15 @@ public class Module {
         m_IO.setDriveTorqueCurrent(currentAmps);
     }
 
-    /** Stop all motor input */
-    public void stop() {
-        m_IO.stop();
-    }
-    
     /** Enable module coasting */
     public void enableCoast(boolean enabled) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'enableCoast'");
+    }
+
+    /** Stop all motor input */
+    public void stop() {
+        m_IO.stop();
     }
 
     /** Get Module index */

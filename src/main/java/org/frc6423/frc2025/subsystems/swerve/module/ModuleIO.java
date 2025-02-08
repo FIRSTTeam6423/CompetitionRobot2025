@@ -63,10 +63,11 @@ public interface ModuleIO {
   /** Set Module velocity goal */
   public void setDriveVelocity(double velMetersPerSec, double ff);
 
+  public void enableCoast(boolean enabled);
+
   /** Stop all motor inputs */
   public default void stop() {
     setPivotVolts(0);
     setDriveVolts(0);
   }
-  ;
 }
