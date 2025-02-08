@@ -41,7 +41,6 @@ public class Module {
 
   /** Update Module */
   public void periodic() {
-    io.periodic();
     io.updateInputs(inputs);
     Logger.processInputs("Swerve/Module" + index, inputs);
 
