@@ -55,6 +55,15 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
+    TalonFXSimState driveSimState = m_driveMotor.getSimState();
+    driveSimState.Orientation = ChassisReference.Clockwise_Positive;
+
+    m_driveSim.setInput(driveSimState.getMotorVoltage());
+
+    m_pivotSim.update(0.02);
+    m_driveSim.update(0.02);
+    driveSimState.setRotorVelocity((m_driveSim.getAngularVelocityRPM() / 60) * driveReduction);
+    
     inputs.pivotEnabled = true;
     inputs.driveEnabled = true;
 
@@ -68,18 +77,6 @@ public class ModuleIOSim implements ModuleIO {
     inputs.driveVelRadsPerSec = m_driveSim.getAngularVelocityRadPerSec();
     inputs.driveAppliedVolts = m_driveSim.getInputVoltage();
     inputs.driveSupplyCurrent = m_driveSim.getCurrentDrawAmps();
-  }
-
-  @Override
-  public void periodic() {
-    TalonFXSimState driveSimState = m_driveMotor.getSimState();
-    driveSimState.Orientation = ChassisReference.Clockwise_Positive;
-
-    m_driveSim.setInput(driveSimState.getMotorVoltage());
-
-    m_pivotSim.update(0.02);
-    m_driveSim.update(0.02);
-    driveSimState.setRotorVelocity((m_driveSim.getAngularVelocityRPM() / 60) * driveReduction);
   }
 
   @Override

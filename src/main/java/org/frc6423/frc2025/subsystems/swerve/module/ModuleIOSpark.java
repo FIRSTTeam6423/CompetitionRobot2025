@@ -72,9 +72,6 @@ public class ModuleIOSpark implements ModuleIO {
   }
 
   @Override
-  public void periodic() {}
-
-  @Override
   public void setPivotVolts(double volts) {
     m_pivotMotor.setVoltage(volts);
   }

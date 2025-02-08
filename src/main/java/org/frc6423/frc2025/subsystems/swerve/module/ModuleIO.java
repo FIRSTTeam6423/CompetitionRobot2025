@@ -33,9 +33,6 @@ public interface ModuleIO {
   /** Updates logged akit values */
   public void updateInputs(ModuleIOInputs inputs);
 
-  /** Update module hardware */
-  public void periodic();
-
   public default void setPivotVolts(double volts, boolean focEnabled) {
     setPivotVolts(volts);
   }
@@ -53,6 +50,12 @@ public interface ModuleIO {
   public default void setDriveVolts(double volts) {
     setDriveVolts(volts, true);
   }
+
+  /** Set Pivot torque current */
+  public default void setPivotTorqueCurrent(double currentAmps) {}
+
+  /** Set Drive torque current */
+  public default void setDriveTorqueCurrent(double currentAmps) {}
 
   /** Set Module angle goal */
   public void setPivotAngle(Rotation2d angle);
