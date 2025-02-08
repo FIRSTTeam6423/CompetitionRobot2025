@@ -1,100 +1,99 @@
-// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
-// https://github.com/FIRSTTeam6423
-// 
-// Open Source Software; you can modify and/or share it under the terms of
-// MIT license file in the root directory of this project
-
 package org.frc6423.frc2025.subsystems.swerve.module;
 
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
-import org.littletonrobotics.junction.Logger;
 
 public class Module {
-  private final int index;
-  private final ModuleIO io;
-  private final ModuleIOInputsAutoLogged inputs;
+    private final ModuleIO m_IO;
+    
+    private final int m_index;
+    private final ModuleConfig m_config;
 
-  private SwerveModuleState m_goalState;
+    private final ModuleIOInputsAutoLogged m_inputs;
 
-  private final SimpleMotorFeedforward m_driveFeedforward;
+    private SimpleMotorFeedforward m_driveff;
 
-  private final Alert m_pivotConnectionAlert;
-  private final Alert m_driveConnectionAlert;
+    public Module(ModuleConfig config) {
+        m_IO = new ModuleIOTalonFX(config);
 
-  public Module(ModuleIO io, int index) {
-    this.index = index;
-    this.io = io;
-    this.inputs = new ModuleIOInputsAutoLogged();
+        m_index = config.kIndex;
+        this.m_config = config;
 
-    m_driveFeedforward = new SimpleMotorFeedforward(0.088468, 2.1314); // ! Add constants later
+        m_inputs = new ModuleIOInputsAutoLogged();
 
-    m_pivotConnectionAlert = new Alert(index + " pivot disconnected", AlertType.kWarning);
-    m_driveConnectionAlert = new Alert(index + " drive disconnected", AlertType.kWarning);
-  }
-
-  /** Update Module */
-  public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Swerve/Module" + index, inputs);
-
-    m_pivotConnectionAlert.set(inputs.pivotEnabled);
-    m_driveConnectionAlert.set(inputs.driveEnabled);
-  }
-
-  /** Set swerve state goal */
-  public void setDesiredSate(SwerveModuleState goalState, DriveControlMode controlMode) {
-    Rotation2d currentAngle = getCurrentState().angle;
-
-    goalState.optimize(currentAngle);
-    // Scaless speed based on how far the module angle is from goal angle
-    goalState.speedMetersPerSecond *= goalState.angle.minus(currentAngle).getCos();
-
-    io.setPivotAngle(goalState.angle);
-
-    if (controlMode == DriveControlMode.CLOSEDLOOP) {
-      io.setDriveVelocity(
-          goalState.speedMetersPerSecond,
-          m_driveFeedforward.calculate(goalState.speedMetersPerSecond)); // Closed loop control
-    } else {
-      io.setDriveVolts(
-          m_driveFeedforward.calculate(goalState.speedMetersPerSecond)); // Open Loop control
+        m_driveff = new SimpleMotorFeedforward(0.0, 0.0);
     }
-  }
 
-  /** Set all Module motor input to 0 */
-  public void stopModuleInputs() {
-    io.stop();
-  }
+    /** Update auto logged inputs */
+    public void updateInputs() {
+        m_IO.updateInputs(m_inputs);
+    }
 
-  /** Get current goal state */
-  public SwerveModuleState getDesiredState() {
-    return m_goalState;
-  }
+    /** Periodically ran logic */
+    public void periodic() {
+        Logger.processInputs("Swerve/Module" + m_index, m_inputs);
+    }
 
-  /** Get current swerve module state {@link SwerveModuleState} */
-  public SwerveModuleState getCurrentState() {
-    return new SwerveModuleState(inputs.driveVelRadsPerSec, inputs.pivotABSPose);
-  }
+    /** Run SwerveModuleState setpoint */
+    public SwerveModuleState runSetpoint(SwerveModuleState setpointState) {
+        setpointState.optimize(getPivotAngle());
+        setpointState.speedMetersPerSecond *= setpointState.angle.minus(getPivotAngle()).getCos();
 
-  /** Get current swerve module pose {@link SwerveModulePosition} */
-  public SwerveModulePosition getCurrentPose() {
-    return new SwerveModulePosition(inputs.drivePoseRads, inputs.pivotPose);
-  }
+        double speedMPS = setpointState.speedMetersPerSecond;
+        m_IO.setPivotAngle(setpointState.angle);
+        m_IO.setDriveVelocity(speedMPS, m_driveff.calculate(speedMPS)); // !
+        return setpointState;
+    }
 
-  /** Get module index */
-  public int getIndex() {
-    return index;
-  }
-  
-  public static enum DriveControlMode {
-      OPENLOOP,
-      CLOSEDLOOP
-  }
+    /** Run SwerveModuleState setpoint with setpoint wheel torque (torque-based ff) */
+    public SwerveModuleState runSetpoint(SwerveModuleState setpointState, double driveTorqueNm) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'runSetpoint'");
+    }
+
+    /** Runs SwerveModuleState setpoint but runs drive in open loop mode */
+    public SwerveModuleState runSetpointOpenloop(SwerveModuleState setpointState, boolean FOCEnabled) {
+        setpointState.optimize(getPivotAngle());
+        setpointState.speedMetersPerSecond *= setpointState.angle.minus(getPivotAngle()).getCos();
+
+        double speedMPS = setpointState.speedMetersPerSecond;
+        m_IO.setPivotAngle(setpointState.angle);
+        m_IO.setDriveVolts(speedMPS, FOCEnabled); // !
+        return new SwerveModuleState();
+    }
+
+    /** Set pivot angle setpoint */
+    public void setPivotAngle(Rotation2d desiredAngle) {
+        m_IO.setPivotAngle(desiredAngle);
+    }
+
+    /** Set drive torque current setpoint */
+    public void runDriveCurrent(double currentAmps) {
+        m_IO.setDriveTorqueCurrent(currentAmps);
+    }
+
+    /** Stop all motor input */
+    public void stop() {
+        m_IO.stop();
+    }
+    
+    /** Enable module coasting */
+    public void enableCoast(boolean enabled) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'enableCoast'");
+    }
+
+    /** Get Module index */
+    public int getModuleIndex() {
+        return m_index;
+    }
+
+    /** returns current module angle */
+    public Rotation2d getPivotAngle() {
+        return m_inputs.pivotABSPose;
+    }
 }

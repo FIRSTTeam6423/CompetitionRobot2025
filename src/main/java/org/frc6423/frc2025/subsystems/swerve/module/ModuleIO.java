@@ -33,11 +33,11 @@ public interface ModuleIO {
   /** Updates logged akit values */
   public void updateInputs(ModuleIOInputs inputs);
 
-  public default void setPivotVolts(double volts, boolean focEnabled) {
+  public default void setPivotVolts(double volts, boolean FOCEnabled) {
     setPivotVolts(volts);
   }
 
-  public default void setDriveVolts(double volts, boolean focEnabled) {
+  public default void setDriveVolts(double volts, boolean FOCEnabled) {
     setDriveVolts(volts);
   }
 

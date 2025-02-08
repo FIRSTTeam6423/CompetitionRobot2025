@@ -10,7 +10,6 @@ import static org.frc6423.frc2025.Constants.*;
 
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -20,8 +19,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
-
-  private final XboxController m_DriverController;
 
   public Robot() {
     // AKit init
@@ -54,8 +51,6 @@ public class Robot extends LoggedRobot {
     Logger.start();
 
     RobotController.setBrownoutVoltage(6.0);
-
-    m_DriverController = new XboxController(0);
 
     // Subsystem init
 

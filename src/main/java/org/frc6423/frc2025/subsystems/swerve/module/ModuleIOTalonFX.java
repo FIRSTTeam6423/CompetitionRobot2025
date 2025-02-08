@@ -92,7 +92,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             m_sigDriveSupplyCurrent,
             m_sigDriveTorqueCurrent);
 
-        inputs.pivotEnabled = true;
+        inputs.pivotEnabled = true; // ! needs debouncers
         inputs.driveEnabled = true;
 
         inputs.pivotABSPose = Rotation2d.fromRotations(m_sigPivotABSPoseRots.getValueAsDouble()).minus(new Rotation2d()); // ! Minus offset

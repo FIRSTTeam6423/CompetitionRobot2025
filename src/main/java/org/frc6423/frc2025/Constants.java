@@ -40,6 +40,7 @@ public class Constants {
   }
 
   /** Get selected robot type */
+  @SuppressWarnings("resource")
   public static RobotType getRobot() {
     if (Robot.isReal() && m_robotType == RobotType.SIMULATED) {
       new Alert("Simulated robot type selected; Defaulting to devbot", AlertType.kError);
