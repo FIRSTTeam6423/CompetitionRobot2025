@@ -191,13 +191,13 @@ public class CompBotSwerveConfigs extends SwerveConfig {
     config.ClosedLoopGeneral.ContinuousWrap = true; // Takes the shortest path
 
     // Gains
-    config.Slot0.kP = 500.0;
+    config.Slot0.kP = 20.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.68275;
 
-    config.Slot0.kV = 0.43;
-    config.Slot0.kA = 0.0;
-    config.Slot0.kS = 0.27;
+    config.Slot0.kV = 0.42962962963;
+    config.Slot0.kA = 0.031543;
+    config.Slot0.kS = 0.28;
 
     config.MotionMagic.MotionMagicCruiseVelocity = 1;
     config.MotionMagic.MotionMagicAcceleration = 1;
@@ -209,7 +209,20 @@ public class CompBotSwerveConfigs extends SwerveConfig {
   @Override
   public TalonFXConfiguration getDriveConfigTalonFX() {
     TalonFXConfiguration config = new TalonFXConfiguration();
-    config.Slot0.kP = 1.0;
+
+    config.Audio.BeepOnBoot = true;
+
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.CurrentLimits.SupplyCurrentLimit = 60.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimit = 120.0;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+
+    config.Feedback.RotorToSensorRatio = getDriveReduction();
+
+    config.Slot0.kS = 14.0;
+    config.Slot0.kP = 100.0;
+    config.Slot0.kD = 1.0;
     return config;
   }
 

@@ -56,7 +56,7 @@ public abstract class SwerveConfig {
   }
 
   public double getDriveCurrentLimitAmps() {
-    return 40.0;
+    return 80.0;
   }
 
   public abstract double getWheelRadiusInches();

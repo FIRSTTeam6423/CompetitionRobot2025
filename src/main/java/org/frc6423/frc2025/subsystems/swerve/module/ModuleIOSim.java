@@ -43,18 +43,14 @@ public class ModuleIOSim implements ModuleIO {
     m_pivotSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                pivotMotor, 0.004, config.kPivotConfigTalonFX.Feedback.SensorToMechanismRatio),
+                pivotMotor, 0.004, config.kPivotConfigTalonFX.Feedback.RotorToSensorRatio),
             pivotMotor);
-    driveReduction = config.kDriveConfigTalonFX.Feedback.SensorToMechanismRatio;
+    driveReduction = config.kDriveConfigTalonFX.Feedback.RotorToSensorRatio;
     m_driveSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(driveMotor, 0.025, driveReduction), driveMotor);
 
-    m_pivotFeedback =
-        new PIDController(
-            1,
-            0,
-            0);
+    m_pivotFeedback = new PIDController(100.0, 0, 0);
 
     m_pivotFeedback.enableContinuousInput(-Math.PI, Math.PI);
   }
