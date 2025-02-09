@@ -209,6 +209,7 @@ public class CompBotSwerveConfigs extends SwerveConfig {
   @Override
   public TalonFXConfiguration getDriveConfigTalonFX() {
     TalonFXConfiguration config = new TalonFXConfiguration();
+    config.Slot0.kP = 1.0;
     return config;
   }
 

@@ -8,6 +8,7 @@ package org.frc6423.frc2025.subsystems.swerve;
 
 import static org.frc6423.frc2025.Constants.kTickSpeed;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,12 +19,15 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 import org.frc6423.frc2025.subsystems.swerve.module.Module;
 import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
+import org.littletonrobotics.junction.Logger;
 
 public class SwerveSubsystem extends SubsystemBase {
   private final SwerveConfig m_config;
@@ -32,6 +36,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private SwerveDriveKinematics m_kinematics;
   private SwerveDrivePoseEstimator m_poseEstimator;
+
+  private Rotation2d m_simRotation = new Rotation2d();
+
+  private final Field2d m_f2d;
 
   public SwerveSubsystem(SwerveConfig config) {
     // Create modules
@@ -44,6 +52,8 @@ public class SwerveSubsystem extends SubsystemBase {
     m_poseEstimator =
         new SwerveDrivePoseEstimator(m_kinematics, getHeading(), getModulePoses(), new Pose2d());
 
+    m_f2d = new Field2d();
+
     m_config = config;
   }
 
@@ -51,12 +61,29 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
     Arrays.stream(m_modules).forEach((m) -> m.updateInputs());
 
+    Logger.recordOutput("Swerve/ActualOutput", getVelocitiesRobotRelative());
+    Logger.recordOutput("Swerve/ActualStates", getModuleStates());
+
+    updateOdometry();
+    m_f2d.setRobotPose(getPose());
+    SmartDashboard.putData(m_f2d);
+
     // Stop module input when driverstation is disabled
     if (DriverStation.isDisabled()) {
       for (Module module : m_modules) {
         module.stop();
       }
     }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    double clamped =
+        MathUtil.clamp(
+            m_kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond,
+            -m_config.getMaxAngularSpeedRadsPerSec(),
+            m_config.getMaxAngularSpeedRadsPerSec());
+    m_simRotation.rotateBy(Rotation2d.fromRadians(clamped));
   }
 
   /**
@@ -100,11 +127,13 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public void runVelocities(ChassisSpeeds velocity, boolean openloopEnabled) {
     velocity = ChassisSpeeds.discretize(velocity, kTickSpeed);
-    System.out.println(velocity.vxMetersPerSecond);
 
     SwerveModuleState[] desiredStates = m_kinematics.toSwerveModuleStates(velocity);
     SwerveDriveKinematics.desaturateWheelSpeeds(
         desiredStates, m_config.getMaxLinearSpeedMetersPerSec());
+
+    Logger.recordOutput("Swerve/desiredVelocity", velocity);
+    Logger.recordOutput("Swerve/desiredSetpoints", desiredStates);
 
     for (int i = 0; i < desiredStates.length; i++) {
       if (openloopEnabled) {
@@ -128,6 +157,11 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
+  /** update swerve pose estimator */
+  public void updateOdometry() {
+    m_poseEstimator.update(getHeading(), getModulePoses());
+  }
+
   /** Gets current robot velocity (robot relative) */
   public ChassisSpeeds getVelocitiesRobotRelative() {
     return m_kinematics.toChassisSpeeds(getModuleStates());
@@ -135,7 +169,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Gets current robot heading */
   public Rotation2d getHeading() {
-    return new Rotation2d();
+    return m_simRotation;
   }
 
   /** Gets current robot field pose */
