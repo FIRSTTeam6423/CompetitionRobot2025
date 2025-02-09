@@ -10,7 +10,6 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 
@@ -51,9 +50,8 @@ public class ModuleConfig {
     this.kPivotOffset = pivotOffset;
     this.kPivotInverted = pivotInverted;
 
-    pivotConfig.MotorOutput.Inverted = pivotInverted
-        ? InvertedValue.Clockwise_Positive
-        : InvertedValue.CounterClockwise_Positive;
+    pivotConfig.MotorOutput.Inverted =
+        pivotInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
 
     pivotConfig.Feedback.FeedbackRemoteSensorID = kPivotABSID;
 

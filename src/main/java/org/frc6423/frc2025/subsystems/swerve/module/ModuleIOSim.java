@@ -42,13 +42,19 @@ public class ModuleIOSim implements ModuleIO {
 
     m_pivotSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(pivotMotor, 0.004, config.kPivotConfigTalonFX.Feedback.SensorToMechanismRatio), pivotMotor);
+            LinearSystemId.createDCMotorSystem(
+                pivotMotor, 0.004, config.kPivotConfigTalonFX.Feedback.SensorToMechanismRatio),
+            pivotMotor);
     driveReduction = config.kDriveConfigTalonFX.Feedback.SensorToMechanismRatio;
     m_driveSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(driveMotor, 0.025, driveReduction), driveMotor);
 
-    m_pivotFeedback = new PIDController(config.kPivotConfigTalonFX.Slot0.kP, config.kPivotConfigTalonFX.Slot0.kI, config.kPivotConfigTalonFX.Slot0.kD);
+    m_pivotFeedback =
+        new PIDController(
+            config.kPivotConfigTalonFX.Slot0.kP,
+            config.kPivotConfigTalonFX.Slot0.kI,
+            config.kPivotConfigTalonFX.Slot0.kD);
 
     m_pivotFeedback.enableContinuousInput(-Math.PI, Math.PI);
   }
@@ -63,7 +69,7 @@ public class ModuleIOSim implements ModuleIO {
     m_pivotSim.update(0.02);
     m_driveSim.update(0.02);
     driveSimState.setRotorVelocity((m_driveSim.getAngularVelocityRPM() / 60) * driveReduction);
-    
+
     inputs.pivotEnabled = true;
     inputs.driveEnabled = true;
 
@@ -92,7 +98,6 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public void setPivotAngle(Rotation2d angle) {
-    System.out.println(angle.getDegrees());
     setPivotVolts(
         m_pivotFeedback.calculate(m_pivotSim.getAngularPositionRad(), angle.getRadians()));
   }

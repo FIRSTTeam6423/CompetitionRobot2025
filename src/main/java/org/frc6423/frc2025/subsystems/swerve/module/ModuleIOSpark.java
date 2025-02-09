@@ -15,9 +15,8 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
@@ -99,8 +98,10 @@ public class ModuleIOSpark implements ModuleIO {
     m_pivotConfig.idleMode(idleMode);
     m_driveConfig.idleMode(idleMode);
 
-    m_pivotMotor.configure(m_pivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-    m_driveMotor.configure(m_driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_pivotMotor.configure(
+        m_pivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_driveMotor.configure(
+        m_driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   @Override

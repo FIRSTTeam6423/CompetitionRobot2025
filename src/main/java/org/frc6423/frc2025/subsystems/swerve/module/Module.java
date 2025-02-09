@@ -1,128 +1,142 @@
-package org.frc6423.frc2025.subsystems.swerve.module;
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
 
-import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
-import org.littletonrobotics.junction.Logger;
+package org.frc6423.frc2025.subsystems.swerve.module;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
+import org.frc6423.frc2025.Robot;
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
+import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
+import org.littletonrobotics.junction.Logger;
 
 public class Module {
-    private final ModuleIO m_IO;
-    
-    private final int m_index;
-    private final ModuleConfig m_config;
+  private final ModuleIO m_IO;
 
-    private final ModuleIOInputsAutoLogged m_inputs;
+  private final int m_index;
+  private final ModuleConfig m_config;
 
-    private SimpleMotorFeedforward m_driveff;
+  private final ModuleIOInputsAutoLogged m_inputs;
 
-    public Module(ModuleConfig config) {
-        m_IO = new ModuleIOTalonFX(config);
+  private SimpleMotorFeedforward m_driveff;
 
-        m_index = config.kIndex;
-        this.m_config = config;
+  public Module(ModuleConfig config) {
+    m_IO =
+        (Robot.isReal())
+            ? (config.kModuletype == moduleType.TALONFX)
+                ? new ModuleIOTalonFX(config)
+                : new ModuleIOSpark(config)
+            : new ModuleIOSim(config);
 
-        m_inputs = new ModuleIOInputsAutoLogged();
+    m_index = config.kIndex;
+    this.m_config = config;
 
-        m_driveff = new SimpleMotorFeedforward(0.0, 0.0);
-    }
+    m_inputs = new ModuleIOInputsAutoLogged();
 
-    /** Update auto logged inputs */
-    public void updateInputs() {
-        m_IO.updateInputs(m_inputs);
-    }
+    m_driveff = new SimpleMotorFeedforward(0.0, 0.0);
+  }
 
-    /** Periodically ran logic */
-    public void periodic() {
-        Logger.processInputs("Swerve/Module" + getModuleIndex(), m_inputs);
-    }
+  /** Update auto logged inputs */
+  public void updateInputs() {
+    m_IO.updateInputs(m_inputs);
+  }
 
-    /** Run SwerveModuleState setpoint */
-    public SwerveModuleState runSetpoint(SwerveModuleState setpointState) {
-        setpointState.optimize(getPivotAngle());
-        setpointState.speedMetersPerSecond *= Math.cos(setpointState.angle.minus(getPivotAngle()).getRadians());
+  /** Periodically ran logic */
+  public void periodic() {
+    Logger.processInputs("Swerve/Module" + getModuleIndex(), m_inputs);
+  }
 
-        double speedMPS = setpointState.speedMetersPerSecond;
-        m_IO.setPivotAngle(setpointState.angle);
-        m_IO.setDriveVelocity(speedMPS, m_driveff.calculate(speedMPS)); // !
-        return setpointState;
-    }
+  /** Run SwerveModuleState setpoint */
+  public SwerveModuleState runSetpoint(SwerveModuleState setpointState) {
+    setpointState.optimize(getPivotAngle());
+    setpointState.speedMetersPerSecond *=
+        Math.cos(setpointState.angle.minus(getPivotAngle()).getRadians());
 
-    /** Run SwerveModuleState setpoint with setpoint wheel torque (torque-based ff) */
-    public SwerveModuleState runSetpoint(SwerveModuleState setpointState, double driveTorqueNm) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'runSetpoint'");
-    }
+    double speedMPS = setpointState.speedMetersPerSecond;
+    m_IO.setPivotAngle(setpointState.angle);
+    m_IO.setDriveVelocity(speedMPS, m_driveff.calculate(speedMPS)); // !
+    return setpointState;
+  }
 
-    /** Runs SwerveModuleState setpoint but runs drive in open loop mode */
-    public SwerveModuleState runSetpointOpenloop(double voltage, Rotation2d angle, boolean FOCEnabled) {
-        SwerveModuleState setpointState = new SwerveModuleState(voltage, angle);
+  /** Run SwerveModuleState setpoint with setpoint wheel torque (torque-based ff) */
+  public SwerveModuleState runSetpoint(SwerveModuleState setpointState, double driveTorqueNm) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'runSetpoint'");
+  }
 
-        setpointState.optimize(getPivotAngle());
-        setpointState.speedMetersPerSecond *= Math.cos(setpointState.angle.minus(getPivotAngle()).getRadians());
+  /** Runs SwerveModuleState setpoint but runs drive in open loop mode */
+  public SwerveModuleState runSetpointOpenloop(
+      double voltage, Rotation2d angle, boolean FOCEnabled) {
+    SwerveModuleState setpointState = new SwerveModuleState(voltage, angle);
 
-        double speedMPS = setpointState.speedMetersPerSecond;
-        m_IO.setPivotAngle(setpointState.angle);
-        m_IO.setDriveVolts(speedMPS, FOCEnabled); // !
-        return new SwerveModuleState();
-    }
+    setpointState.optimize(getPivotAngle());
+    setpointState.speedMetersPerSecond *=
+        Math.cos(setpointState.angle.minus(getPivotAngle()).getRadians());
 
-    /** Set pivot angle setpoint */
-    public void setPivotAngle(Rotation2d desiredAngle) {
-        m_IO.setPivotAngle(desiredAngle);
-    }
+    double speedMPS = setpointState.speedMetersPerSecond;
+    m_IO.setPivotAngle(setpointState.angle);
+    m_IO.setDriveVolts(speedMPS, FOCEnabled); // !
+    return new SwerveModuleState();
+  }
 
-    /** Set drive torque current setpoint */
-    public void runDriveCurrent(double currentAmps) {
-        m_IO.setDriveTorqueCurrent(currentAmps);
-    }
+  /** Set pivot angle setpoint */
+  public void setPivotAngle(Rotation2d desiredAngle) {
+    m_IO.setPivotAngle(desiredAngle);
+  }
 
-    /** Enable module coasting */
-    public void enableCoast(boolean enabled) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'enableCoast'");
-    }
+  /** Set drive torque current setpoint */
+  public void runDriveCurrent(double currentAmps) {
+    m_IO.setDriveTorqueCurrent(currentAmps);
+  }
 
-    /** Stop all motor input */
-    public void stop() {
-        m_IO.stop();
-    }
+  /** Enable module coasting */
+  public void enableCoast(boolean enabled) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'enableCoast'");
+  }
 
-    /** Get Module index */
-    public int getModuleIndex() {
-        return m_index;
-    }
+  /** Stop all motor input */
+  public void stop() {
+    m_IO.stop();
+  }
 
-    /** Get Module config */
-    public ModuleConfig getModuleConfig() {
-        return m_config;
-    }
+  /** Get Module index */
+  public int getModuleIndex() {
+    return m_index;
+  }
 
-    /** Gets Drive Speed in MPS */
-    public double getVelMetersPerSec() {
-        return m_inputs.driveVelRadsPerSec * m_config.kWheelRadiusMeters;
-    }
+  /** Get Module config */
+  public ModuleConfig getModuleConfig() {
+    return m_config;
+  }
 
-    /** returns current module angle */
-    public Rotation2d getPivotAngle() {
-        return m_inputs.pivotABSPose;
-    }
+  /** Gets Drive Speed in MPS */
+  public double getVelMetersPerSec() {
+    return m_inputs.driveVelRadsPerSec * m_config.kWheelRadiusMeters;
+  }
 
-    /** Returns drive pose in meters */
-    public double getPoseMeters() {
-        return m_inputs.drivePoseRads * m_config.kWheelRadiusMeters; 
-    }
+  /** returns current module angle */
+  public Rotation2d getPivotAngle() {
+    return m_inputs.pivotABSPose;
+  }
 
-    /** Returns swerve field pose */
-    public SwerveModulePosition getModulePose() {
-        return new SwerveModulePosition(getPoseMeters(), getPivotAngle());
-    }
-    
-    /** Returns Module state */
-    public SwerveModuleState getModuleState() {
-        return new SwerveModuleState(getVelMetersPerSec(), getPivotAngle());
-    }
+  /** Returns drive pose in meters */
+  public double getPoseMeters() {
+    return m_inputs.drivePoseRads * m_config.kWheelRadiusMeters;
+  }
+
+  /** Returns swerve field pose */
+  public SwerveModulePosition getModulePose() {
+    return new SwerveModulePosition(getPoseMeters(), getPivotAngle());
+  }
+
+  /** Returns Module state */
+  public SwerveModuleState getModuleState() {
+    return new SwerveModuleState(getVelMetersPerSec(), getPivotAngle());
+  }
 }

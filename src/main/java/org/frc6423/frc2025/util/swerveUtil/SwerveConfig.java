@@ -1,89 +1,94 @@
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
 package org.frc6423.frc2025.util.swerveUtil;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.revrobotics.spark.config.AlternateEncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public abstract class SwerveConfig {
-    // Kinematic constants
-    public abstract double getMaxLinearSpeedMetersPerSec();
+  // Kinematic constants
+  public abstract double getMaxLinearSpeedMetersPerSec();
 
-    public abstract double getMaxLinearAccelMetersPerSecSqrd();
+  public abstract double getMaxLinearAccelMetersPerSecSqrd();
 
-    public double getMaxAngularSpeedRadsPerSec() {
-        double drivebaseRadius = Math.hypot(getTrackWidthXMeters() / 2.0, getTrackWidthYMeters() / 2.0);
-        return getMaxLinearSpeedMetersPerSec() / drivebaseRadius;
-    }
+  public double getMaxAngularSpeedRadsPerSec() {
+    double drivebaseRadius = Math.hypot(getTrackWidthXMeters() / 2.0, getTrackWidthYMeters() / 2.0);
+    return getMaxLinearSpeedMetersPerSec() / drivebaseRadius;
+  }
 
-    public double getMaxAngularSpeedRadsPerSecSqrd() {
-        double drivebaseRadius = Math.hypot(getTrackWidthXMeters() / 2.0, getTrackWidthYMeters() / 2.0);
-        return getMaxLinearAccelMetersPerSecSqrd()/drivebaseRadius;
-    }
+  public double getMaxAngularSpeedRadsPerSecSqrd() {
+    double drivebaseRadius = Math.hypot(getTrackWidthXMeters() / 2.0, getTrackWidthYMeters() / 2.0);
+    return getMaxLinearAccelMetersPerSecSqrd() / drivebaseRadius;
+  }
 
-    // Robot characteristics
-    public abstract double getRobotMassKg();
+  // Robot characteristics
+  public abstract double getRobotMassKg();
 
-    public abstract double getRobotWidthMeters();
+  public abstract double getRobotWidthMeters();
 
-    public abstract double getRobotLengthMeters();
+  public abstract double getRobotLengthMeters();
 
-    public abstract double getTrackWidthYMeters();
+  public abstract double getTrackWidthYMeters();
 
-    public abstract double getTrackWidthXMeters();
+  public abstract double getTrackWidthXMeters();
 
-    public abstract double getBumperWidthInches();
+  public abstract double getBumperWidthInches();
 
-    public abstract double getBumperLengthMeters();
+  public abstract double getBumperLengthMeters();
 
-    public abstract Translation2d[] getModuleLocs();
+  public abstract Translation2d[] getModuleLocs();
 
-    // Module characteristics
-    public abstract double getPivotReduction();
+  // Module characteristics
+  public abstract double getPivotReduction();
 
-    public abstract double getDriveReduction();
+  public abstract double getDriveReduction();
 
-    public double getPivotCurrentLimitAmps() {
-        return 40.0;
-    }
+  public double getPivotCurrentLimitAmps() {
+    return 40.0;
+  }
 
-    public double getDriveCurrentLimitAmps() {
-        return 40.0;
-    }
+  public double getDriveCurrentLimitAmps() {
+    return 40.0;
+  }
 
-    public abstract double getWheelRadiusInches();
+  public abstract double getWheelRadiusInches();
 
-    public abstract ModuleConfig[] getModuleConfigs();
+  public abstract ModuleConfig[] getModuleConfigs();
 
-    // Gains
-    public abstract PIDController getRotationalFeedback();
+  // Gains
+  public abstract PIDController getRotationalFeedback();
 
-    public abstract PIDController getTranslationFeedback();
+  public abstract PIDController getTranslationFeedback();
 
-    // CTRe Configs
-    public abstract CANcoderConfiguration getCANcoderConfig();
-    
-    public abstract TalonFXConfiguration getPivotConfigTalonFX();
+  // CTRe Configs
+  public abstract CANcoderConfiguration getCANcoderConfig();
 
-    public abstract TalonFXConfiguration getDriveConfigTalonFX();
+  public abstract TalonFXConfiguration getPivotConfigTalonFX();
 
-    // REV Configs
-    public abstract AlternateEncoderConfig getPivotABSEncoderConfig();
+  public abstract TalonFXConfiguration getDriveConfigTalonFX();
 
-    public abstract SparkMaxConfig getPivotConfigSparkMax();
+  // REV Configs
+  public abstract AlternateEncoderConfig getPivotABSEncoderConfig();
 
-    public abstract SparkMaxConfig getDriveConfigSparkMax();
+  public abstract SparkMaxConfig getPivotConfigSparkMax();
 
-    // Gyro
-    public abstract GyroType getGyroType();
+  public abstract SparkMaxConfig getDriveConfigSparkMax();
 
-    public abstract int getGyroID();
+  // Gyro
+  public abstract GyroType getGyroType();
 
-    public enum GyroType {
-        NAVX,
-        PIGEON
-    }
+  public abstract int getGyroID();
+
+  public enum GyroType {
+    NAVX,
+    PIGEON
+  }
 }

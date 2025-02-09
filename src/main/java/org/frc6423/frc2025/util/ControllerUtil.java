@@ -10,7 +10,9 @@ import edu.wpi.first.math.MathUtil;
 import java.util.function.DoubleSupplier;
 
 public class ControllerUtil {
-  public static double applyDeadband(DoubleSupplier axis) {
-    return MathUtil.applyDeadband(axis.getAsDouble(), 0.02);
+
+  /** Applies a deadband of 0.098 */
+  public static DoubleSupplier applyDeadband(DoubleSupplier axis) {
+    return () -> MathUtil.applyDeadband(axis.getAsDouble(), 0.098);
   }
 }

@@ -8,9 +8,13 @@ package org.frc6423.frc2025;
 
 import static org.frc6423.frc2025.Constants.*;
 
+import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.frc6423.frc2025.subsystems.swerve.SwerveSubsystem;
+import org.frc6423.frc2025.subsystems.swerve.constants.CompBotSwerveConfigs;
+import org.frc6423.frc2025.util.ControllerUtil;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -19,6 +23,10 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
+
+  private final PS5Controller m_driveController;
+
+  private final SwerveSubsystem m_swerveSubsystem;
 
   public Robot() {
     // AKit init
@@ -52,9 +60,16 @@ public class Robot extends LoggedRobot {
 
     RobotController.setBrownoutVoltage(6.0);
 
+    m_driveController = new PS5Controller(0);
     // Subsystem init
+    m_swerveSubsystem = new SwerveSubsystem(new CompBotSwerveConfigs());
 
     // Default Commands
+    m_swerveSubsystem.setDefaultCommand(
+        m_swerveSubsystem.teleopSwerveCommmand(
+            ControllerUtil.applyDeadband(m_driveController::getLeftY),
+            ControllerUtil.applyDeadband(m_driveController::getLeftX),
+            ControllerUtil.applyDeadband(m_driveController::getRightX)));
   }
 
   @Override
