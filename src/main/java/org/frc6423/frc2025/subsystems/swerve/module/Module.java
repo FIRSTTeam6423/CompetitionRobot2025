@@ -38,7 +38,7 @@ public class Module {
 
     m_inputs = new ModuleIOInputsAutoLogged();
 
-    m_driveff = new SimpleMotorFeedforward(14.0, 0.0, 0.0);
+    m_driveff = new SimpleMotorFeedforward(0.1849, 2.5108, 0.24017);
   }
 
   /** Update auto logged inputs */
