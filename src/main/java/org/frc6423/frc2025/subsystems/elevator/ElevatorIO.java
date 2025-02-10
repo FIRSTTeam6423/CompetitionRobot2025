@@ -3,7 +3,6 @@ package org.frc6423.frc2025.subsystems.elevator;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ElevatorIO {
-
     @AutoLog
     public class ElevatorIOInputs {
         public boolean LMotorEnabled = false;
@@ -26,4 +25,30 @@ public interface ElevatorIO {
         public double RMotorTorqueCurrentAmps = 0.0;
         public double RMotorTempCelsius = 0.0;
     }
+
+    /** Update logged inputs */
+    public void updateInputs(ElevatorIOInputs inputs);
+
+    /** Run voltage to left elevator motor */
+    public void runLeftMotorVolts(double voltage);
+
+    /** Run voltage to right elevator motor */
+    public void runRightMotorVolts(double voltage);
+     
+    /** Stops elevator */
+    public default void stop() {
+        runLeftMotorVolts(0.0);
+        runRightMotorVolts(0.0);
+    }
+
+    /** Run target pose in meters */
+    public void runTargetPose(double poseMeters);
+
+    /**
+     * Set Elevator target pose with feedforward
+     * 
+     * @param poseMeters desired elevator pose in meters
+     * @param ff feedforward
+     */
+    public void runTargetPose(double poseMeters, double ff);
 }
