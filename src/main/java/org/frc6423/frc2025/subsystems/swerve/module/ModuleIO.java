@@ -61,7 +61,7 @@ public interface ModuleIO {
   public void setPivotAngle(Rotation2d angle);
 
   /** Set Module velocity goal */
-  public void setDriveVelocity(double velMetersPerSec, double ff);
+  public void setDriveVelocity(double velMetersPerSec, double torqueFF);
 
   public void enableCoast(boolean enabled);
 

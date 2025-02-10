@@ -12,7 +12,7 @@ import java.util.function.DoubleSupplier;
 public class ControllerUtil {
 
   /** Applies a deadband of 0.098 */
-  public static DoubleSupplier applyDeadband(DoubleSupplier axis) {
-    return () -> MathUtil.applyDeadband(axis.getAsDouble(), 0.098);
+  public static DoubleSupplier applyDeadband(DoubleSupplier axis, boolean invert) {
+    return () -> MathUtil.applyDeadband(axis.getAsDouble(), 0.098) * (invert ? -1 : 1);
   }
 }

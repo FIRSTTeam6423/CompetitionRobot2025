@@ -16,7 +16,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import java.util.Arrays;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
 
@@ -108,6 +107,9 @@ public class CompBotSwerveConfigs extends SwerveConfig {
               0,
               Rotation2d.fromRadians(0),
               true,
+              getPivotReduction(),
+              getDriveReduction(),
+              Units.inchesToMeters(getWheelRadiusInches()),
               getPivotConfigTalonFX(),
               getDriveConfigTalonFX(),
               getCANcoderConfig()),
@@ -118,6 +120,9 @@ public class CompBotSwerveConfigs extends SwerveConfig {
               1,
               Rotation2d.fromRadians(0),
               true,
+              getPivotReduction(),
+              getDriveReduction(),
+              Units.inchesToMeters(getWheelRadiusInches()),
               getPivotConfigTalonFX(),
               getDriveConfigTalonFX(),
               getCANcoderConfig()),
@@ -128,6 +133,9 @@ public class CompBotSwerveConfigs extends SwerveConfig {
               2,
               Rotation2d.fromRadians(0),
               true,
+              getPivotReduction(),
+              getDriveReduction(),
+              Units.inchesToMeters(getWheelRadiusInches()),
               getPivotConfigTalonFX(),
               getDriveConfigTalonFX(),
               getCANcoderConfig()),
@@ -138,14 +146,13 @@ public class CompBotSwerveConfigs extends SwerveConfig {
               3,
               Rotation2d.fromRadians(0),
               true,
+              getPivotReduction(),
+              getDriveReduction(),
+              Units.inchesToMeters(getWheelRadiusInches()),
               getPivotConfigTalonFX(),
               getDriveConfigTalonFX(),
               getCANcoderConfig())
         };
-
-    Arrays.stream(configs)
-        .forEach(
-            (c) -> c.kWheelRadiusMeters = Units.inchesToMeters(getWheelRadiusInches())); // Shut up
 
     return configs;
   }
@@ -219,10 +226,18 @@ public class CompBotSwerveConfigs extends SwerveConfig {
     config.CurrentLimits.StatorCurrentLimitEnable = true;
 
     config.Feedback.RotorToSensorRatio = getDriveReduction();
+    config.Feedback.SensorToMechanismRatio =
+        getDriveReduction() / (getWheelRadiusInches() * 2 * Math.PI);
 
-    config.Slot0.kS = 14.0;
+    // config.Slot0.kS = 8.5;
     config.Slot0.kP = 100.0;
     config.Slot0.kD = 1.0;
+
+    config.TorqueCurrent.TorqueNeutralDeadband = 10.0;
+
+    config.MotionMagic.MotionMagicCruiseVelocity = getMaxLinearSpeedMetersPerSec();
+    config.MotionMagic.MotionMagicAcceleration = getMaxLinearAccelMetersPerSecSqrd();
+
     return config;
   }
 

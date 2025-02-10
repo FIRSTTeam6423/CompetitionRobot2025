@@ -11,7 +11,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 
 public class ModuleConfig {
   public int kIndex;
@@ -28,8 +27,8 @@ public class ModuleConfig {
   public CANcoderConfiguration kCANcoderConfig;
 
   public SparkMaxConfig kPivotConfigSparkMax, kDriveConfigSparkMax;
-
-  public double kWheelRadiusMeters = Units.inchesToMeters(2);
+  public double kPivotReduction, kDriveReduction;
+  public double kWheelRadiusMeters;
 
   /** Create a new TalonFX modul */
   public ModuleConfig(
@@ -39,6 +38,9 @@ public class ModuleConfig {
       int pivotABSID,
       Rotation2d pivotOffset,
       boolean pivotInverted,
+      double pivotReduction,
+      double driveReduction,
+      double wheelRadius,
       TalonFXConfiguration pivotConfig,
       TalonFXConfiguration driveConfig,
       CANcoderConfiguration CANcoderConfig) {
@@ -54,6 +56,10 @@ public class ModuleConfig {
         pivotInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
 
     pivotConfig.Feedback.FeedbackRemoteSensorID = kPivotABSID;
+
+    this.kPivotReduction = pivotReduction;
+    this.kDriveReduction = driveReduction;
+    this.kWheelRadiusMeters = wheelRadius;
 
     this.kPivotConfigTalonFX = pivotConfig;
     this.kDriveConfigTalonFX = driveConfig;

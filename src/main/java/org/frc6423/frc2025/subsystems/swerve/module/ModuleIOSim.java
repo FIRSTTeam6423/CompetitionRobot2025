@@ -42,15 +42,17 @@ public class ModuleIOSim implements ModuleIO {
 
     m_pivotSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(
-                pivotMotor, 0.004, config.kPivotConfigTalonFX.Feedback.RotorToSensorRatio),
+            LinearSystemId.createDCMotorSystem(pivotMotor, 0.004, config.kPivotReduction),
             pivotMotor);
-    driveReduction = config.kDriveConfigTalonFX.Feedback.RotorToSensorRatio;
+    driveReduction = config.kDriveReduction;
     m_driveSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(driveMotor, 0.025, driveReduction), driveMotor);
+            LinearSystemId.createDCMotorSystem(driveMotor, 0.025, config.kDriveReduction),
+            driveMotor);
 
-    m_pivotFeedback = new PIDController(100.0, 0, 0);
+    // m_pivotFeedback = new PIDController(config.kPivotConfigTalonFX.Slot0.kP,
+    // config.kPivotConfigTalonFX.Slot0.kI, config.kPivotConfigTalonFX.Slot0.kD);
+    m_pivotFeedback = new PIDController(100, 0, 0);
 
     m_pivotFeedback.enableContinuousInput(-Math.PI, Math.PI);
   }
@@ -58,13 +60,13 @@ public class ModuleIOSim implements ModuleIO {
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     TalonFXSimState driveSimState = m_driveMotor.getSimState();
-    driveSimState.Orientation = ChassisReference.Clockwise_Positive;
+    driveSimState.Orientation = ChassisReference.CounterClockwise_Positive;
 
     m_driveSim.setInput(driveSimState.getMotorVoltage());
 
     m_pivotSim.update(0.02);
     m_driveSim.update(0.02);
-    driveSimState.setRotorVelocity((m_driveSim.getAngularVelocityRPM() / 60) * driveReduction);
+    driveSimState.setRotorVelocity((m_driveSim.getAngularVelocityRPM() / 60.0) * driveReduction);
 
     inputs.pivotEnabled = true;
     inputs.driveEnabled = true;
@@ -95,13 +97,13 @@ public class ModuleIOSim implements ModuleIO {
   @Override
   public void setPivotAngle(Rotation2d angle) {
     setPivotVolts(
-        m_pivotFeedback.calculate(m_pivotSim.getAngularPositionRad(), angle.getRadians()));
+        m_pivotFeedback.calculate(m_pivotSim.getAngularPositionRotations(), angle.getRotations()));
   }
 
   @Override
-  public void setDriveVelocity(double velMetersPerSec, double ff) {
+  public void setDriveVelocity(double velMetersPerSec, double torqueFF) {
     m_driveMotor.setControl(
-        m_driveVelocityControl.withVelocity(velMetersPerSec).withFeedForward(ff)); // !
+        m_driveVelocityControl.withVelocity(velMetersPerSec).withFeedForward(torqueFF)); // !
   }
 
   @Override

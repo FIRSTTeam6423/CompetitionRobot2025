@@ -38,7 +38,7 @@ public class Module {
 
     m_inputs = new ModuleIOInputsAutoLogged();
 
-    m_driveff = new SimpleMotorFeedforward(0.0, 0.0);
+    m_driveff = new SimpleMotorFeedforward(14.0, 0.0, 0.0);
   }
 
   /** Update auto logged inputs */
@@ -59,7 +59,9 @@ public class Module {
 
     double speedMPS = setpointState.speedMetersPerSecond;
     m_IO.setPivotAngle(setpointState.angle);
-    m_IO.setDriveVelocity(speedMPS, m_driveff.calculate(speedMPS)); // !
+    m_IO.setDriveVelocity(
+        speedMPS, 10.0); // m_driveff.calculate(speedMPS/m_config.kWheelRadiusMeters) *
+    // m_config.kWheelRadiusMeters); // !
     return setpointState;
   }
 
@@ -122,7 +124,7 @@ public class Module {
 
   /** returns current module angle */
   public Rotation2d getPivotAngle() {
-    return m_inputs.pivotABSPose;
+    return m_inputs.pivotABSPose.minus(m_config.kPivotOffset);
   }
 
   /** Returns drive pose in meters */

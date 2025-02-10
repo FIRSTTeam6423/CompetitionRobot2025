@@ -67,9 +67,9 @@ public class Robot extends LoggedRobot {
     // Default Commands
     m_swerveSubsystem.setDefaultCommand(
         m_swerveSubsystem.teleopSwerveCommmand(
-            ControllerUtil.applyDeadband(m_driveController::getLeftY),
-            ControllerUtil.applyDeadband(m_driveController::getLeftX),
-            ControllerUtil.applyDeadband(m_driveController::getRightX)));
+            ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
+            ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
+            ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
   }
 
   @Override

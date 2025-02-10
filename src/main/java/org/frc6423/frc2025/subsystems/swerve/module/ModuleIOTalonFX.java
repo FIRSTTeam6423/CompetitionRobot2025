@@ -159,8 +159,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   @Override
-  public void setDriveVelocity(double velMetersPerSec, double ff) {
-    m_driveMotor.setControl(m_velReq.withVelocity(velMetersPerSec).withFeedForward(ff));
+  public void setDriveVelocity(double velMetersPerSec, double torqueFF) {
+    m_driveMotor.setControl(m_velReq.withVelocity(velMetersPerSec).withFeedForward(torqueFF));
   }
 
   @Override
