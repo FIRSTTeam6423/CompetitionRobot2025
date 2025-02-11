@@ -52,8 +52,9 @@ public class ElevatorIOComp implements ElevatorIO {
         m_motorConf.MotionMagic.MotionMagicJerk = 0.0;
 
         // Conversion from rotations to meters
-        // reduction / (2pi * drumRadiusMeters)
-        m_motorConf.Feedback.SensorToMechanismRatio = (17567/20000) / (2 * Math.PI * 5); 
+        // reduction * circumference 
+        // reduction is 1/5 and radius of spool radius is 0.878350 meters
+        m_motorConf.Feedback.SensorToMechanismRatio = (1/5) * (2 * Math.PI * 0.878350); 
 
         m_parentM.getConfigurator().apply(m_motorConf);
         m_childM.getConfigurator().apply(m_motorConf);
