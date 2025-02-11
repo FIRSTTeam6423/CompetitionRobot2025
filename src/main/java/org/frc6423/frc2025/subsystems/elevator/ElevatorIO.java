@@ -36,15 +36,11 @@ public interface ElevatorIO {
   public void updateInputs(ElevatorIOInputs inputs);
 
   /** Run voltage to left elevator motor */
-  public void runLeftMotorVolts(double voltage);
-
-  /** Run voltage to right elevator motor */
-  public void runRightMotorVolts(double voltage);
+  public void runMotorVolts(double voltage, boolean focEnabled);
 
   /** Stops elevator */
   public default void stop() {
-    runLeftMotorVolts(0.0);
-    runRightMotorVolts(0.0);
+    runMotorVolts(0.0, false);
   }
 
   /** Resets pose to 0.0 meters */

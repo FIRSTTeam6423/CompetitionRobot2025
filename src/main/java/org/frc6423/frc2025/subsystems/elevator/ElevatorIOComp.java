@@ -5,45 +5,64 @@ import static org.frc6423.frc2025.Constants.*;
 import org.frc6423.frc2025.util.motorUtil.TalonFXUtil;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class ElevatorIOComp implements ElevatorIO {
-    private final TalonFX m_lMotor, m_rMotor;
-    private final TalonFXConfiguration m_lMotorConf, m_rMotorConf;
+    private final TalonFX m_parentM, m_childM;
+    private final TalonFXConfiguration m_motorConf;
+
+    // Control requests
+    private final VoltageOut m_voltOutReq;
+    private final PositionVoltage m_poseOutReq;
 
     public ElevatorIOComp() {
-        m_lMotor = new TalonFX(0, kCANivore);
-        m_rMotor = new TalonFX(0, kCANivore);
+        m_parentM = new TalonFX(0, kCANivore);
+        m_childM = new TalonFX(0, kCANivore); // ! ID
+
+        m_voltOutReq = new VoltageOut(0.0).withEnableFOC(true);
+        m_poseOutReq = new PositionVoltage(0.0).withEnableFOC(true);
 
         // register to global talonfx array
-        TalonFXUtil.registerMotor(m_lMotor);
-        TalonFXUtil.registerMotor(m_rMotor);
+        TalonFXUtil.registerMotor(m_parentM);
+        TalonFXUtil.registerMotor(m_childM);
 
-        m_lMotorConf = new TalonFXConfiguration();
-        m_lMotorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        m_lMotorConf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        m_motorConf = new TalonFXConfiguration();
+        m_motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        m_motorConf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-        m_lMotorConf.Slot0.withKP(0.0).withKI(0.0).withKD(0.0); // PID config
-        m_lMotorConf.Slot0.withKS(0.0).withKV(0.0).withKA(0.0); // feedforward config
+        m_motorConf.Slot0.withKP(0.0).withKI(0.0).withKD(0.0); // PID config
+        m_motorConf.Slot0.withKS(0.0).withKV(0.0).withKA(0.0); // feedforward config
 
-        m_lMotorConf.CurrentLimits.StatorCurrentLimit = 80.0;
-        m_lMotorConf.CurrentLimits.StatorCurrentLimitEnable = true;
-        m_lMotorConf.CurrentLimits.SupplyCurrentLimit = 80.0;
-        m_lMotorConf.CurrentLimits.SupplyCurrentLowerLimit = -80.0;
-        m_lMotorConf.CurrentLimits.SupplyCurrentLimitEnable = true;
+        m_motorConf.CurrentLimits.StatorCurrentLimit = 80.0;
+        m_motorConf.CurrentLimits.StatorCurrentLimitEnable = true;
+        m_motorConf.CurrentLimits.SupplyCurrentLimit = 80.0;
+        m_motorConf.CurrentLimits.SupplyCurrentLowerLimit = -80.0;
+        m_motorConf.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        m_lMotorConf.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-        m_lMotorConf.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+        m_motorConf.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
+        m_motorConf.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
 
-        m_lMotorConf.MotionMagic.MotionMagicCruiseVelocity = 0.0; // ! TODO
-        m_lMotorConf.MotionMagic.MotionMagicAcceleration = 0.0;
-        m_lMotorConf.MotionMagic.MotionMagicJerk = 0.0;
+        m_motorConf.MotionMagic.MotionMagicCruiseVelocity = 0.0; // ! TODO
+        m_motorConf.MotionMagic.MotionMagicAcceleration = 0.0;
+        m_motorConf.MotionMagic.MotionMagicJerk = 0.0;
 
-        m_rMotorConf = new TalonFXConfiguration();
-        m_rMotorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        m_rMotorConf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        // Conversion from rotations to meters
+        // reduction / (2pi * drumRadiusMeters)
+        m_motorConf.Feedback.SensorToMechanismRatio = (17567/20000) / (2 * Math.PI * 5); 
+
+        m_parentM.getConfigurator().apply(m_motorConf);
+        m_childM.getConfigurator().apply(m_motorConf);
+
+        m_childM.setControl(new Follower(m_parentM.getDeviceID(), true));
+        m_childM.optimizeBusUtilization();
+        m_parentM.optimizeBusUtilization();
+
+        m_parentM.setPosition(0.0);
     }
 
     @Override
@@ -51,38 +70,29 @@ public class ElevatorIOComp implements ElevatorIO {
     }
 
     @Override
-    public void runLeftMotorVolts(double voltage) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'runLeftMotorVolts'");
-    }
-
-    @Override
-    public void runRightMotorVolts(double voltage) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'runRightMotorVolts'");
+    public void runMotorVolts(double voltage, boolean focEnabled) {
+        m_parentM.setControl(m_voltOutReq.withOutput(voltage).withEnableFOC(focEnabled));
     }
 
     @Override
     public void resetPose(double poseMeters) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'resetPose'");
+        m_parentM.setPosition(0.0);
     }
 
     @Override
     public void setCoasting(boolean enabled) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setCoasting'");
+        m_motorConf.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
+        m_parentM.getConfigurator().apply(m_motorConf);
+        m_childM.getConfigurator().apply(m_motorConf);
     }
 
     @Override
     public void runTargetPose(double poseMeters) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'runTargetPose'");
+        m_parentM.setControl(m_poseOutReq.withPosition(poseMeters).withEnableFOC(true));
     }
 
     @Override
     public void runTargetPose(double poseMeters, double ff) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'runTargetPose'");
+        m_parentM.setControl(m_poseOutReq.withPosition(poseMeters).withEnableFOC(true).withFeedForward(ff));
     }
 }
