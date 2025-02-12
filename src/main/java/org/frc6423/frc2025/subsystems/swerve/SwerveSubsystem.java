@@ -80,10 +80,12 @@ public class SwerveSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
     double clamped =
         MathUtil.clamp(
-            m_kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond,
-            -m_config.getMaxAngularSpeedRadsPerSec(),
-            m_config.getMaxAngularSpeedRadsPerSec());
-    m_simRotation.rotateBy(Rotation2d.fromRadians(clamped));
+            getVelocitiesRobotRelative().omegaRadiansPerSecond,
+            -m_config.getMaxAngularSpeedRadsPerSec()/1000,
+            m_config.getMaxAngularSpeedRadsPerSec()/1000);
+    m_simRotation = m_simRotation.rotateBy(Rotation2d.fromRadians(clamped));
+
+    Logger.recordOutput("Swerve/simRotation", m_simRotation.getDegrees());
   }
 
   /**
@@ -164,7 +166,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Gets current robot velocity (robot relative) */
   public ChassisSpeeds getVelocitiesRobotRelative() {
-    return m_kinematics.toChassisSpeeds(getModuleStates());
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+        m_kinematics.toChassisSpeeds(getModuleStates()), getHeading());
   }
 
   /** Gets current robot heading */
