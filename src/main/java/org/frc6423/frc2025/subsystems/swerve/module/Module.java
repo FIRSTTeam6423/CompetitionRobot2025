@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import org.frc6423.frc2025.Robot;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig.moduleType;
@@ -38,7 +39,7 @@ public class Module {
 
     m_inputs = new ModuleIOInputsAutoLogged();
 
-    m_driveff = new SimpleMotorFeedforward(0.1849, 2.5108, 0.24017);
+    m_driveff = new SimpleMotorFeedforward(0.14, 0.134);
   }
 
   /** Update auto logged inputs */
@@ -60,7 +61,13 @@ public class Module {
     double speedMPS = setpointState.speedMetersPerSecond;
     m_IO.setPivotAngle(setpointState.angle);
     m_IO.setDriveVelocity(
-        speedMPS, 10.0); // m_driveff.calculate(speedMPS/m_config.kWheelRadiusMeters) *
+        speedMPS,
+        m_driveff.calculate(
+            (speedMPS / m_config.kWheelRadiusMeters)
+                * (m_config.kDriveReduction
+                    / DCMotor.getKrakenX60Foc(1)
+                        .KtNMPerAmp))); // m_driveff.calculate(speedMPS/m_config.kWheelRadiusMeters)
+    // *
     // m_config.kWheelRadiusMeters); // !
     return setpointState;
   }
@@ -124,7 +131,7 @@ public class Module {
 
   /** returns current module angle */
   public Rotation2d getPivotAngle() {
-    return m_inputs.pivotABSPose.minus(m_config.kPivotOffset);
+    return m_inputs.pivotPose.minus(m_config.kPivotOffset);
   }
 
   /** Returns drive pose in meters */

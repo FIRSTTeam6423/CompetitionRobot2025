@@ -54,7 +54,7 @@ public class ModuleIOSim implements ModuleIO {
     // config.kPivotConfigTalonFX.Slot0.kI, config.kPivotConfigTalonFX.Slot0.kD);
     m_pivotFeedback = new PIDController(100, 0, 0);
 
-    m_pivotFeedback.enableContinuousInput(-Math.PI, Math.PI);
+    m_pivotFeedback.enableContinuousInput(0, 0.5);
   }
 
   @Override
