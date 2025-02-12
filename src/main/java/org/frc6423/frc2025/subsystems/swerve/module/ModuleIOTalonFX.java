@@ -17,7 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import org.frc6423.frc2025.util.motorUtil.TalonFXUtil;
+import org.frc6423.frc2025.util.motorUtil.CTReUtil;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 
 public class ModuleIOTalonFX implements ModuleIO {
@@ -53,8 +53,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_pivotConfig = config.kPivotConfigTalonFX;
     m_driveConfig = config.kDriveConfigTalonFX;
 
-    TalonFXUtil.registerMotor(m_pivotMotor);
-    TalonFXUtil.registerMotor(m_driveMotor);
+    CTReUtil.registerMotor(m_pivotMotor);
+    CTReUtil.registerMotor(m_driveMotor);
 
     m_pivotCANcoder = new CANcoder(config.kPivotABSID);
 
