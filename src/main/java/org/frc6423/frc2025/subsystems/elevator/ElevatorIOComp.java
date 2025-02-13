@@ -8,6 +8,8 @@ package org.frc6423.frc2025.subsystems.elevator;
 
 import static org.frc6423.frc2025.Constants.*;
 
+import org.frc6423.frc2025.util.motorUtil.CTReUtil;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -15,7 +17,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import org.frc6423.frc2025.util.motorUtil.TalonFXUtil;
 
 public class ElevatorIOComp implements ElevatorIO {
   private final TalonFX m_parentM, m_childM;
@@ -33,8 +34,8 @@ public class ElevatorIOComp implements ElevatorIO {
     m_poseOutReq = new PositionVoltage(0.0).withEnableFOC(true);
 
     // register to global talonfx array
-    TalonFXUtil.registerMotor(m_parentM);
-    TalonFXUtil.registerMotor(m_childM);
+    CTReUtil.registerMotor(m_parentM);
+    CTReUtil.registerMotor(m_childM);
 
     m_motorConf = new TalonFXConfiguration();
     m_motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -80,6 +81,11 @@ public class ElevatorIOComp implements ElevatorIO {
   }
 
   @Override
+  public void runTargetPose(double poseMeters) {
+    m_parentM.setControl(m_poseOutReq.withPosition(poseMeters).withEnableFOC(true));
+  }
+
+  @Override
   public void resetPose(double poseMeters) {
     m_parentM.setPosition(0.0);
   }
@@ -89,10 +95,5 @@ public class ElevatorIOComp implements ElevatorIO {
     m_motorConf.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
     m_parentM.getConfigurator().apply(m_motorConf);
     m_childM.getConfigurator().apply(m_motorConf);
-  }
-
-  @Override
-  public void runTargetPose(double poseMeters) {
-    m_parentM.setControl(m_poseOutReq.withPosition(poseMeters).withEnableFOC(true));
   }
 }
