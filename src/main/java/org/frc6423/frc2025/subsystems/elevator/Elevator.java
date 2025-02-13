@@ -47,7 +47,7 @@ public class Elevator extends SubsystemBase {
     m_io.updateInputs(m_inputs);
 
     Logger.recordOutput("Elevator/poseMeters", getPoseMeters());
-    Logger.recordOutput("Elevator/zeroed", false);
+    Logger.recordOutput("Elevator/zeroed", m_zeroed);
   }
 
   /** Sets elevator goal setpoint */
