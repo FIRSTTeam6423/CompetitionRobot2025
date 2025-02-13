@@ -9,12 +9,13 @@ package org.frc6423.frc2025.subsystems.elevator;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
+import org.frc6423.frc2025.Robot;
 import org.littletonrobotics.junction.Logger;
 
-public class Elevator extends SubsystemBase {
+public class ElevatorSubsystem extends SubsystemBase {
   /** ELEVATOR CONSTANTS */
   // mech constants
-  public static final double kReduction = 1 / 2;
+  public static final double kReduction = 4;
 
   public static final double kSpoolRadiusMeters = 0.878350;
   public static final double kRangeMeters = 0.0;
@@ -36,8 +37,8 @@ public class Elevator extends SubsystemBase {
   private double m_setpointMeters;
   private boolean m_zeroed;
 
-  public Elevator() {
-    m_io = new ElevatorIOComp();
+  public ElevatorSubsystem() {
+    m_io = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
     m_inputs = new ElevatorIOInputsAutoLogged();
   }
 
