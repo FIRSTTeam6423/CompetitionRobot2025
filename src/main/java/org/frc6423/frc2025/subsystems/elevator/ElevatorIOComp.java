@@ -85,7 +85,7 @@ public class ElevatorIOComp implements ElevatorIO {
   }
 
   @Override
-  public void setCoasting(boolean enabled) {
+  public void motorCoasting(boolean enabled) {
     m_motorConf.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
     m_parentM.getConfigurator().apply(m_motorConf);
     m_childM.getConfigurator().apply(m_motorConf);
@@ -94,11 +94,5 @@ public class ElevatorIOComp implements ElevatorIO {
   @Override
   public void runTargetPose(double poseMeters) {
     m_parentM.setControl(m_poseOutReq.withPosition(poseMeters).withEnableFOC(true));
-  }
-
-  @Override
-  public void runTargetPose(double poseMeters, double ff) {
-    m_parentM.setControl(
-        m_poseOutReq.withPosition(poseMeters).withEnableFOC(true).withFeedForward(ff));
   }
 }

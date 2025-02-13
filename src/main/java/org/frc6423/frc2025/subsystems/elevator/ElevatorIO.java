@@ -52,11 +52,8 @@ public interface ElevatorIO {
   public void resetPose(double poseMeters);
 
   /** Enable coasting */
-  public void setCoasting(boolean enabled);
-
-  /** Run target pose in meters */
-  public void runTargetPose(double poseMeters);
+  public void motorCoasting(boolean enabled);
 
   /** Set elevator pose with feedforward */
-  public void runTargetPose(double poseMeters, double ff);
+  public void runTargetPose(double poseMeters);
 }
