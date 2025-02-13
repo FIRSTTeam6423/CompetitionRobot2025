@@ -38,7 +38,7 @@ public class Elevator extends SubsystemBase {
   private boolean m_zeroed;
 
   public Elevator() {
-    m_io = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOComp();
+    m_io = new ElevatorIOComp();
     m_inputs = new ElevatorIOInputsAutoLogged();
   }
 
