@@ -25,8 +25,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
+
+import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIO;
+import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIONavX;
+import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOPigeon;
 import org.frc6423.frc2025.subsystems.swerve.module.Module;
 import org.frc6423.frc2025.util.swerveUtil.SwerveConfig;
+import org.frc6423.frc2025.util.swerveUtil.SwerveConfig.GyroType;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -35,9 +40,10 @@ public class SwerveSubsystem extends SubsystemBase {
   private final Module[] m_modules;
 
   private SwerveDriveKinematics m_kinematics;
-  private SwerveDrivePoseEstimator m_poseEstimator;
+  private SwerveDrivePoseEstimator m_odo;
 
-  private Rotation2d m_simRotation = new Rotation2d();
+  private final GyroIO m_gyro;
+  private Rotation2d m_simHeading;
 
   private final Field2d m_f2d;
 
@@ -49,8 +55,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
     // Create math objects
     m_kinematics = new SwerveDriveKinematics(config.getModuleLocs());
-    m_poseEstimator =
+    m_odo =
         new SwerveDrivePoseEstimator(m_kinematics, getHeading(), getModulePoses(), new Pose2d());
+    
+    m_gyro = config.getGyroType() == GyroType.PIGEON ? new GyroIOPigeon(config.getGyroID()) : new GyroIONavX();
+    m_simHeading = new Rotation2d();
 
     m_f2d = new Field2d();
 
@@ -59,14 +68,18 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Update all modules
     Arrays.stream(m_modules).forEach((m) -> m.updateInputs());
-
-    Logger.recordOutput("Swerve/ActualOutput", getVelocitiesRobotRelative());
-    Logger.recordOutput("Swerve/ActualStates", getModuleStates());
-
+    
+    // Odo update
     updateOdometry();
     m_f2d.setRobotPose(getPose());
     SmartDashboard.putData(m_f2d);
+
+    // Log swerve data
+    Logger.recordOutput("Swerve/ActualOutput", getVelocitiesRobotRelative());
+    Logger.recordOutput("Swerve/ActualStates", getModuleStates());
+
 
     // Stop module input when driverstation is disabled
     if (DriverStation.isDisabled()) {
@@ -83,9 +96,9 @@ public class SwerveSubsystem extends SubsystemBase {
             getVelocitiesRobotRelative().omegaRadiansPerSecond,
             -m_config.getMaxAngularSpeedRadsPerSec()/1000,
             m_config.getMaxAngularSpeedRadsPerSec()/1000);
-    m_simRotation = m_simRotation.rotateBy(Rotation2d.fromRadians(clamped));
+    m_simHeading = m_simHeading.rotateBy(Rotation2d.fromRadians(clamped));
 
-    Logger.recordOutput("Swerve/simRotation", m_simRotation.getDegrees());
+    Logger.recordOutput("Swerve/simRotation", m_simHeading.getDegrees());
   }
 
   /**
@@ -161,24 +174,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** update swerve pose estimator */
   public void updateOdometry() {
-    m_poseEstimator.update(getHeading(), getModulePoses());
+    m_odo.update(getHeading(), getModulePoses());
   }
 
-  /** Gets current robot velocity (robot relative) */
-  public ChassisSpeeds getVelocitiesRobotRelative() {
-    return ChassisSpeeds.fromRobotRelativeSpeeds(
-        m_kinematics.toChassisSpeeds(getModuleStates()), getHeading());
-  }
-
-  /** Gets current robot heading */
-  public Rotation2d getHeading() {
-    return m_simRotation;
-  }
-
-  /** Gets current robot field pose */
-  public Pose2d getPose() {
-    return m_poseEstimator.getEstimatedPosition();
-  }
+  // GETTERS
 
   /** Returns an array of module field positions */
   public SwerveModulePosition[] getModulePoses() {
@@ -188,5 +187,21 @@ public class SwerveSubsystem extends SubsystemBase {
   /** Returns an array of module states */
   public SwerveModuleState[] getModuleStates() {
     return Arrays.stream(m_modules).map(Module::getModuleState).toArray(SwerveModuleState[]::new);
+  }
+
+  /** Gets current robot heading */
+  public Rotation2d getHeading() {
+    return m_simHeading;
+  }
+
+  /** Gets current robot field pose */
+  public Pose2d getPose() {
+    return m_odo.getEstimatedPosition();
+  }
+
+  /** Gets current robot velocity (robot relative) */
+  public ChassisSpeeds getVelocitiesRobotRelative() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+        m_kinematics.toChassisSpeeds(getModuleStates()), getHeading());
   }
 }

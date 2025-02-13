@@ -22,14 +22,14 @@ import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 
 public class ModuleIOTalonFX implements ModuleIO {
 
-  private final TalonFX m_pivotMotor, m_driveMotor;
-  private final CANcoder m_pivotCANcoder;
+  private final TalonFX m_pivotM, m_driveM;
+  private final CANcoder m_pivotEncoder;
 
-  private final TalonFXConfiguration m_pivotConfig, m_driveConfig;
+  private final TalonFXConfiguration m_pivotConf, m_driveConf;
 
   // Control Requests
   private final VoltageOut m_voltReq;
-  private final TorqueCurrentFOC m_torqueCurrentReq;
+  private final TorqueCurrentFOC m_torqueReq;
   private final PositionTorqueCurrentFOC m_poseReq;
   private final VelocityTorqueCurrentFOC m_velReq;
 
@@ -47,34 +47,34 @@ public class ModuleIOTalonFX implements ModuleIO {
       m_sigDriveTorqueCurrent;
 
   public ModuleIOTalonFX(ModuleConfig config) {
-    m_pivotMotor = new TalonFX(config.kPivotID);
-    m_driveMotor = new TalonFX(config.kDriveID);
+    m_pivotM = new TalonFX(config.kPivotID);
+    m_driveM = new TalonFX(config.kDriveID);
 
-    m_pivotConfig = config.kPivotConfigTalonFX;
-    m_driveConfig = config.kDriveConfigTalonFX;
+    m_pivotConf = config.kPivotConfigTalonFX;
+    m_driveConf = config.kDriveConfigTalonFX;
 
-    CTReUtil.registerMotor(m_pivotMotor);
-    CTReUtil.registerMotor(m_driveMotor);
+    CTReUtil.registerMotor(m_pivotM);
+    CTReUtil.registerMotor(m_driveM);
 
-    m_pivotCANcoder = new CANcoder(config.kPivotABSID);
+    m_pivotEncoder = new CANcoder(config.kPivotABSID);
 
     m_voltReq = new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0);
-    m_torqueCurrentReq = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0);
+    m_torqueReq = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0);
     m_poseReq = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0);
     m_velReq = new VelocityTorqueCurrentFOC(0.0).withUpdateFreqHz(0);
 
-    m_sigPivotABSPoseRots = m_pivotCANcoder.getAbsolutePosition();
-    m_sigPivotPoseRots = m_pivotMotor.getPosition();
-    m_sigPivotVelRPM = m_pivotMotor.getVelocity();
-    m_sigPivotAppliedVolts = m_pivotMotor.getMotorVoltage();
-    m_sigPivotSupplyCurrent = m_pivotMotor.getStatorCurrent();
-    m_sigPivotTorqueCurrent = m_pivotMotor.getTorqueCurrent();
+    m_sigPivotABSPoseRots = m_pivotEncoder.getAbsolutePosition();
+    m_sigPivotPoseRots = m_pivotM.getPosition();
+    m_sigPivotVelRPM = m_pivotM.getVelocity();
+    m_sigPivotAppliedVolts = m_pivotM.getMotorVoltage();
+    m_sigPivotSupplyCurrent = m_pivotM.getStatorCurrent();
+    m_sigPivotTorqueCurrent = m_pivotM.getTorqueCurrent();
 
-    m_sigDrivePoseRots = m_driveMotor.getPosition();
-    m_sigDriveVelRPM = m_driveMotor.getVelocity();
-    m_sigDriveAppliedVolts = m_driveMotor.getMotorVoltage();
-    m_sigDriveSupplyCurrent = m_driveMotor.getStatorCurrent();
-    m_sigDriveTorqueCurrent = m_driveMotor.getTorqueCurrent();
+    m_sigDrivePoseRots = m_driveM.getPosition();
+    m_sigDriveVelRPM = m_driveM.getVelocity();
+    m_sigDriveAppliedVolts = m_driveM.getMotorVoltage();
+    m_sigDriveSupplyCurrent = m_driveM.getStatorCurrent();
+    m_sigDriveTorqueCurrent = m_driveM.getTorqueCurrent();
 
     // ! Register to odo thread
 
@@ -92,9 +92,9 @@ public class ModuleIOTalonFX implements ModuleIO {
         m_sigDriveSupplyCurrent,
         m_sigDriveTorqueCurrent);
 
-    m_pivotCANcoder.optimizeBusUtilization();
-    m_pivotMotor.optimizeBusUtilization();
-    m_driveMotor.optimizeBusUtilization();
+    m_pivotEncoder.optimizeBusUtilization();
+    m_pivotM.optimizeBusUtilization();
+    m_driveM.optimizeBusUtilization();
   }
 
   @Override
@@ -134,48 +134,48 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   @Override
-  public void setPivotVolts(double volts, boolean focEnabled) {
-    m_pivotMotor.setControl(m_voltReq.withOutput(volts).withEnableFOC(focEnabled));
+  public void runPivotVolts(double volts, boolean focEnabled) {
+    m_pivotM.setControl(m_voltReq.withOutput(volts).withEnableFOC(focEnabled));
   }
 
   @Override
-  public void setDriveVolts(double volts, boolean focEnabled) {
-    m_driveMotor.setControl(m_voltReq.withOutput(volts).withEnableFOC(focEnabled));
+  public void runDriveVolts(double volts, boolean focEnabled) {
+    m_driveM.setControl(m_voltReq.withOutput(volts).withEnableFOC(focEnabled));
   }
 
   @Override
-  public void setPivotTorqueCurrent(double currentAmps) {
-    m_pivotMotor.setControl(m_torqueCurrentReq.withOutput(currentAmps));
+  public void setPivotTorque(double currentAmps) {
+    m_pivotM.setControl(m_torqueReq.withOutput(currentAmps));
   }
 
   @Override
-  public void setDriveTorqueCurrent(double currentAmps) {
-    m_driveMotor.setControl(m_torqueCurrentReq.withOutput(currentAmps));
+  public void setDriveTorque(double currentAmps) {
+    m_driveM.setControl(m_torqueReq.withOutput(currentAmps));
   }
 
   @Override
   public void setPivotAngle(Rotation2d angle) {
-    m_pivotMotor.setControl(m_poseReq.withPosition(angle.getRotations()));
+    m_pivotM.setControl(m_poseReq.withPosition(angle.getRotations()));
   }
 
   @Override
   public void setDriveVelocity(double velMetersPerSec, double torqueFF) {
-    m_driveMotor.setControl(m_velReq.withVelocity(velMetersPerSec).withFeedForward(torqueFF));
+    m_driveM.setControl(m_velReq.withVelocity(velMetersPerSec).withFeedForward(torqueFF));
   }
 
   @Override
-  public void enableCoast(boolean enabled) {
+  public void setCoastMode(boolean enabled) {
     NeutralModeValue idleMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
-    m_pivotConfig.MotorOutput.NeutralMode = idleMode;
-    m_driveConfig.MotorOutput.NeutralMode = idleMode;
+    m_pivotConf.MotorOutput.NeutralMode = idleMode;
+    m_driveConf.MotorOutput.NeutralMode = idleMode;
 
-    m_pivotMotor.getConfigurator().apply(m_pivotConfig);
-    m_driveMotor.getConfigurator().apply(m_driveConfig);
+    m_pivotM.getConfigurator().apply(m_pivotConf);
+    m_driveM.getConfigurator().apply(m_driveConf);
   }
 
   @Override
   public void stop() {
-    m_pivotMotor.stopMotor();
-    m_driveMotor.stopMotor();
+    m_pivotM.stopMotor();
+    m_driveM.stopMotor();
   }
 }

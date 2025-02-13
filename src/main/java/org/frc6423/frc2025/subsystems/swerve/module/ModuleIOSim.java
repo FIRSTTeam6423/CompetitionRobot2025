@@ -21,8 +21,8 @@ import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 
 public class ModuleIOSim implements ModuleIO {
   private final DCMotorSim m_pivotSim, m_driveSim;
-  private final TalonFX m_driveMotor;
-  private final VoltageOut m_driveVoltage;
+  private final TalonFX m_driveM;
+  private final VoltageOut m_driveVolt;
   private final VelocityTorqueCurrentFOC m_driveVelocityControl;
 
   private final PIDController m_pivotFeedback;
@@ -34,10 +34,10 @@ public class ModuleIOSim implements ModuleIO {
     DCMotor pivotMotor = DCMotor.getKrakenX60(1);
     DCMotor driveMotor = DCMotor.getKrakenX60(1);
 
-    m_driveMotor = new TalonFX(config.kDriveID);
-    m_driveMotor.getConfigurator().apply(config.kDriveConfigTalonFX);
+    m_driveM = new TalonFX(config.kDriveID);
+    m_driveM.getConfigurator().apply(config.kDriveConfigTalonFX);
 
-    m_driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
+    m_driveVolt = new VoltageOut(0.0).withEnableFOC(true);
     m_driveVelocityControl = new VelocityTorqueCurrentFOC(0.0).withSlot(0);
 
     m_pivotSim =
@@ -59,7 +59,7 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    TalonFXSimState driveSimState = m_driveMotor.getSimState();
+    TalonFXSimState driveSimState = m_driveM.getSimState();
     driveSimState.Orientation = ChassisReference.CounterClockwise_Positive;
 
     m_driveSim.setInput(driveSimState.getMotorVoltage());
@@ -84,30 +84,30 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
-  public void setPivotVolts(double volts) {
+  public void runPivotVolts(double volts) {
     pivotAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
     m_pivotSim.setInputVoltage(pivotAppliedVolts);
   }
 
   @Override
-  public void setDriveVolts(double volts) {
-    m_driveMotor.setControl(m_driveVoltage.withOutput(volts).withEnableFOC(true));
+  public void runDriveVolts(double volts) {
+    m_driveM.setControl(m_driveVolt.withOutput(volts).withEnableFOC(true));
   }
 
   @Override
   public void setPivotAngle(Rotation2d angle) {
-    setPivotVolts(
+    runPivotVolts(
         m_pivotFeedback.calculate(m_pivotSim.getAngularPositionRotations(), angle.getRotations()));
   }
 
   @Override
   public void setDriveVelocity(double velMetersPerSec, double torqueFF) {
-    m_driveMotor.setControl(
+    m_driveM.setControl(
         m_driveVelocityControl.withVelocity(velMetersPerSec).withFeedForward(torqueFF)); // !
   }
 
   @Override
-  public void enableCoast(boolean enabled) {}
+  public void setCoastMode(boolean enabled) {}
 
   @Override
   public void stop() {

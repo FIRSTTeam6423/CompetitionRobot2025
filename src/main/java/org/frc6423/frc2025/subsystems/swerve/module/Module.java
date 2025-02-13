@@ -89,7 +89,7 @@ public class Module {
 
     double speedMPS = setpointState.speedMetersPerSecond;
     m_IO.setPivotAngle(setpointState.angle);
-    m_IO.setDriveVolts(speedMPS, FOCEnabled); // !
+    m_IO.runPivotVolts(speedMPS, FOCEnabled); // !
     return new SwerveModuleState();
   }
 
@@ -100,7 +100,7 @@ public class Module {
 
   /** Set drive torque current setpoint */
   public void runDriveCurrent(double currentAmps) {
-    m_IO.setDriveTorqueCurrent(currentAmps);
+    m_IO.setDriveTorque(currentAmps);
   }
 
   /** Enable module coasting */

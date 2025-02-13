@@ -33,29 +33,30 @@ public interface ModuleIO {
   /** Updates logged akit values */
   public void updateInputs(ModuleIOInputs inputs);
 
-  public default void setPivotVolts(double volts, boolean FOCEnabled) {
-    setPivotVolts(volts);
+  public default void runPivotVolts(double volts, boolean FOCEnabled) {
+    runPivotVolts(volts);
   }
 
-  public default void setDriveVolts(double volts, boolean FOCEnabled) {
-    setDriveVolts(volts);
+  /** Set pivot motor voltage */
+  public default void runDriveVolts(double volts, boolean FOCEnabled) {
+    runDriveVolts(volts);
   }
 
   /** Set Pivot motor voltage */
-  public default void setPivotVolts(double volts) {
-    setPivotVolts(volts, true);
+  public default void runPivotVolts(double volts) {
+    runPivotVolts(volts, true);
   }
 
   /** Set Drive motor voltage */
-  public default void setDriveVolts(double volts) {
-    setDriveVolts(volts, true);
+  public default void runDriveVolts(double volts) {
+    runPivotVolts(volts, true);
   }
 
   /** Set Pivot torque current */
-  public default void setPivotTorqueCurrent(double currentAmps) {}
+  public default void setPivotTorque(double currentAmps) {}
 
   /** Set Drive torque current */
-  public default void setDriveTorqueCurrent(double currentAmps) {}
+  public default void setDriveTorque(double currentAmps) {}
 
   /** Set Module angle goal */
   public void setPivotAngle(Rotation2d angle);
@@ -63,11 +64,11 @@ public interface ModuleIO {
   /** Set Module velocity goal */
   public void setDriveVelocity(double velMetersPerSec, double torqueFF);
 
-  public void enableCoast(boolean enabled);
+  public void setCoastMode(boolean enabled);
 
   /** Stop all motor inputs */
   public default void stop() {
-    setPivotVolts(0);
-    setDriveVolts(0);
+    runPivotVolts(0);
+    runDriveVolts(0);
   }
 }
