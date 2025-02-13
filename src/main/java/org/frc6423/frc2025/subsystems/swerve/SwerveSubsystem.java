@@ -25,8 +25,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
-
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIO;
+import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIONavX;
 import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOPigeon;
 import org.frc6423.frc2025.subsystems.swerve.module.Module;
@@ -43,6 +43,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private SwerveDrivePoseEstimator m_odo;
 
   private final GyroIO m_gyro;
+  private final GyroIOInputsAutoLogged m_gyroInputs;
   private Rotation2d m_simHeading;
 
   private final Field2d m_f2d;
@@ -53,13 +54,17 @@ public class SwerveSubsystem extends SubsystemBase {
     m_modules = new Module[moduleConfigs.length];
     Arrays.stream(moduleConfigs).forEach((c) -> m_modules[c.kIndex - 1] = new Module(c));
 
+    m_gyro =
+        config.getGyroType() == GyroType.PIGEON
+            ? new GyroIOPigeon(config.getGyroID())
+            : new GyroIONavX();
+    m_gyroInputs = new GyroIOInputsAutoLogged();
+    m_simHeading = new Rotation2d();
+
     // Create math objects
     m_kinematics = new SwerveDriveKinematics(config.getModuleLocs());
     m_odo =
         new SwerveDrivePoseEstimator(m_kinematics, getHeading(), getModulePoses(), new Pose2d());
-    
-    m_gyro = config.getGyroType() == GyroType.PIGEON ? new GyroIOPigeon(config.getGyroID()) : new GyroIONavX();
-    m_simHeading = new Rotation2d();
 
     m_f2d = new Field2d();
 
@@ -68,9 +73,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Update all modules
+    // Update gyro and all modules
     Arrays.stream(m_modules).forEach((m) -> m.updateInputs());
-    
+    m_gyro.updateInputs(m_gyroInputs);
+
     // Odo update
     updateOdometry();
     m_f2d.setRobotPose(getPose());
@@ -79,7 +85,6 @@ public class SwerveSubsystem extends SubsystemBase {
     // Log swerve data
     Logger.recordOutput("Swerve/ActualOutput", getVelocitiesRobotRelative());
     Logger.recordOutput("Swerve/ActualStates", getModuleStates());
-
 
     // Stop module input when driverstation is disabled
     if (DriverStation.isDisabled()) {
@@ -94,8 +99,8 @@ public class SwerveSubsystem extends SubsystemBase {
     double clamped =
         MathUtil.clamp(
             getVelocitiesRobotRelative().omegaRadiansPerSecond,
-            -m_config.getMaxAngularSpeedRadsPerSec()/1000,
-            m_config.getMaxAngularSpeedRadsPerSec()/1000);
+            -m_config.getMaxAngularSpeedRadsPerSec() / 10000,
+            m_config.getMaxAngularSpeedRadsPerSec() / 10000);
     m_simHeading = m_simHeading.rotateBy(Rotation2d.fromRadians(clamped));
 
     Logger.recordOutput("Swerve/simRotation", m_simHeading.getDegrees());

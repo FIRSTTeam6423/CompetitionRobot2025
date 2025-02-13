@@ -39,8 +39,7 @@ public class ModuleIOSpark implements ModuleIO {
     m_pivotFeedback = m_pivotM.getClosedLoopController();
     m_pivotConf = config.kPivotConfigSparkMax;
 
-    m_pivotM.configure(
-        m_pivotConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_pivotM.configure(m_pivotConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     // Drive init
     m_driveM = new SparkMax(config.kDriveID, MotorType.kBrushless);
@@ -49,8 +48,7 @@ public class ModuleIOSpark implements ModuleIO {
     m_driveFeedback = m_driveM.getClosedLoopController();
     m_driveConf = config.kDriveConfigSparkMax;
 
-    m_driveM.configure(
-        m_driveConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_driveM.configure(m_driveConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
