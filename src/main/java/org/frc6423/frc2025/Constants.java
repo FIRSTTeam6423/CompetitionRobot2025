@@ -11,7 +11,11 @@ import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
+/** A class */
 public class Constants {
+
+  public static final double kTickSpeed = 0.02;
+
   // * Select which robot to initalize
   private static final RobotType m_robotType = RobotType.SIMULATED;
 
@@ -42,6 +46,7 @@ public class Constants {
   }
 
   /** Get selected robot type */
+  @SuppressWarnings("resource")
   public static RobotType getRobot() {
     if (Robot.isReal() && m_robotType == RobotType.SIMULATED) {
       new Alert("Simulated robot type selected; Defaulting to devbot", AlertType.kError);

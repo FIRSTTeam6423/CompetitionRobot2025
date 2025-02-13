@@ -1,4 +1,14 @@
 {
+  "Keyboard 0 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
+  "Keyboard 1 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
   "keyboardJoysticks": [
     {
       "axisConfig": [
@@ -88,5 +98,12 @@
       "buttonCount": 0,
       "povCount": 0
     }
-  ]
+  ],
+  "robotJoysticks": [
+    {
+      "guid": "Keyboard0"
+    }
+  ],
+  "useEnableDisableHotkeys": true,
+  "useEstopHotkey": true
 }
