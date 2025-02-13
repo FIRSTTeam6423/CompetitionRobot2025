@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.frc6423.frc2025.subsystems.elevator.ElevatorSubsystem;
 import org.frc6423.frc2025.subsystems.swerve.SwerveSubsystem;
 import org.frc6423.frc2025.subsystems.swerve.constants.CompBotSwerveConfigs;
 import org.frc6423.frc2025.util.ControllerUtil;
@@ -27,6 +28,7 @@ public class Robot extends LoggedRobot {
   private final PS5Controller m_driveController;
 
   private final SwerveSubsystem m_swerveSubsystem;
+  private final ElevatorSubsystem m_elevatorSubsystem;
 
   public Robot() {
     // AKit init
@@ -63,6 +65,7 @@ public class Robot extends LoggedRobot {
     m_driveController = new PS5Controller(0);
     // Subsystem init
     m_swerveSubsystem = new SwerveSubsystem(new CompBotSwerveConfigs());
+    m_elevatorSubsystem = new ElevatorSubsystem();
 
     // Default Commands
     m_swerveSubsystem.setDefaultCommand(

@@ -6,6 +6,7 @@
 
 package org.frc6423.frc2025;
 
+import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
@@ -16,6 +17,8 @@ public class Constants {
 
   // * Select which robot to initalize
   private static final RobotType m_robotType = RobotType.SIMULATED;
+
+  public static final CANBus kCANivore = new CANBus("CAN-chan"); // :3
 
   /*
    * Robot types:
