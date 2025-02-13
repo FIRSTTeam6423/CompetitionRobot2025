@@ -7,7 +7,6 @@
 package org.frc6423.frc2025;
 
 import com.ctre.phoenix6.CANBus;
-
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 

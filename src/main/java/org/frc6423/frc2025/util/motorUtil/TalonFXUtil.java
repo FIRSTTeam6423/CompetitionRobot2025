@@ -6,13 +6,11 @@
 
 package org.frc6423.frc2025.util.motorUtil;
 
-import java.util.Arrays;
-import java.util.Random;
-
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.configs.AudioConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import java.util.Arrays;
+import java.util.Random;
 
 /** A class that's responsible for configuring all talons to do things */
 public class TalonFXUtil {
@@ -21,11 +19,13 @@ public class TalonFXUtil {
 
   /** Register Talon to global talon array */
   public static void registerMotor(TalonFX talon) {
-    talon.getConfigurator()
-      .apply(new AudioConfigs()
-        .withAllowMusicDurDisable(true)
-        .withBeepOnBoot(true)
-        .withBeepOnConfig(true));
+    talon
+        .getConfigurator()
+        .apply(
+            new AudioConfigs()
+                .withAllowMusicDurDisable(true)
+                .withBeepOnBoot(true)
+                .withBeepOnConfig(true));
 
     globalTalonArray[globalTalonArray.length] = talon;
   }
