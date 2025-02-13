@@ -131,7 +131,7 @@ public class Module {
 
   /** returns current module angle */
   public Rotation2d getPivotAngle() {
-    return m_inputs.pivotPose.minus(m_config.kPivotOffset);
+    return m_inputs.pivotPose;
   }
 
   /** Returns drive pose in meters */

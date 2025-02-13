@@ -30,6 +30,8 @@ public class ModuleIOSim implements ModuleIO {
   private double pivotAppliedVolts;
   private double driveReduction;
 
+  private final Rotation2d pivotABSinitPose = new Rotation2d(Math.random() * 2.0 * Math.PI);
+
   public ModuleIOSim(ModuleConfig config) {
     DCMotor pivotMotor = DCMotor.getKrakenX60(1);
     DCMotor driveMotor = DCMotor.getKrakenX60(1);
@@ -71,8 +73,9 @@ public class ModuleIOSim implements ModuleIO {
     inputs.pivotEnabled = true;
     inputs.driveEnabled = true;
 
-    inputs.pivotABSPose = Rotation2d.fromRadians(m_pivotSim.getAngularPositionRad());
-    inputs.pivotPose = inputs.pivotABSPose;
+    inputs.pivotABSPose =
+        Rotation2d.fromRadians(m_pivotSim.getAngularPositionRad()).plus(pivotABSinitPose);
+    inputs.pivotPose = Rotation2d.fromRadians(m_pivotSim.getAngularPositionRad());
     inputs.pivotVelRadsPerSec = m_pivotSim.getAngularVelocityRadPerSec();
     inputs.pivotAppliedVolts = m_pivotSim.getInputVoltage();
     inputs.pivotSupplyCurrent = m_pivotSim.getCurrentDrawAmps();
