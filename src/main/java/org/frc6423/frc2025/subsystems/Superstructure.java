@@ -33,6 +33,7 @@ public class Superstructure {
   private StructState m_state;
   private final HashMap<StructState, Trigger> m_stateTriggers;
 
+
   public Superstructure(ElevatorSubsystem elevator) {
     m_elevator = new ElevatorSubsystem();
 
@@ -45,6 +46,7 @@ public class Superstructure {
 
     m_stateTriggers
         .get(StructState.INTAKE_CHUTE)
-        .whileTrue(m_elevator.runPoseSetpoint(ElevatorSubsystem.kChuteIntakingPoseMeters));
+        .whileTrue(m_elevator.runPoseSetpoint(ElevatorSubsystem.kChuteIntakingPoseMeters))
+        .onFalse(m_elevator.runPoseSetpoint(0.0));
   }
 }
