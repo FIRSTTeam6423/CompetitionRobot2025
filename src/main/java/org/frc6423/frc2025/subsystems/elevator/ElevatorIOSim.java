@@ -62,12 +62,6 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   @Override
-  public void resetPose(double poseMeters) {}
-
-  @Override
-  public void motorCoasting(boolean enabled) {}
-
-  @Override
   public void runTargetPose(double poseMeters) {
     runMotorVolts(
         m_elevatorFeedback.calculate(m_elevatorSim.getPositionMeters(), poseMeters)
@@ -76,4 +70,10 @@ public class ElevatorIOSim implements ElevatorIO {
 
     Logger.recordOutput("Elevator/setpointPose", poseMeters);
   }
+
+  @Override
+  public void resetPose(double poseMeters) {}
+
+  @Override
+  public void motorCoasting(boolean enabled) {}
 }

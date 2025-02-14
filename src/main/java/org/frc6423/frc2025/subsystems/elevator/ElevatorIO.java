@@ -43,6 +43,9 @@ public interface ElevatorIO {
     runMotorVolts(0.0, false);
   }
 
+  /** Set elevator pose with feedforward */
+  public void runTargetPose(double poseMeters);
+
   /** Resets pose to 0.0 meters */
   public default void resetPose() {
     resetPose(0.0);
@@ -53,7 +56,4 @@ public interface ElevatorIO {
 
   /** Enable coasting */
   public void motorCoasting(boolean enabled);
-
-  /** Set elevator pose with feedforward */
-  public void runTargetPose(double poseMeters);
 }
