@@ -15,10 +15,11 @@ import org.littletonrobotics.junction.Logger;
 public class ElevatorSubsystem extends SubsystemBase {
   /** ELEVATOR CONSTANTS */
   // mech constants
-  public static final double kReduction = 4;
+  public static final double kMassKg = 5.6 + 1.8; // Carriage + 1 stage
 
+  public static final double kReduction = 4;
   public static final double kSpoolRadiusMeters = 0.878350;
-  public static final double kRangeMeters = 0.0;
+  public static final double kRangeMeters = 1.218;
 
   // Non-scoring poses
   public static final double kChuteIntakingPoseMeters = 0.0;

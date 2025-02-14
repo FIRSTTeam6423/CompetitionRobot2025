@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.frc6423.frc2025.subsystems.elevator.ElevatorSubsystem;
 import org.frc6423.frc2025.subsystems.swerve.SwerveSubsystem;
 import org.frc6423.frc2025.subsystems.swerve.constants.CompBotSwerveConfigs;
-import org.frc6423.frc2025.util.ControllerUtil;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -67,12 +66,16 @@ public class Robot extends LoggedRobot {
     m_swerveSubsystem = new SwerveSubsystem(new CompBotSwerveConfigs());
     m_elevatorSubsystem = new ElevatorSubsystem();
 
+    m_elevatorSubsystem.setDefaultCommand(
+        m_elevatorSubsystem.runPoseSetpoint(
+            m_driveController.getLeftY() * ElevatorSubsystem.kRangeMeters)); // elevator test command
+
     // Default Commands
-    m_swerveSubsystem.setDefaultCommand(
-        m_swerveSubsystem.teleopSwerveCommmand(
-            ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
-            ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
-            ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
+    // m_swerveSubsystem.setDefaultCommand(
+    //     m_swerveSubsystem.teleopSwerveCommmand(
+    //         ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
+    //         ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
+    //         ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
   }
 
   @Override
