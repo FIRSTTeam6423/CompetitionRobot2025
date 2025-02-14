@@ -68,7 +68,8 @@ public class Robot extends LoggedRobot {
 
     m_elevatorSubsystem.setDefaultCommand(
         m_elevatorSubsystem.runPoseSetpoint(
-            m_driveController.getLeftY() * ElevatorSubsystem.kRangeMeters)); // elevator test command
+            m_driveController.getLeftY()
+                * ElevatorSubsystem.kRangeMeters)); // elevator test command
 
     // Default Commands
     // m_swerveSubsystem.setDefaultCommand(
