@@ -1,10 +1,10 @@
-package org.frc6423.frc2025.subsystems.arm;
+package org.frc6423.frc2025.subsystems.wrist;
 
 import org.littletonrobotics.junction.AutoLog;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
-public interface ArmIO {
+public interface Wrist {
     @AutoLog
     public class ArmIOInputs {
         public boolean pivotMotorEnabled = false;
