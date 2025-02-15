@@ -33,7 +33,6 @@ public class Superstructure {
   private StructState m_state;
   private final HashMap<StructState, Trigger> m_stateTriggers;
 
-
   public Superstructure(ElevatorSubsystem elevator) {
     m_elevator = new ElevatorSubsystem();
 

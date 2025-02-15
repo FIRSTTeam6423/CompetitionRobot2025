@@ -8,8 +8,6 @@ package org.frc6423.frc2025.subsystems.elevator;
 
 import static org.frc6423.frc2025.Constants.*;
 
-import org.frc6423.frc2025.util.motorUtil.CTReUtil;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -17,6 +15,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import org.frc6423.frc2025.util.motorUtil.CTReUtil;
 
 public class ElevatorIOComp implements ElevatorIO {
   private final TalonFX m_parentM, m_childM;
