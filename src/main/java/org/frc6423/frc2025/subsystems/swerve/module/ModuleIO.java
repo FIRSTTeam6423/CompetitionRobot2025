@@ -18,7 +18,7 @@ public interface ModuleIO {
 
     public Rotation2d pivotABSPose = new Rotation2d();
     public Rotation2d pivotPose = new Rotation2d();
-    public double pivotVelRadsPerSec = 0.0;
+    public double pivotVelRadPerSec = 0.0;
     public double pivotAppliedVolts = 0.0;
     public double pivotSupplyCurrent = 0.0;
     public double pivotTorqueCurrent = 0.0;

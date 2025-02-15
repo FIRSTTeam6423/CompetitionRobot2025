@@ -119,7 +119,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         Rotation2d.fromRotations(m_sigPivotABSPoseRots.getValueAsDouble())
             .minus(new Rotation2d()); // ! Minus offset
     inputs.pivotPose = Rotation2d.fromRotations(m_sigPivotPoseRots.getValueAsDouble());
-    inputs.pivotVelRadsPerSec =
+    inputs.pivotVelRadPerSec =
         Units.rotationsPerMinuteToRadiansPerSecond(m_sigPivotVelRPM.getValueAsDouble());
     inputs.pivotAppliedVolts = m_sigPivotAppliedVolts.getValueAsDouble();
     inputs.pivotSupplyCurrent = m_sigPivotSupplyCurrent.getValueAsDouble();

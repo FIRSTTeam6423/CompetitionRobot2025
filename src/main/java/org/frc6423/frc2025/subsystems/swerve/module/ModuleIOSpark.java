@@ -58,7 +58,7 @@ public class ModuleIOSpark implements ModuleIO {
 
     inputs.pivotABSPose = Rotation2d.fromRotations(m_pivotABSEncoder.getPosition());
     inputs.pivotPose = Rotation2d.fromRotations(m_pivotEncoder.getPosition());
-    inputs.pivotVelRadsPerSec =
+    inputs.pivotVelRadPerSec =
         Units.rotationsPerMinuteToRadiansPerSecond(m_pivotEncoder.getVelocity());
     inputs.pivotAppliedVolts = m_pivotM.getAppliedOutput() * m_pivotM.getBusVoltage();
     inputs.pivotSupplyCurrent = m_pivotM.getOutputCurrent();

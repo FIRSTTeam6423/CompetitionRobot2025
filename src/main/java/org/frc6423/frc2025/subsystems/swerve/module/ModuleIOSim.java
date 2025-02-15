@@ -76,7 +76,7 @@ public class ModuleIOSim implements ModuleIO {
     inputs.pivotABSPose =
         Rotation2d.fromRadians(m_pivotSim.getAngularPositionRad()).plus(pivotABSinitPose);
     inputs.pivotPose = Rotation2d.fromRadians(m_pivotSim.getAngularPositionRad());
-    inputs.pivotVelRadsPerSec = m_pivotSim.getAngularVelocityRadPerSec();
+    inputs.pivotVelRadPerSec = m_pivotSim.getAngularVelocityRadPerSec();
     inputs.pivotAppliedVolts = m_pivotSim.getInputVoltage();
     inputs.pivotSupplyCurrent = m_pivotSim.getCurrentDrawAmps();
 
