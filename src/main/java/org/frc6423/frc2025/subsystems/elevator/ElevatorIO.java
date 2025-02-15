@@ -38,11 +38,6 @@ public interface ElevatorIO {
   /** Run voltage to left elevator motor */
   public void runMotorVolts(double voltage, boolean focEnabled);
 
-  /** Stops elevator */
-  public default void stop() {
-    runMotorVolts(0.0, false);
-  }
-
   /** Set elevator pose with feedforward */
   public void runTargetPose(double poseMeters);
 
@@ -53,6 +48,11 @@ public interface ElevatorIO {
 
   /** Resets motor encoders to specific pose */
   public void resetPose(double poseMeters);
+
+  /** Stops elevator */
+  public default void stop() {
+    runMotorVolts(0.0, false);
+  }
 
   /** Enable coasting */
   public void motorCoasting(boolean enabled);

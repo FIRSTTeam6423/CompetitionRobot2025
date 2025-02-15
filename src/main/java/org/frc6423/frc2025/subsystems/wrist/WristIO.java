@@ -37,4 +37,21 @@ public interface WristIO {
 
   /** Set target roller velocity in rads per second */
   public void runTargetRollerVeloctiy(double radsPerSec);
+
+  /** Reset encoder pose to 0 rads (stowed pose) */
+  public default void resetPose() {
+    resetPose(Rotation2d.fromRadians(0));
+  } 
+
+  /** Set pose to specific angle */
+  public void resetPose(Rotation2d pose);
+
+  /** Stop all motor input */
+  public default void stop() {
+    runVolts(0);
+    runRollerVolts(0);
+  }
+
+  /** Enable coast mode to move mechanism */
+  public void setCoasting(boolean enabled);
 }

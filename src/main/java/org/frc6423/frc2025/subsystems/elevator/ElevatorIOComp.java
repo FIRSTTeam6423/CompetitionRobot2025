@@ -90,6 +90,11 @@ public class ElevatorIOComp implements ElevatorIO {
   }
 
   @Override
+  public void stop() {
+    m_parentM.stopMotor();
+  }
+
+  @Override
   public void motorCoasting(boolean enabled) {
     m_motorConf.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
     m_parentM.getConfigurator().apply(m_motorConf);

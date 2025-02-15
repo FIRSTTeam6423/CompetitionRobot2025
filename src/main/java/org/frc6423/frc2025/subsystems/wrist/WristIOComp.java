@@ -43,5 +43,12 @@ public class WristIOComp implements WristIO {
     public void runTargetRollerVeloctiy(double radsPerSec) {
         m_rollerM.getClosedLoopController().setReference(radsPerSec, ControlType.kVelocity);
     }
-    
+
+    @Override
+    public void resetPose(Rotation2d pose) {
+    } // !
+
+    @Override
+    public void setCoasting(boolean enabled) {
+    } // !
 }
