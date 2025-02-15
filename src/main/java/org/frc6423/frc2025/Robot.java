@@ -66,17 +66,12 @@ public class Robot extends LoggedRobot {
     m_swerveSubsystem = new SwerveSubsystem(new CompBotSwerveConfigs());
     m_elevatorSubsystem = new ElevatorSubsystem();
 
-    m_elevatorSubsystem.setDefaultCommand(
-        m_elevatorSubsystem.runPoseSetpoint(
-            m_driveController.getLeftY()
-                * ElevatorSubsystem.kRangeMeters)); // elevator test command
-
     // Default Commands
-    // m_swerveSubsystem.setDefaultCommand(
-    //     m_swerveSubsystem.teleopSwerveCommmand(
-    //         ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
-    //         ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
-    //         ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
+    m_swerveSubsystem.setDefaultCommand(
+        m_swerveSubsystem.teleopSwerveCommmand(
+            ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
+            ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
+            ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
   }
 
   @Override
