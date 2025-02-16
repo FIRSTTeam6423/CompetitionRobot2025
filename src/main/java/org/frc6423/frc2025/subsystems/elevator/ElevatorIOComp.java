@@ -15,7 +15,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import org.frc6423.frc2025.util.motorUtil.CTReUtil;
 
 public class ElevatorIOComp implements ElevatorIO {
   private final TalonFX m_parentM, m_childM;
@@ -26,15 +25,13 @@ public class ElevatorIOComp implements ElevatorIO {
   private final PositionVoltage m_poseOutReq;
 
   public ElevatorIOComp() {
-    m_parentM = new TalonFX(0, kCANivore);
-    m_childM = new TalonFX(0, kCANivore); // ! ID
+    m_parentM = new TalonFX(0, kCANbus);
+    m_childM = new TalonFX(0, kCANbus); // ! ID
 
     m_voltOutReq = new VoltageOut(0.0).withEnableFOC(true);
     m_poseOutReq = new PositionVoltage(0.0).withEnableFOC(true);
 
     // register to global talonfx array
-    CTReUtil.registerMotor(m_parentM);
-    CTReUtil.registerMotor(m_childM);
 
     m_motorConf = new TalonFXConfiguration();
     m_motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;

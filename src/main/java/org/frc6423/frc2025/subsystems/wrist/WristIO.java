@@ -41,7 +41,7 @@ public interface WristIO {
   /** Reset encoder pose to 0 rads (stowed pose) */
   public default void resetPose() {
     resetPose(Rotation2d.fromRadians(0));
-  } 
+  }
 
   /** Set pose to specific angle */
   public void resetPose(Rotation2d pose);

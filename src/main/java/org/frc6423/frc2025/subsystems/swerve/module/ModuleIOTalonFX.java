@@ -6,6 +6,8 @@
 
 package org.frc6423.frc2025.subsystems.swerve.module;
 
+import static org.frc6423.frc2025.Constants.kCANbus;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
@@ -17,7 +19,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import org.frc6423.frc2025.util.motorUtil.CTReUtil;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 
 public class ModuleIOTalonFX implements ModuleIO {
@@ -47,14 +48,11 @@ public class ModuleIOTalonFX implements ModuleIO {
       m_sigDriveTorqueCurrent;
 
   public ModuleIOTalonFX(ModuleConfig config) {
-    m_pivotM = new TalonFX(config.kPivotID);
-    m_driveM = new TalonFX(config.kDriveID);
+    m_pivotM = new TalonFX(config.kPivotID, kCANbus);
+    m_driveM = new TalonFX(config.kDriveID, kCANbus);
 
     m_pivotConf = config.kPivotConfigTalonFX;
     m_driveConf = config.kDriveConfigTalonFX;
-
-    CTReUtil.registerMotor(m_pivotM);
-    CTReUtil.registerMotor(m_driveM);
 
     m_pivotEncoder = new CANcoder(config.kPivotABSID);
 
