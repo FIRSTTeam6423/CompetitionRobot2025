@@ -12,7 +12,7 @@ import java.util.function.DoubleSupplier;
 import org.frc6423.frc2025.Robot;
 import org.littletonrobotics.junction.Logger;
 
-public class ElevatorSubsystem extends SubsystemBase {
+public class Elevator extends SubsystemBase {
   /** ELEVATOR CONSTANTS */
   // mech constants
   public static final double kMassKg = 5.6 + 1.8; // Carriage + 1 stage
@@ -22,7 +22,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   public static final double kRangeMeters = 1.218;
 
   // Non-scoring poses
-  public static final double kChuteIntakingPoseMeters = 0.0;
   public static final double kLowerAlgaeRemovePoseMeters = 0.0;
   public static final double kHigherAlgaeRemovePoseMeters = 0.0;
 
@@ -38,7 +37,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private double m_setpointMeters;
   private boolean m_zeroed;
 
-  public ElevatorSubsystem() {
+  public Elevator() {
     m_io = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
     m_inputs = new ElevatorIOInputsAutoLogged();
   }

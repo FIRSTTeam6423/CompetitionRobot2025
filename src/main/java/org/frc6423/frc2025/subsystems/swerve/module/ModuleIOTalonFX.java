@@ -19,6 +19,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import org.frc6423.frc2025.Robot;
 import org.frc6423.frc2025.util.swerveUtil.ModuleConfig;
 
 public class ModuleIOTalonFX implements ModuleIO {
@@ -50,6 +51,9 @@ public class ModuleIOTalonFX implements ModuleIO {
   public ModuleIOTalonFX(ModuleConfig config) {
     m_pivotM = new TalonFX(config.kPivotID, kCANbus);
     m_driveM = new TalonFX(config.kDriveID, kCANbus);
+
+    Robot.talonHandler.registerTalon(m_pivotM);
+    Robot.talonHandler.registerTalon(m_driveM);
 
     m_pivotConf = config.kPivotConfigTalonFX;
     m_driveConf = config.kDriveConfigTalonFX;

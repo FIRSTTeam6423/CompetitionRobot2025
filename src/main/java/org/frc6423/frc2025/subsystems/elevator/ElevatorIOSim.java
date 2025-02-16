@@ -29,11 +29,11 @@ public class ElevatorIOSim implements ElevatorIO {
     m_elevatorSim =
         new ElevatorSim( // ! These are BS constants
             DCMotor.getKrakenX60Foc(1),
-            ElevatorSubsystem.kReduction,
-            Units.kilogramsToLbs(ElevatorSubsystem.kMassKg),
-            ElevatorSubsystem.kSpoolRadiusMeters,
+            Elevator.kReduction,
+            Units.kilogramsToLbs(Elevator.kMassKg),
+            Elevator.kSpoolRadiusMeters,
             0.0,
-            ElevatorSubsystem.kRangeMeters,
+            Elevator.kRangeMeters,
             true,
             0.0);
 

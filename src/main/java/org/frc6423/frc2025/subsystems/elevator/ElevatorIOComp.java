@@ -15,6 +15,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import org.frc6423.frc2025.Robot;
 
 public class ElevatorIOComp implements ElevatorIO {
   private final TalonFX m_parentM, m_childM;
@@ -25,8 +26,11 @@ public class ElevatorIOComp implements ElevatorIO {
   private final PositionVoltage m_poseOutReq;
 
   public ElevatorIOComp() {
-    m_parentM = new TalonFX(0, kCANbus);
-    m_childM = new TalonFX(0, kCANbus); // ! ID
+    m_parentM = new TalonFX(14, kCANbus);
+    m_childM = new TalonFX(15, kCANbus); // ! ID
+
+    Robot.talonHandler.registerTalon(m_parentM);
+    Robot.talonHandler.registerTalon(m_childM);
 
     m_voltOutReq = new VoltageOut(0.0).withEnableFOC(true);
     m_poseOutReq = new PositionVoltage(0.0).withEnableFOC(true);
