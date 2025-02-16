@@ -12,7 +12,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-def ROBOT_MAIN_CLASS = "org.frc6423.frc2025.Main"
+def ROBOT_MAIN_CLASS = "wmironpatriots.Main"
 
 version = '1.0.0'
 
