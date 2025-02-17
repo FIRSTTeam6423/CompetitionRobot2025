@@ -33,7 +33,7 @@ public interface ElevatorIO {
   }
 
   /** Update logged inputs */
-  public void updateInputs(ElevatorIOInputs inputs);
+  public abstract void updateInputs(ElevatorIOInputs inputs);
 
   /** Run voltage to left elevator motor */
   public void runMotorVolts(double voltage, boolean focEnabled);

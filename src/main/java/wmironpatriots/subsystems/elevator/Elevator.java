@@ -6,16 +6,16 @@
 
 package wmironpatriots.subsystems.elevator;
 
+import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import wmironpatriots.Robot;
+import monologue.Annotations.Log;
 
-import java.util.function.DoubleSupplier;
-
-import org.frc6423.frc2025.subsystems.elevator.ElevatorIOInputsAutoLogged;
-import org.littletonrobotics.junction.Logger;
-
-public class Elevator extends SubsystemBase {
+/** Elevator subsytem for raising and lower wrist subsystem for scoring */
+public abstract class Elevator extends SubsystemBase {
   /** ELEVATOR CONSTANTS */
   // mech constants
   public static final double kMassKg = 5.6 + 1.8; // Carriage + 1 stage
@@ -34,76 +34,82 @@ public class Elevator extends SubsystemBase {
   public static final double kL3PoseMeters = 0.0;
   public static final double kL4PoseMeters = 0.0;
 
-  private final ElevatorIO m_io;
-  private final ElevatorIOInputsAutoLogged m_inputs;
 
-  private double m_setpointMeters;
-  private boolean m_zeroed;
+  /** LOGGED VALUES */
+  @Log protected boolean LMotorEnabled = false;
+  @Log protected boolean RMotorEnabled = false;
 
-  public Elevator() {
-    m_io = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
-    m_inputs = new ElevatorIOInputsAutoLogged();
+  @Log protected double poseMeters;
+  @Log protected double velMPS;
+  @Log protected boolean isZeroed = false;
+
+  @Log protected double LMotorPoseRads;
+  @Log protected double LVelRadsPerSec;
+  @Log protected double LMotorAppliedVolts; 
+  @Log protected double LMotorSupplyCurrentAmps;
+  @Log protected double LMotorTorqueCurrentAmps;
+  @Log protected double LMotorTempCelsius;
+
+  @Log protected double RMotorPoseRads;
+  @Log protected double RVelRadsPerSec;
+  @Log protected double RMotorAppliedVolts; 
+  @Log protected double RMotorSupplyCurrentAmps;
+  @Log protected double RMotorTorqueCurrentAmps;
+  @Log protected double RMotorTempCelsius;
+
+
+  /** Variables */
+  private final PositionVoltage m_motorPoseOutReq = new PositionVoltage(0.0).withEnableFOC(true);
+  private final VoltageOut m_motorVoltOutReq = new VoltageOut(0.0).withEnableFOC(true);
+
+  /** Run target position meters from current zeroed pose */
+  public Command runTargetPoseCommand(double poseMeters) {
+    return this.run(() -> {
+      runMotorControl(m_motorPoseOutReq.withPosition(poseMeters).withEnableFOC(true));
+    });
   }
 
-  @Override
-  public void periodic() {
-    m_io.updateInputs(m_inputs);
-
-    Logger.recordOutput("Elevator/poseMeters", getPoseMeters());
-    Logger.recordOutput("Elevator/zeroed", m_zeroed);
+  /** Zero elevator encoders at current pose */
+  public Command zeroPoseCommand() {
+    return this.run(() -> {
+      setEncoderPose(0.0);
+      isZeroed = true;
+    });
   }
 
-  /** Sets elevator goal setpoint */
-  public Command runPoseSetpoint(double poseMeters) {
-    return this.run(
-        () -> {
-          m_setpointMeters = poseMeters;
-          m_io.runTargetPose(m_setpointMeters);
-
-          Logger.recordOutput("Elevator/setpointMeters", m_setpointMeters); // Logs setpoint to NT
-        });
-  }
-
-  /** Sets elevator goal setpoint (meters) */
-  public Command runPoseSetpoint(DoubleSupplier poseSupplier) {
-    return runPoseSetpoint(poseSupplier.getAsDouble());
-  }
-
-  /** Zero elevator encoder at current position */
+  /** Runs elevator down until current spikes above threshold */
   public Command runPoseZeroingCommand() {
-    return this.run(() -> m_io.runMotorVolts(-2.0, false))
-        .until(() -> m_inputs.LMotorSupplyCurrentAmps > 20.0)
+  return this.run(() -> runMotorControl(m_motorVoltOutReq.withOutput(0.0).withEnableFOC(true)))
+        .until(() -> LMotorSupplyCurrentAmps > 20.0)
         .finallyDo(
             (interrupted) -> {
-              m_io.stop();
-              m_io.resetPose();
-              m_zeroed = true;
+              stopMotors();
+              resetPose(); 
+              isZeroed = true;
             });
   }
 
-  /** Run elevator down until current spikes */
-  public Command runCurrentPoseZeroingCommand() {
-    return this.run(
-        () -> {
-          m_io.resetPose();
-          m_zeroed = true;
-        });
-  }
-
-  /** Enable coasting to make manual movement easier */
+  /** Enable coast mode to move elevator easier */
   public Command elevatorCoasting(boolean enabled) {
-    return this.run(() -> m_io.motorCoasting(enabled));
+    return this.runOnce(() -> motorCoasting(enabled));
   }
 
-  // GETTERS
-
-  /** Returns elevator goal pose in meters */
-  public double getSetpointMeters() {
-    return m_setpointMeters;
+  /** Set elevator pose to 0.0 meters */
+  private void resetPose() {
+    setEncoderPose(0.0);
   }
 
-  /** Returns pose in meters from last encoder zero */
-  public double getPoseMeters() {
-    return m_inputs.poseMeters;
-  }
+  // Hardware methods
+  /** Run elevator motor with control request */
+  protected abstract void runMotorControl(ControlRequest request);
+
+  /** Set elevator encoder position in meters */
+  protected abstract void setEncoderPose(double poseMeters);
+
+  /** Stop motor input */
+  protected abstract void stopMotors();
+
+  /** Enable or disable motor coasting */
+  protected abstract void motorCoasting(boolean enabled);
+  
 }
