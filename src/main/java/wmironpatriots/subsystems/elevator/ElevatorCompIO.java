@@ -6,35 +6,27 @@
 
 package wmironpatriots.subsystems.elevator;
 
-import static wmironpatriots.Constants.*;
+import static wmironpatriots.Constants.kCANbus;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import wmironpatriots.Robot;
 
-public class ElevatorIOComp implements ElevatorIO {
+public class ElevatorCompIO extends Elevator {
   private final TalonFX m_parentM, m_childM;
   private final TalonFXConfiguration m_motorConf;
 
-  // Control requests
-  private final VoltageOut m_voltOutReq;
-  private final PositionVoltage m_poseOutReq;
-
-  public ElevatorIOComp() {
+  public ElevatorCompIO() {
     m_parentM = new TalonFX(14, kCANbus);
     m_childM = new TalonFX(15, kCANbus); // ! ID
 
     Robot.talonHandler.registerTalon(m_parentM);
     Robot.talonHandler.registerTalon(m_childM);
-
-    m_voltOutReq = new VoltageOut(0.0).withEnableFOC(true);
-    m_poseOutReq = new PositionVoltage(0.0).withEnableFOC(true);
 
     // register to global talonfx array
 
@@ -74,32 +66,28 @@ public class ElevatorIOComp implements ElevatorIO {
   }
 
   @Override
-  public void updateInputs(ElevatorIOInputs inputs) {}
-
-  @Override
-  public void runMotorVolts(double voltage, boolean focEnabled) {
-    m_parentM.setControl(m_voltOutReq.withOutput(voltage).withEnableFOC(focEnabled));
+  public void periodic() {
+    // Update logged values here
   }
 
   @Override
-  public void runTargetPose(double poseMeters) {
-    m_parentM.setControl(m_poseOutReq.withPosition(poseMeters).withEnableFOC(true));
+  protected void runMotorControl(ControlRequest request) {
+    m_parentM.setControl(request);
   }
 
   @Override
-  public void resetPose(double poseMeters) {
+  protected void setEncoderPose(double poseMeters) {
     m_parentM.setPosition(0.0);
   }
 
   @Override
-  public void stop() {
+  protected void stopMotors() {
     m_parentM.stopMotor();
   }
 
   @Override
-  public void motorCoasting(boolean enabled) {
-    m_motorConf.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
-    m_parentM.getConfigurator().apply(m_motorConf);
-    m_childM.getConfigurator().apply(m_motorConf);
+  protected void motorCoasting(boolean enabled) {
+    NeutralModeValue idleMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
+    m_parentM.setNeutralMode(idleMode);
   }
 }

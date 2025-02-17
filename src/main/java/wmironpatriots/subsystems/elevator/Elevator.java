@@ -9,12 +9,11 @@ package wmironpatriots.subsystems.elevator;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Annotations.Log;
 
-/** Elevator subsytem for raising and lower wrist subsystem for scoring */
+/** Elevator subsytem for raising and lower tail subsystem for scoring */
 public abstract class Elevator extends SubsystemBase {
   /** ELEVATOR CONSTANTS */
   // mech constants
@@ -30,13 +29,13 @@ public abstract class Elevator extends SubsystemBase {
 
   // Scoring poses
   public static final double kL1PoseMeters = 0.0;
-  public static final double kL2PoseMeters = 0.0;
-  public static final double kL3PoseMeters = 0.0;
-  public static final double kL4PoseMeters = 0.0;
-
+  public static final double kL2PoseMeters = 3.16;
+  public static final double kL3PoseMeters = 10.81;
+  public static final double kL4PoseMeters = 24;
 
   /** LOGGED VALUES */
   @Log protected boolean LMotorEnabled = false;
+
   @Log protected boolean RMotorEnabled = false;
 
   @Log protected double poseMeters;
@@ -45,46 +44,48 @@ public abstract class Elevator extends SubsystemBase {
 
   @Log protected double LMotorPoseRads;
   @Log protected double LVelRadsPerSec;
-  @Log protected double LMotorAppliedVolts; 
+  @Log protected double LMotorAppliedVolts;
   @Log protected double LMotorSupplyCurrentAmps;
   @Log protected double LMotorTorqueCurrentAmps;
   @Log protected double LMotorTempCelsius;
 
   @Log protected double RMotorPoseRads;
   @Log protected double RVelRadsPerSec;
-  @Log protected double RMotorAppliedVolts; 
+  @Log protected double RMotorAppliedVolts;
   @Log protected double RMotorSupplyCurrentAmps;
   @Log protected double RMotorTorqueCurrentAmps;
   @Log protected double RMotorTempCelsius;
 
-
   /** Variables */
   private final PositionVoltage m_motorPoseOutReq = new PositionVoltage(0.0).withEnableFOC(true);
+
   private final VoltageOut m_motorVoltOutReq = new VoltageOut(0.0).withEnableFOC(true);
 
   /** Run target position meters from current zeroed pose */
   public Command runTargetPoseCommand(double poseMeters) {
-    return this.run(() -> {
-      runMotorControl(m_motorPoseOutReq.withPosition(poseMeters).withEnableFOC(true));
-    });
+    return this.run(
+        () -> {
+          runMotorControl(m_motorPoseOutReq.withPosition(poseMeters).withEnableFOC(true));
+        });
   }
 
   /** Zero elevator encoders at current pose */
   public Command zeroPoseCommand() {
-    return this.run(() -> {
-      setEncoderPose(0.0);
-      isZeroed = true;
-    });
+    return this.run(
+        () -> {
+          setEncoderPose(0.0);
+          isZeroed = true;
+        });
   }
 
   /** Runs elevator down until current spikes above threshold */
   public Command runPoseZeroingCommand() {
-  return this.run(() -> runMotorControl(m_motorVoltOutReq.withOutput(0.0).withEnableFOC(true)))
+    return this.run(() -> runMotorControl(m_motorVoltOutReq.withOutput(0.0).withEnableFOC(true)))
         .until(() -> LMotorSupplyCurrentAmps > 20.0)
         .finallyDo(
             (interrupted) -> {
               stopMotors();
-              resetPose(); 
+              resetPose();
               isZeroed = true;
             });
   }
@@ -111,5 +112,4 @@ public abstract class Elevator extends SubsystemBase {
 
   /** Enable or disable motor coasting */
   protected abstract void motorCoasting(boolean enabled);
-  
 }

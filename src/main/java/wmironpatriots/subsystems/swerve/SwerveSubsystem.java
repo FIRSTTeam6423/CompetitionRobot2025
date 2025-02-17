@@ -6,6 +6,8 @@
 
 package wmironpatriots.subsystems.swerve;
 
+import static wmironpatriots.Constants.kTickSpeed;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,20 +23,16 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.Arrays;
+import java.util.function.DoubleSupplier;
+import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
+import org.littletonrobotics.junction.Logger;
 import wmironpatriots.subsystems.swerve.gyro.GyroIO;
 import wmironpatriots.subsystems.swerve.gyro.GyroIONavX;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOPigeon;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.util.swerveUtil.SwerveConfig;
 import wmironpatriots.util.swerveUtil.SwerveConfig.GyroType;
-
-import static wmironpatriots.Constants.kTickSpeed;
-
-import java.util.Arrays;
-import java.util.function.DoubleSupplier;
-
-import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
-import org.littletonrobotics.junction.Logger;
 
 public class SwerveSubsystem extends SubsystemBase {
   private final SwerveConfig m_config;

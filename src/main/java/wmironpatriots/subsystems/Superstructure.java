@@ -7,10 +7,9 @@
 package wmironpatriots.subsystems;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import wmironpatriots.subsystems.elevator.Elevator;
-import wmironpatriots.subsystems.wrist.Wrist;
-
 import java.util.HashMap;
+import wmironpatriots.subsystems.elevator.Elevator;
+import wmironpatriots.subsystems.elevator.ElevatorCompIO;
 
 public class Superstructure {
   public static enum StructState {
@@ -31,14 +30,12 @@ public class Superstructure {
   }
 
   private final Elevator m_elevator;
-  private final Wrist m_wrist;
 
   private StructState m_state;
   private final HashMap<StructState, Trigger> m_stateTriggers;
 
   public Superstructure(Elevator elevator, Wrist wrist) {
-    m_elevator = new Elevator();
-    m_wrist = new Wrist();
+    m_elevator = new ElevatorCompIO();
 
     m_state = StructState.IDLE;
     m_stateTriggers = new HashMap<StructState, Trigger>();
@@ -47,6 +44,6 @@ public class Superstructure {
       m_stateTriggers.put(state, new Trigger(() -> m_state == state));
     }
 
-    m_stateTriggers.get(StructState.INTAKE_CHUTE).whileTrue(m_elevator.runPoseSetpoint(0.0));
+    m_stateTriggers.get(StructState.INTAKE_CHUTE).whileTrue(m_elevator.runTargetPoseCommand(0.0));
   }
 }

@@ -11,12 +11,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOInputsAutoLogged;
+import org.littletonrobotics.junction.Logger;
 import wmironpatriots.Robot;
 import wmironpatriots.util.swerveUtil.ModuleConfig;
 import wmironpatriots.util.swerveUtil.ModuleConfig.moduleType;
-
-import org.frc6423.frc2025.subsystems.swerve.module.ModuleIOInputsAutoLogged;
-import org.littletonrobotics.junction.Logger;
 
 public class Module {
   private final ModuleIO m_IO;

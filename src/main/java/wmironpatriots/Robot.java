@@ -6,26 +6,28 @@
 
 package wmironpatriots;
 
+import java.util.function.BiConsumer;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import wmironpatriots.subsystems.elevator.Elevator;
+import monologue.Logged;
+import monologue.Monologue;
+
+import org.littletonrobotics.junction.LoggedRobot;
+
+import com.ctre.phoenix6.SignalLogger;
+
 import wmironpatriots.subsystems.swerve.SwerveSubsystem;
 import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
 import wmironpatriots.util.ControllerUtil;
 import wmironpatriots.util.deviceUtil.TalonFXHandler;
 
-import static wmironpatriots.Constants.*;
-
-import org.littletonrobotics.junction.LogFileUtil;
-import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGReader;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-
-public class Robot extends LoggedRobot {
+public class Robot extends LoggedRobot implements Logged {
+  private final CommandScheduler m_scheduler = CommandScheduler.getInstance();
 
   private final PS5Controller m_driveController;
 
@@ -34,34 +36,7 @@ public class Robot extends LoggedRobot {
   private final SwerveSubsystem m_swerveSubsystem;
 
   public Robot() {
-    // AKit init
-    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
-    Logger.recordMetadata("Version", BuildConstants.VERSION);
-    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
-    Logger.recordMetadata("Dirty", String.valueOf(BuildConstants.DIRTY));
-    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
-    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
-
-    switch (getDeployMode()) {
-      case SIMULATION:
-        Logger.addDataReceiver(new WPILOGWriter());
-        Logger.addDataReceiver(new NT4Publisher());
-        break;
-
-      case REAL:
-        Logger.addDataReceiver(new WPILOGWriter());
-        Logger.addDataReceiver(new NT4Publisher());
-        break;
-
-      case REPLAY:
-        setUseTiming(false);
-        String logPath = LogFileUtil.findReplayLog();
-        Logger.setReplaySource(new WPILOGReader(logPath));
-        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
-        break;
-    }
-
-    Logger.start();
+    startupMonologue();
 
     RobotController.setBrownoutVoltage(6.0);
 
@@ -101,5 +76,42 @@ public class Robot extends LoggedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+  }
+
+  private void startupMonologue() {
+    DriverStation.silenceJoystickConnectionWarning(true);
+
+    if(isReal()) {
+      SignalLogger.enableAutoLogging(false);
+    }
+
+    // logs build data to the datalog
+    final String meta = "/BuildData/";
+    Monologue.log(meta + "RuntimeType", getRuntimeType().toString());
+    Monologue.log(meta + "ProjectName", BuildConstants.MAVEN_NAME);
+    Monologue.log(meta + "Version", BuildConstants.VERSION);
+    Monologue.log(meta + "BuildDate", BuildConstants.BUILD_DATE);
+    Monologue.log(meta + "GitDirty", String.valueOf(BuildConstants.DIRTY));
+    Monologue.log(meta + "GitSHA", BuildConstants.GIT_SHA);
+    Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
+    Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
+
+    // Command logging
+    BiConsumer<Command, Boolean> logCommandFunction =
+        (Command command, Boolean active) -> {
+          Monologue.log("Commands/" + command.getName(), active);
+        };
+    m_scheduler.onCommandInitialize(
+        (Command command) -> {
+          logCommandFunction.accept(command, true);
+        });
+    m_scheduler.onCommandFinish(
+        (Command command) -> {
+          logCommandFunction.accept(command, false);
+        });
+    m_scheduler.onCommandInterrupt(
+        (Command command) -> {
+          logCommandFunction.accept(command, false);
+        });
   }
 }
