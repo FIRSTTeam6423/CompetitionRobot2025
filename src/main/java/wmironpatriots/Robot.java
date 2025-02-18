@@ -8,14 +8,12 @@ package wmironpatriots;
 
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-
 import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
@@ -40,9 +38,10 @@ public class Robot extends TimedRobot implements Logged {
     // Subsystem init
     m_elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
 
-    m_driveController.square()
-      .whileTrue(m_elevator.runTargetPoseCommand(m_elevator.kL3PoseMeters))
-      .onFalse(m_elevator.runTargetPoseCommand(0.0)); 
+    m_driveController
+        .square()
+        .whileTrue(m_elevator.runTargetPoseCommand(m_elevator.kL3PoseMeters))
+        .onFalse(m_elevator.runTargetPoseCommand(0.0));
   }
 
   @Override
