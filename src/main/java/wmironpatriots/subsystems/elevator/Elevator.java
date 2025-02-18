@@ -34,23 +34,23 @@ public abstract class Elevator extends SubsystemBase {
   public static final double kL4PoseMeters = 24;
 
   /** LOGGED VALUES */
-  @Log protected boolean LMotorEnabled = false;
+  @Log protected boolean LMotorOk = false;
 
-  @Log protected boolean RMotorEnabled = false;
+  @Log protected boolean RMotorOk = false;
 
   @Log protected double poseMeters;
   @Log protected double velMPS;
   @Log protected boolean isZeroed = false;
 
   @Log protected double LMotorPoseRads;
-  @Log protected double LVelRadsPerSec;
+  @Log protected double LMotorVelRadsPerSec;
   @Log protected double LMotorAppliedVolts;
   @Log protected double LMotorSupplyCurrentAmps;
   @Log protected double LMotorTorqueCurrentAmps;
   @Log protected double LMotorTempCelsius;
 
   @Log protected double RMotorPoseRads;
-  @Log protected double RVelRadsPerSec;
+  @Log protected double RMotorVelRadsPerSec;
   @Log protected double RMotorAppliedVolts;
   @Log protected double RMotorSupplyCurrentAmps;
   @Log protected double RMotorTorqueCurrentAmps;

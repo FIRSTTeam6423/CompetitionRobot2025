@@ -34,7 +34,7 @@ public class Superstructure {
   private StructState m_state;
   private final HashMap<StructState, Trigger> m_stateTriggers;
 
-  public Superstructure(Elevator elevator, Wrist wrist) {
+  public Superstructure(Elevator elevator) {
     m_elevator = new ElevatorCompIO();
 
     m_state = StructState.IDLE;

@@ -8,6 +8,7 @@ package wmironpatriots.subsystems.elevator;
 
 import static wmironpatriots.Constants.kCANbus;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
@@ -15,20 +16,23 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.util.Units;
 import wmironpatriots.Robot;
 
-public class ElevatorCompIO extends Elevator {
+public class ElevatorIOComp extends Elevator {
   private final TalonFX m_parentM, m_childM;
   private final TalonFXConfiguration m_motorConf;
 
-  public ElevatorCompIO() {
+  private final BaseStatusSignal m_LPoseSig, m_LVelSig, m_LAppliedVolts, m_LSCurrentSig, m_LTCurrentSig, m_LTemp;
+  private final BaseStatusSignal m_RPoseSig, m_RVelSig, m_RAppliedVolts, m_RSCurrentSig, m_RTCurrentSig, m_RTemp;
+
+  public ElevatorIOComp() {
     m_parentM = new TalonFX(14, kCANbus);
     m_childM = new TalonFX(15, kCANbus); // ! ID
 
+    // register to global talonfx array
     Robot.talonHandler.registerTalon(m_parentM);
     Robot.talonHandler.registerTalon(m_childM);
-
-    // register to global talonfx array
 
     m_motorConf = new TalonFXConfiguration();
     m_motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -62,12 +66,68 @@ public class ElevatorCompIO extends Elevator {
     m_childM.optimizeBusUtilization();
     m_parentM.optimizeBusUtilization();
 
-    m_parentM.setPosition(0.0);
+    m_LPoseSig = m_parentM.getPosition();
+    m_LVelSig = m_parentM.getVelocity();
+    m_LAppliedVolts = m_parentM.getMotorVoltage();
+    m_LSCurrentSig = m_parentM.getStatorCurrent();
+    m_LTCurrentSig = m_parentM.getTorqueCurrent();
+    m_LTemp = m_parentM.getDeviceTemp();
+
+    m_RPoseSig = m_childM.getPosition();
+    m_RVelSig = m_childM.getVelocity();
+    m_RAppliedVolts = m_parentM.getMotorVoltage();
+    m_RSCurrentSig = m_childM.getStatorCurrent();
+    m_RTCurrentSig = m_childM.getTorqueCurrent();
+    m_RTemp = m_childM.getDeviceTemp();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(
+      100.0, 
+      m_LPoseSig,
+      m_LVelSig,
+      m_LAppliedVolts,
+      m_LSCurrentSig,
+      m_LTCurrentSig,
+      m_LTemp,
+      m_RPoseSig,
+      m_RVelSig,
+      m_RAppliedVolts,
+      m_RSCurrentSig,
+      m_RTCurrentSig,
+      m_RTemp
+    );
   }
 
   @Override
   public void periodic() {
-    // Update logged values here
+    LMotorOk = BaseStatusSignal.refreshAll(
+      m_LPoseSig,
+      m_LVelSig,
+      m_RAppliedVolts,
+      m_LSCurrentSig,
+      m_LTCurrentSig,
+      m_LTemp).isOK();
+    RMotorOk = BaseStatusSignal.refreshAll(
+      m_RPoseSig,
+      m_RVelSig,
+      m_RAppliedVolts,
+      m_RSCurrentSig,
+      m_RTCurrentSig,
+      m_RTemp
+    ).isOK();
+
+    LMotorPoseRads = Units.rotationsToRadians(m_LPoseSig.getValueAsDouble());
+    LMotorVelRadsPerSec = Units.rotationsPerMinuteToRadiansPerSecond(m_LVelSig.getValueAsDouble());
+    LMotorAppliedVolts = m_LAppliedVolts.getValueAsDouble();
+    LMotorSupplyCurrentAmps = m_LSCurrentSig.getValueAsDouble();
+    LMotorTorqueCurrentAmps = m_LTCurrentSig.getValueAsDouble();
+    LMotorTempCelsius = m_LTemp.getValueAsDouble();
+
+    RMotorPoseRads = Units.rotationsToRadians(m_RPoseSig.getValueAsDouble());
+    RMotorVelRadsPerSec = Units.rotationsPerMinuteToRadiansPerSecond(m_RVelSig.getValueAsDouble());
+    RMotorAppliedVolts = m_RAppliedVolts.getValueAsDouble();
+    RMotorSupplyCurrentAmps = m_RSCurrentSig.getValueAsDouble();
+    RMotorTorqueCurrentAmps = m_RTCurrentSig.getValueAsDouble();
+    RMotorTempCelsius = m_RTemp.getValueAsDouble();
   }
 
   @Override
