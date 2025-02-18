@@ -15,7 +15,6 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.util.Units;
 import wmironpatriots.Robot;
 
@@ -23,8 +22,18 @@ public class ElevatorIOComp extends Elevator {
   private final TalonFX m_parentM, m_childM;
   private final TalonFXConfiguration m_motorConf;
 
-  private final BaseStatusSignal m_LPoseSig, m_LVelSig, m_LAppliedVolts, m_LSCurrentSig, m_LTCurrentSig, m_LTemp;
-  private final BaseStatusSignal m_RPoseSig, m_RVelSig, m_RAppliedVolts, m_RSCurrentSig, m_RTCurrentSig, m_RTemp;
+  private final BaseStatusSignal m_LPoseSig,
+      m_LVelSig,
+      m_LAppliedVolts,
+      m_LSCurrentSig,
+      m_LTCurrentSig,
+      m_LTemp;
+  private final BaseStatusSignal m_RPoseSig,
+      m_RVelSig,
+      m_RAppliedVolts,
+      m_RSCurrentSig,
+      m_RTCurrentSig,
+      m_RTemp;
 
   public ElevatorIOComp() {
     m_parentM = new TalonFX(14, kCANbus);
@@ -81,39 +90,31 @@ public class ElevatorIOComp extends Elevator {
     m_RTemp = m_childM.getDeviceTemp();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-      100.0, 
-      m_LPoseSig,
-      m_LVelSig,
-      m_LAppliedVolts,
-      m_LSCurrentSig,
-      m_LTCurrentSig,
-      m_LTemp,
-      m_RPoseSig,
-      m_RVelSig,
-      m_RAppliedVolts,
-      m_RSCurrentSig,
-      m_RTCurrentSig,
-      m_RTemp
-    );
+        100.0,
+        m_LPoseSig,
+        m_LVelSig,
+        m_LAppliedVolts,
+        m_LSCurrentSig,
+        m_LTCurrentSig,
+        m_LTemp,
+        m_RPoseSig,
+        m_RVelSig,
+        m_RAppliedVolts,
+        m_RSCurrentSig,
+        m_RTCurrentSig,
+        m_RTemp);
   }
 
   @Override
   public void periodic() {
-    LMotorOk = BaseStatusSignal.refreshAll(
-      m_LPoseSig,
-      m_LVelSig,
-      m_RAppliedVolts,
-      m_LSCurrentSig,
-      m_LTCurrentSig,
-      m_LTemp).isOK();
-    RMotorOk = BaseStatusSignal.refreshAll(
-      m_RPoseSig,
-      m_RVelSig,
-      m_RAppliedVolts,
-      m_RSCurrentSig,
-      m_RTCurrentSig,
-      m_RTemp
-    ).isOK();
+    LMotorOk =
+        BaseStatusSignal.refreshAll(
+                m_LPoseSig, m_LVelSig, m_RAppliedVolts, m_LSCurrentSig, m_LTCurrentSig, m_LTemp)
+            .isOK();
+    RMotorOk =
+        BaseStatusSignal.refreshAll(
+                m_RPoseSig, m_RVelSig, m_RAppliedVolts, m_RSCurrentSig, m_RTCurrentSig, m_RTemp)
+            .isOK();
 
     LMotorPoseMeters = Units.rotationsToRadians(m_LPoseSig.getValueAsDouble());
     LMotorVelMPS = Units.rotationsPerMinuteToRadiansPerSecond(m_LVelSig.getValueAsDouble());
@@ -129,8 +130,8 @@ public class ElevatorIOComp extends Elevator {
     RMotorTorqueCurrentAmps = m_RTCurrentSig.getValueAsDouble();
     RMotorTempCelsius = m_RTemp.getValueAsDouble();
 
-    poseMeters = (LMotorPoseMeters + RMotorPoseMeters)/2;
-    velMPS = (LMotorVelMPS + RMotorVelMPS)/2;
+    poseMeters = (LMotorPoseMeters + RMotorPoseMeters) / 2;
+    velMPS = (LMotorVelMPS + RMotorVelMPS) / 2;
   }
 
   @Override

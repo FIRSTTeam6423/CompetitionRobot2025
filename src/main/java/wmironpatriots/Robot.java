@@ -6,21 +6,17 @@
 
 package wmironpatriots;
 
-import java.util.function.BiConsumer;
-
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
-
 import org.littletonrobotics.junction.LoggedRobot;
-
-import com.ctre.phoenix6.SignalLogger;
-
 import wmironpatriots.subsystems.swerve.SwerveSubsystem;
 import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
 import wmironpatriots.util.ControllerUtil;
@@ -81,7 +77,7 @@ public class Robot extends LoggedRobot implements Logged {
   private void startupMonologue() {
     DriverStation.silenceJoystickConnectionWarning(true);
 
-    if(isReal()) {
+    if (isReal()) {
       SignalLogger.enableAutoLogging(false);
     }
 
