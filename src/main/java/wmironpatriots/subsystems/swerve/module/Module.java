@@ -96,6 +96,7 @@ public abstract class Module {
     return new SwerveModuleState();
   }
 
+  /** Stops module */
   public void stop() {
     stopMotors();
   }

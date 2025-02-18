@@ -82,7 +82,7 @@ public abstract class Elevator extends SubsystemBase {
 
   /** Runs elevator down until current spikes above threshold */
   public Command runPoseZeroingCommand() {
-    return this.run(() -> runMotorControl(m_motorVoltOutReq.withOutput(0.0).withEnableFOC(true)))
+    return this.run(() -> runMotorControl(m_motorVoltOutReq.withOutput(1.0)))
         .until(() -> LMotorSupplyCurrentAmps > 20.0)
         .finallyDo(
             (interrupted) -> {
@@ -100,6 +100,11 @@ public abstract class Elevator extends SubsystemBase {
   /** Set elevator pose to 0.0 meters */
   private void resetPose() {
     setEncoderPose(0.0);
+  }
+
+  /** Checks if elevator is around a specific range of the setpoint */
+  public boolean inSetpointRange(double setpointMeters) {
+    return Math.abs(setpointMeters - LMotorPoseMeters) < 0.05; // TODO tweak range if needed
   }
 
   /** HARDWARE METHODS */

@@ -14,7 +14,6 @@ import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 public class Superstructure {
   public static enum StructState {
     IDLE,
-    INTAKE_CHUTE,
     INTAKE_GROUND,
     L1_SETUP,
     L2_SETUP,
@@ -43,7 +42,5 @@ public class Superstructure {
     for (StructState state : StructState.values()) {
       m_stateTriggers.put(state, new Trigger(() -> m_state == state));
     }
-
-    m_stateTriggers.get(StructState.INTAKE_CHUTE).whileTrue(m_elevator.runTargetPoseCommand(0.0));
   }
 }

@@ -16,7 +16,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
-import wmironpatriots.Robot;
 
 public class ElevatorIOComp extends Elevator {
   private final TalonFX m_parentM, m_childM;
@@ -40,8 +39,8 @@ public class ElevatorIOComp extends Elevator {
     m_childM = new TalonFX(15, kCANbus); // ! ID
 
     // register to global talonfx array
-    Robot.talonHandler.registerTalon(m_parentM);
-    Robot.talonHandler.registerTalon(m_childM);
+    // Robot.talonHandler.registerTalon(m_parentM);
+    // Robot.talonHandler.registerTalon(m_childM);
 
     m_motorConf = new TalonFXConfiguration();
     m_motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;

@@ -14,34 +14,35 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+
 import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import org.frc6423.frc2025.BuildConstants;
-import wmironpatriots.util.deviceUtil.TalonFXHandler;
+import wmironpatriots.subsystems.elevator.Elevator;
+import wmironpatriots.subsystems.elevator.ElevatorIOComp;
+import wmironpatriots.subsystems.elevator.ElevatorIOSim;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler m_scheduler = CommandScheduler.getInstance();
 
-  private final PS5Controller m_driveController;
+  private final CommandPS5Controller m_driveController;
 
-  public static final TalonFXHandler talonHandler = new TalonFXHandler();
+  private final Elevator m_elevator;
 
   public Robot() {
     startupMonologue();
 
-    RobotController.setBrownoutVoltage(6.0);
+    RobotController.setBrownoutVoltage(.0);
 
-    m_driveController = new PS5Controller(0);
+    m_driveController = new CommandPS5Controller(0);
     // Subsystem init
-    // m_swerveSubsystem = new SwerveSubsystem(new CompBotSwerveConfigs());
+    m_elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
 
-    // Default Commands
-    // m_swerveSubsystem.setDefaultCommand(
-    //     m_swerveSubsystem.teleopSwerveCommmand(
-    //         ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
-    //         ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
-    //         ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
+    m_driveController.square()
+      .whileTrue(m_elevator.runTargetPoseCommand(m_elevator.kL3PoseMeters))
+      .onFalse(m_elevator.runTargetPoseCommand(0.0)); 
   }
 
   @Override
@@ -63,7 +64,9 @@ public class Robot extends TimedRobot implements Logged {
   public void autonomousPeriodic() {}
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    m_elevator.runPoseZeroingCommand();
+  }
 
   @Override
   public void testInit() {
