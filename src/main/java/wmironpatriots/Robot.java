@@ -11,25 +11,21 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
-import org.littletonrobotics.junction.LoggedRobot;
-import wmironpatriots.subsystems.swerve.SwerveSubsystem;
-import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
-import wmironpatriots.util.ControllerUtil;
+import org.frc6423.frc2025.BuildConstants;
 import wmironpatriots.util.deviceUtil.TalonFXHandler;
 
-public class Robot extends LoggedRobot implements Logged {
+public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler m_scheduler = CommandScheduler.getInstance();
 
   private final PS5Controller m_driveController;
 
   public static final TalonFXHandler talonHandler = new TalonFXHandler();
-
-  private final SwerveSubsystem m_swerveSubsystem;
 
   public Robot() {
     startupMonologue();
@@ -38,14 +34,14 @@ public class Robot extends LoggedRobot implements Logged {
 
     m_driveController = new PS5Controller(0);
     // Subsystem init
-    m_swerveSubsystem = new SwerveSubsystem(new CompBotSwerveConfigs());
+    // m_swerveSubsystem = new SwerveSubsystem(new CompBotSwerveConfigs());
 
     // Default Commands
-    m_swerveSubsystem.setDefaultCommand(
-        m_swerveSubsystem.teleopSwerveCommmand(
-            ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
-            ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
-            ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
+    // m_swerveSubsystem.setDefaultCommand(
+    //     m_swerveSubsystem.teleopSwerveCommmand(
+    //         ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
+    //         ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
+    //         ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
   }
 
   @Override

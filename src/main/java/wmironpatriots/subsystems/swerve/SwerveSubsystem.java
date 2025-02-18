@@ -25,14 +25,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
-import org.frc6423.frc2025.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
-import org.littletonrobotics.junction.Logger;
-import wmironpatriots.subsystems.swerve.gyro.GyroIO;
-import wmironpatriots.subsystems.swerve.gyro.GyroIONavX;
-import wmironpatriots.subsystems.swerve.gyro.GyroIOPigeon;
+import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.module.Module;
+import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
+import wmironpatriots.subsystems.swerve.module.ModuleIOSim;
 import wmironpatriots.util.swerveUtil.SwerveConfig;
-import wmironpatriots.util.swerveUtil.SwerveConfig.GyroType;
 
 public class SwerveSubsystem extends SubsystemBase {
   private final SwerveConfig m_config;
@@ -42,23 +39,22 @@ public class SwerveSubsystem extends SubsystemBase {
   private SwerveDriveKinematics m_kinematics;
   private SwerveDrivePoseEstimator m_odo;
 
-  private final GyroIO m_gyro;
-  private final GyroIOInputsAutoLogged m_gyroInputs;
   private Rotation2d m_simHeading;
 
   private final Field2d m_f2d;
 
   public SwerveSubsystem(SwerveConfig config) {
     // Create modules
-    var moduleConfigs = config.getModuleConfigs();
-    m_modules = new Module[moduleConfigs.length];
-    Arrays.stream(moduleConfigs).forEach((c) -> m_modules[c.kIndex - 1] = new Module(c));
+    if (Robot.isReal()) {
+      var moduleConfigs = config.getModuleConfigs();
+      m_modules = new Module[moduleConfigs.length];
+      Arrays.stream(moduleConfigs).forEach((c) -> m_modules[c.kIndex - 1] = new ModuleIOComp(c));
+    } else {
+      var moduleConfigs = config.getModuleConfigs();
+      m_modules = new Module[moduleConfigs.length];
+      Arrays.stream(moduleConfigs).forEach((c) -> m_modules[c.kIndex - 1] = new ModuleIOSim(c));
+    }
 
-    m_gyro =
-        config.getGyroType() == GyroType.PIGEON
-            ? new GyroIOPigeon(config.getGyroID())
-            : new GyroIONavX();
-    m_gyroInputs = new GyroIOInputsAutoLogged();
     m_simHeading = new Rotation2d();
 
     // Create math objects
@@ -74,8 +70,8 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Update gyro and all modules
-    Arrays.stream(m_modules).forEach((m) -> m.updateInputs());
-    m_gyro.updateInputs(m_gyroInputs);
+    Arrays.stream(m_modules).forEach((m) -> m.periodic());
+    // m_gyro.updateInputs(m_gyroInputs);
 
     // Odo update
     updateOdometry();
@@ -83,8 +79,8 @@ public class SwerveSubsystem extends SubsystemBase {
     SmartDashboard.putData(m_f2d);
 
     // Log swerve data
-    Logger.recordOutput("Swerve/ActualOutput", getVelocitiesRobotRelative());
-    Logger.recordOutput("Swerve/ActualStates", getModuleStates());
+    // Logger.recordOutput("Swerve/ActualOutput", getVelocitiesRobotRelative());
+    // Logger.recordOutput("Swerve/ActualStates", getModuleStates());
 
     // Stop module input when driverstation is disabled
     if (DriverStation.isDisabled()) {
@@ -103,7 +99,7 @@ public class SwerveSubsystem extends SubsystemBase {
             m_config.getMaxAngularSpeedRadsPerSec() / 10000);
     m_simHeading = m_simHeading.rotateBy(Rotation2d.fromRadians(clamped));
 
-    Logger.recordOutput("Swerve/simRotation", m_simHeading.getDegrees());
+    // Logger.recordOutput("Swerve/simRotation", m_simHeading.getDegrees());
   }
 
   /**
@@ -152,8 +148,8 @@ public class SwerveSubsystem extends SubsystemBase {
     SwerveDriveKinematics.desaturateWheelSpeeds(
         desiredStates, m_config.getMaxLinearSpeedMetersPerSec());
 
-    Logger.recordOutput("Swerve/desiredVelocity", velocity);
-    Logger.recordOutput("Swerve/desiredSetpoints", desiredStates);
+    // Logger.recordOutput("Swerve/desiredVelocity", velocity);
+    // Logger.recordOutput("Swerve/desiredSetpoints", desiredStates);
 
     for (int i = 0; i < desiredStates.length; i++) {
       if (openloopEnabled) {

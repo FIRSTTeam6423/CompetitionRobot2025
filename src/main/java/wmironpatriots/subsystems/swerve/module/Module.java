@@ -6,23 +6,22 @@
 
 package wmironpatriots.subsystems.swerve.module;
 
+import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import monologue.Annotations.Log;
-
-import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
-
 import wmironpatriots.util.swerveUtil.ModuleConfig;
 
 public abstract class Module {
   /** LOGGED VALUES */
   @Log protected boolean pivotOk = false;
+
   @Log protected boolean driveOk = false;
 
   @Log protected Rotation2d pivotABSPose = new Rotation2d();
@@ -38,11 +37,14 @@ public abstract class Module {
   @Log protected double driveSupplyCurrent;
   @Log protected double driveTorqueCurrent;
 
-
   /** VARIABLES */
-  private final VoltageOut m_motorVoltsOutReq = new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
-  private final VelocityVoltage m_motorVelocityOutReq = new VelocityVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
-  private final PositionVoltage m_motorPositionOutReq = new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+  private final VoltageOut m_motorVoltsOutReq =
+      new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+
+  private final VelocityVoltage m_motorVelocityOutReq =
+      new VelocityVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+  private final PositionVoltage m_motorPositionOutReq =
+      new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
   private final SimpleMotorFeedforward m_driveFF = new SimpleMotorFeedforward(0.14, 0.134);
 
@@ -52,22 +54,23 @@ public abstract class Module {
     m_config = config;
   }
 
+  /** Periodically ran logic */
+  public void periodic() {}
+
   /** Run setpoint module state */
   public SwerveModuleState runSetpoint(SwerveModuleState setpoint) {
     setpoint.optimize(pivotABSPose);
-    setpoint.speedMetersPerSecond *=
-      Math.cos(setpoint.angle.minus(pivotABSPose).getRadians());
+    setpoint.speedMetersPerSecond *= Math.cos(setpoint.angle.minus(pivotABSPose).getRadians());
 
     double speedMPS = setpoint.speedMetersPerSecond;
     runPivotControl(m_motorPositionOutReq.withPosition(setpoint.angle.getRotations()));
     runDriveControl(
-      m_motorVelocityOutReq
-        .withVelocity(speedMPS)
-        .withFeedForward(m_driveFF.calculate(
-            (speedMPS / m_config.kWheelRadiusMeters)
-                * (m_config.kDriveReduction
-                    / DCMotor.getKrakenX60Foc(1)
-                        .KtNMPerAmp))));
+        m_motorVelocityOutReq
+            .withVelocity(speedMPS)
+            .withFeedForward(
+                m_driveFF.calculate(
+                    (speedMPS / m_config.kWheelRadiusMeters)
+                        * (m_config.kDriveReduction / DCMotor.getKrakenX60Foc(1).KtNMPerAmp))));
 
     return new SwerveModuleState();
   }
@@ -79,7 +82,8 @@ public abstract class Module {
   }
 
   /** Run setpoint module state but with open loop drive control */
-  public SwerveModuleState runSetpointOpenloop(double voltage, Rotation2d angle, boolean FOCEnabled) {
+  public SwerveModuleState runSetpointOpenloop(
+      double voltage, Rotation2d angle, boolean FOCEnabled) {
     SwerveModuleState setpointState = new SwerveModuleState(voltage, angle);
 
     setpointState.optimize(pivotABSPose);
@@ -92,6 +96,10 @@ public abstract class Module {
     return new SwerveModuleState();
   }
 
+  public void stop() {
+    stopMotors();
+  }
+
   /** Enable coast mode to move robot easier */
   public void moduleCoasting(boolean enabled) {
     motorCoasting(enabled);
@@ -100,7 +108,7 @@ public abstract class Module {
   /** Returns module angle */
   public Rotation2d getModuleAngle() {
     return pivotPose;
-  } 
+  }
 
   /** Converts drive motor speed to mps */
   public double getModuleSpeedMPS() {
@@ -116,7 +124,6 @@ public abstract class Module {
   public SwerveModuleState getModuleState() {
     return new SwerveModuleState(getModuleSpeedMPS(), pivotPose);
   }
-
 
   /** HARDWARE METHODS */
   /** Run Pivot motor with control request */

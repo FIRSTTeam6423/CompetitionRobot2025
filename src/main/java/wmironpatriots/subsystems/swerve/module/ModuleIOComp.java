@@ -9,9 +9,9 @@ package wmironpatriots.subsystems.swerve.module;
 import com.ctre.phoenix6.controls.ControlRequest;
 import wmironpatriots.util.swerveUtil.ModuleConfig;
 
-public class ModuleIOSim extends Module {
+public class ModuleIOComp extends Module {
 
-  public ModuleIOSim(ModuleConfig config) {
+  public ModuleIOComp(ModuleConfig config) {
     super(config);
   }
 

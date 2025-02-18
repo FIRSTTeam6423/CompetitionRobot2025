@@ -33,9 +33,9 @@ public abstract class Elevator extends SubsystemBase {
   public static final double kL3PoseMeters = 10.81;
   public static final double kL4PoseMeters = 24;
 
-
   /** LOGGED VALUES */
   @Log protected boolean LMotorOk = false;
+
   @Log protected boolean RMotorOk = false;
 
   @Log protected double poseMeters;
@@ -56,10 +56,12 @@ public abstract class Elevator extends SubsystemBase {
   @Log protected double RMotorTorqueCurrentAmps;
   @Log protected double RMotorTempCelsius;
 
-
   /** VARIABLES */
-  private final PositionVoltage m_motorPoseOutReq = new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
-  private final VoltageOut m_motorVoltOutReq = new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+  private final PositionVoltage m_motorPoseOutReq =
+      new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+
+  private final VoltageOut m_motorVoltOutReq =
+      new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
   /** Run target position meters from current zeroed pose */
   public Command runTargetPoseCommand(double poseMeters) {
@@ -99,7 +101,6 @@ public abstract class Elevator extends SubsystemBase {
   private void resetPose() {
     setEncoderPose(0.0);
   }
-
 
   /** HARDWARE METHODS */
   /** Run elevator motor with control request */
