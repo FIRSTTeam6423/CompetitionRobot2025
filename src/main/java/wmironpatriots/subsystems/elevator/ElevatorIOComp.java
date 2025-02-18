@@ -115,19 +115,22 @@ public class ElevatorIOComp extends Elevator {
       m_RTemp
     ).isOK();
 
-    LMotorPoseRads = Units.rotationsToRadians(m_LPoseSig.getValueAsDouble());
-    LMotorVelRadsPerSec = Units.rotationsPerMinuteToRadiansPerSecond(m_LVelSig.getValueAsDouble());
+    LMotorPoseMeters = Units.rotationsToRadians(m_LPoseSig.getValueAsDouble());
+    LMotorVelMPS = Units.rotationsPerMinuteToRadiansPerSecond(m_LVelSig.getValueAsDouble());
     LMotorAppliedVolts = m_LAppliedVolts.getValueAsDouble();
     LMotorSupplyCurrentAmps = m_LSCurrentSig.getValueAsDouble();
     LMotorTorqueCurrentAmps = m_LTCurrentSig.getValueAsDouble();
     LMotorTempCelsius = m_LTemp.getValueAsDouble();
 
-    RMotorPoseRads = Units.rotationsToRadians(m_RPoseSig.getValueAsDouble());
-    RMotorVelRadsPerSec = Units.rotationsPerMinuteToRadiansPerSecond(m_RVelSig.getValueAsDouble());
+    RMotorPoseMeters = Units.rotationsToRadians(m_RPoseSig.getValueAsDouble());
+    RMotorVelMPS = Units.rotationsPerMinuteToRadiansPerSecond(m_RVelSig.getValueAsDouble());
     RMotorAppliedVolts = m_RAppliedVolts.getValueAsDouble();
     RMotorSupplyCurrentAmps = m_RSCurrentSig.getValueAsDouble();
     RMotorTorqueCurrentAmps = m_RTCurrentSig.getValueAsDouble();
     RMotorTempCelsius = m_RTemp.getValueAsDouble();
+
+    poseMeters = (LMotorPoseMeters + RMotorPoseMeters)/2;
+    velMPS = (LMotorVelMPS + RMotorVelMPS)/2;
   }
 
   @Override

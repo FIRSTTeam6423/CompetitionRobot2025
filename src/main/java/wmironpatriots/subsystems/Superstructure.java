@@ -9,7 +9,7 @@ package wmironpatriots.subsystems;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import wmironpatriots.subsystems.elevator.Elevator;
-import wmironpatriots.subsystems.elevator.ElevatorCompIO;
+import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 
 public class Superstructure {
   public static enum StructState {
@@ -35,7 +35,7 @@ public class Superstructure {
   private final HashMap<StructState, Trigger> m_stateTriggers;
 
   public Superstructure(Elevator elevator) {
-    m_elevator = new ElevatorCompIO();
+    m_elevator = new ElevatorIOComp();
 
     m_state = StructState.IDLE;
     m_stateTriggers = new HashMap<StructState, Trigger>();
