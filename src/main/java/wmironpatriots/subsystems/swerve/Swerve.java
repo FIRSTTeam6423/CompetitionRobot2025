@@ -31,7 +31,7 @@ import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
 import wmironpatriots.subsystems.swerve.module.ModuleIOSim;
 import wmironpatriots.util.swerveUtil.SwerveConfig;
 
-public class SwerveSubsystem extends SubsystemBase {
+public class Swerve extends SubsystemBase {
   private final SwerveConfig m_config;
 
   private final Module[] m_modules;
@@ -43,7 +43,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private final Field2d m_f2d;
 
-  public SwerveSubsystem(SwerveConfig config) {
+  public Swerve(SwerveConfig config) {
     // Create modules
     if (Robot.isReal()) {
       var moduleConfigs = config.getModuleConfigs();

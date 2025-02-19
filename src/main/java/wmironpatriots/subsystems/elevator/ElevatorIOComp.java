@@ -62,13 +62,6 @@ public class ElevatorIOComp extends Elevator {
     m_motorConf.MotionMagic.MotionMagicAcceleration = 0.03;
     m_motorConf.MotionMagic.MotionMagicJerk = 0.0;
 
-    // Conversion from rotations to meters
-    // reduction * circumference
-    // reduction is 1/5 and radius of spool radius is 0.878350 inches
-    // m_motorConf.Feedback.SensorToMechanismRatio = (1 / 3) * (2 * Math.PI * 0.02230223022);
-    // m_motorConf.Feedback.RotorToSensorRatio = m_motorConf.Feedback.SensorToMechanismRatio;
-    // m_motorConf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-
     m_parentM.getConfigurator().apply(m_motorConf);
     m_childM.getConfigurator().apply(m_motorConf);
 
@@ -117,24 +110,24 @@ public class ElevatorIOComp extends Elevator {
                 m_RPoseSig, m_RVelSig, m_RAppliedVolts, m_RSCurrentSig, m_RTCurrentSig, m_RTemp)
             .isOK();
 
-    LMotorPoseMeters = m_LPoseSig.getValueAsDouble();
+    LMotorPose = m_LPoseSig.getValueAsDouble();
     LMotorVelMPS = Units.rotationsPerMinuteToRadiansPerSecond(m_LVelSig.getValueAsDouble());
     LMotorAppliedVolts = m_LAppliedVolts.getValueAsDouble();
     LMotorSupplyCurrentAmps = m_LSCurrentSig.getValueAsDouble();
     LMotorTorqueCurrentAmps = m_LTCurrentSig.getValueAsDouble();
     LMotorTempCelsius = m_LTemp.getValueAsDouble();
 
-    RMotorPoseMeters = Units.rotationsToRadians(m_RPoseSig.getValueAsDouble());
+    RMotorPose = Units.rotationsToRadians(m_RPoseSig.getValueAsDouble());
     RMotorVelMPS = Units.rotationsPerMinuteToRadiansPerSecond(m_RVelSig.getValueAsDouble());
     RMotorAppliedVolts = m_RAppliedVolts.getValueAsDouble();
     RMotorSupplyCurrentAmps = m_RSCurrentSig.getValueAsDouble();
     RMotorTorqueCurrentAmps = m_RTCurrentSig.getValueAsDouble();
     RMotorTempCelsius = m_RTemp.getValueAsDouble();
 
-    poseMeters = (LMotorPoseMeters + RMotorPoseMeters) / 2;
+    poseMeters = (LMotorPose + RMotorPose) / 2;
     velMPS = (LMotorVelMPS + RMotorVelMPS) / 2;
 
-    System.out.println(LMotorPoseMeters);
+    System.out.println(LMotorPose);
   }
 
   @Override
@@ -143,8 +136,8 @@ public class ElevatorIOComp extends Elevator {
   }
 
   @Override
-  protected void setEncoderPose(double poseMeters) {
-    m_parentM.setPosition(poseMeters);
+  protected void setEncoderPose(double pose) {
+    m_parentM.setPosition(pose);
   }
 
   @Override

@@ -21,6 +21,9 @@ import org.frc6423.frc2025.BuildConstants;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
+import wmironpatriots.subsystems.swerve.Swerve;
+import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
+import wmironpatriots.util.ControllerUtil;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler m_scheduler = CommandScheduler.getInstance();
@@ -28,6 +31,7 @@ public class Robot extends TimedRobot implements Logged {
   private final CommandXboxController m_driveController;
 
   private final Elevator m_elevator;
+  private final Swerve m_swerve;
 
   public Robot() {
     startupMonologue();
@@ -37,7 +41,16 @@ public class Robot extends TimedRobot implements Logged {
     m_driveController = new CommandXboxController(0);
     // Subsystem init
     m_elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
+    m_swerve = new Swerve(new CompBotSwerveConfigs());
 
+    // Default Commands
+    m_swerve.setDefaultCommand(
+        m_swerve.teleopSwerveCommmand(
+            ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
+            ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
+            ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
+
+    // Debug triggers
     m_driveController.a().whileTrue(m_elevator.runTargetPoseCommand(1.717));
 
     m_driveController.x().whileTrue(m_elevator.runTargetPoseCommand(5.88));

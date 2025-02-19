@@ -42,14 +42,14 @@ public abstract class Elevator extends SubsystemBase {
   @Log protected double velMPS;
   @Log protected boolean isZeroed = false;
 
-  @Log protected double LMotorPoseMeters;
+  @Log protected double LMotorPose;
   @Log protected double LMotorVelMPS;
   @Log protected double LMotorAppliedVolts;
   @Log protected double LMotorSupplyCurrentAmps;
   @Log protected double LMotorTorqueCurrentAmps;
   @Log protected double LMotorTempCelsius;
 
-  @Log protected double RMotorPoseMeters;
+  @Log protected double RMotorPose;
   @Log protected double RMotorVelMPS;
   @Log protected double RMotorAppliedVolts;
   @Log protected double RMotorSupplyCurrentAmps;
@@ -105,7 +105,7 @@ public abstract class Elevator extends SubsystemBase {
 
   /** Checks if elevator is around a specific range of the setpoint */
   public boolean inSetpointRange(double setpointMeters) {
-    return Math.abs(setpointMeters - LMotorPoseMeters) < 0.05; // TODO tweak range if needed
+    return Math.abs(setpointMeters - LMotorPose) < 0.05; // TODO tweak range if needed
   }
 
   /** HARDWARE METHODS */
