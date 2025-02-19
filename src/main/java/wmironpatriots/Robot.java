@@ -40,8 +40,8 @@ public class Robot extends TimedRobot implements Logged {
 
     m_driveController = new CommandXboxController(0);
     // Subsystem init
-    m_elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
     m_swerve = new Swerve(new CompBotSwerveConfigs());
+    m_elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
 
     // Default Commands
     m_swerve.setDefaultCommand(
