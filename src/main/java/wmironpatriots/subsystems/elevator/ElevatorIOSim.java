@@ -91,8 +91,8 @@ public class ElevatorIOSim extends Elevator {
                 .Feedback
                 .SensorToMechanismRatio); // I have no clue if this is correct lmfao
 
-    poseMeters = m_simulatedElevator.getPositionMeters();
-    velMPS = m_simulatedElevator.getVelocityMetersPerSecond();
+    pose = m_simulatedElevator.getPositionMeters();
+    velRPM = m_simulatedElevator.getVelocityMetersPerSecond();
   }
 
   @Override

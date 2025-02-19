@@ -37,19 +37,20 @@ public abstract class Elevator extends SubsystemBase {
   @Log protected boolean LMotorOk = false;
   @Log protected boolean RMotorOk = false;
 
-  @Log protected double poseMeters;
-  @Log protected double velMPS;
+  @Log protected double setpointPose;
+  @Log protected double pose;
+  @Log protected double velRPM;
   @Log protected boolean isZeroed = false;
 
   @Log protected double LMotorPose;
-  @Log protected double LMotorVelMPS;
+  @Log protected double LMotorVelRPM;
   @Log protected double LMotorAppliedVolts;
   @Log protected double LMotorSupplyCurrentAmps;
   @Log protected double LMotorTorqueCurrentAmps;
   @Log protected double LMotorTempCelsius;
 
   @Log protected double RMotorPose;
-  @Log protected double RMotorVelMPS;
+  @Log protected double RMotorVelRPM;
   @Log protected double RMotorAppliedVolts;
   @Log protected double RMotorSupplyCurrentAmps;
   @Log protected double RMotorTorqueCurrentAmps;
@@ -62,11 +63,12 @@ public abstract class Elevator extends SubsystemBase {
   private final VoltageOut m_motorVoltOutReq =
       new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
-  /** Run target position meters from current zeroed pose */
-  public Command runTargetPoseCommand(double poseMeters) {
+  /** Run target position in rotations from current zeroed pose */
+  public Command runTargetPoseCommand(double pose) {
     return this.run(
         () -> {
-          runMotorControl(m_motorPoseOutReq.withPosition(poseMeters).withEnableFOC(true));
+          setpointPose = pose;
+          runMotorControl(m_motorPoseOutReq.withPosition(pose).withEnableFOC(true));
         });
   }
 
@@ -97,21 +99,21 @@ public abstract class Elevator extends SubsystemBase {
     return this.runOnce(() -> motorCoasting(enabled));
   }
 
-  /** Set elevator pose to 0.0 meters */
+  /** Set elevator pose to 0.0 rotations */
   private void resetPose() {
     setEncoderPose(0.0);
   }
 
   /** Checks if elevator is around a specific range of the setpoint */
-  public boolean inSetpointRange(double setpointMeters) {
-    return Math.abs(setpointMeters - LMotorPose) < 0.05; // TODO tweak range if needed
+  public boolean inSetpointRange() {
+    return Math.abs(setpointPose - LMotorPose) < 0.05; // TODO tweak range if needed
   }
 
   /** HARDWARE METHODS */
   /** Run elevator motor with control request */
   protected abstract void runMotorControl(ControlRequest request);
 
-  /** Set elevator encoder position in meters */
+  /** Set elevator encoder position in rotations */
   protected abstract void setEncoderPose(double poseMeters);
 
   /** Stop motor input */
