@@ -24,18 +24,17 @@ public abstract class Elevator extends SubsystemBase {
   public static final double kRangeMeters = 1.218;
 
   // Non-scoring poses
-  public static final double kLowerAlgaeRemovePoseMeters = 0.0;
-  public static final double kHigherAlgaeRemovePoseMeters = 0.0;
+  public static final double kLowerAlgaeRemovePose = 0.0;
+  public static final double kHigherAlgaeRemovePose = 0.0;
 
   // Scoring poses
-  public static final double kL1PoseMeters = 0.0;
-  public static final double kL2PoseMeters = 3.16;
-  public static final double kL3PoseMeters = 10.81;
-  public static final double kL4PoseMeters = 24;
+  public static final double kIdlePose = 0.0;
+  public static final double kL2Pose = 3.16;
+  public static final double kL3Pose = 10.81;
+  public static final double kL4Pose = 24;
 
   /** LOGGED VALUES */
   @Log protected boolean LMotorOk = false;
-
   @Log protected boolean RMotorOk = false;
 
   @Log protected double poseMeters;
