@@ -18,7 +18,7 @@ public class Constants {
   // * Select which robot to initalize
   private static final RobotType m_robotType = RobotType.SIMULATED;
 
-  public static final CANBus kCANbus = new CANBus("rio"); // 3:
+  public static final CANBus kCANbus = new CANBus("CANchan"); // 3:
 
   /*
    * Robot types:

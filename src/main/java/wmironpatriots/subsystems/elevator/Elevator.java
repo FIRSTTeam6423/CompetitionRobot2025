@@ -19,7 +19,7 @@ public abstract class Elevator extends SubsystemBase {
   // mech constants
   public static final double kMassKg = 5.6 + 1.8; // Carriage + 1 stage
 
-  public static final double kReduction = 4;
+  public static final double kReduction = 3;
   public static final double kSpoolRadiusMeters = 0.878350;
   public static final double kRangeMeters = 1.218;
 
@@ -75,17 +75,18 @@ public abstract class Elevator extends SubsystemBase {
   public Command zeroPoseCommand() {
     return this.run(
         () -> {
-          setEncoderPose(0.0);
+          setEncoderPose(0);
           isZeroed = true;
         });
   }
 
   /** Runs elevator down until current spikes above threshold */
   public Command runPoseZeroingCommand() {
-    return this.run(() -> runMotorControl(m_motorVoltOutReq.withOutput(1.0)))
+    return this.run(() -> runMotorControl(m_motorVoltOutReq.withOutput(-1.0)))
         .until(() -> LMotorSupplyCurrentAmps > 20.0)
         .finallyDo(
             (interrupted) -> {
+              System.out.println("Zeroed");
               stopMotors();
               resetPose();
               isZeroed = true;

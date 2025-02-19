@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
@@ -25,7 +25,7 @@ import wmironpatriots.subsystems.elevator.ElevatorIOSim;
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler m_scheduler = CommandScheduler.getInstance();
 
-  private final CommandPS5Controller m_driveController;
+  private final CommandXboxController m_driveController;
 
   private final Elevator m_elevator;
 
@@ -34,14 +34,15 @@ public class Robot extends TimedRobot implements Logged {
 
     RobotController.setBrownoutVoltage(.0);
 
-    m_driveController = new CommandPS5Controller(0);
+    m_driveController = new CommandXboxController(0);
     // Subsystem init
     m_elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
 
-    m_driveController
-        .square()
-        .whileTrue(m_elevator.runTargetPoseCommand(m_elevator.kL3PoseMeters))
-        .onFalse(m_elevator.runTargetPoseCommand(0.0));
+    m_driveController.a().whileTrue(m_elevator.runTargetPoseCommand(1.717));
+
+    m_driveController.x().whileTrue(m_elevator.runTargetPoseCommand(5.88));
+
+    m_driveController.y().whileTrue(m_elevator.runTargetPoseCommand(12.9));
   }
 
   @Override
@@ -64,7 +65,7 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void teleopInit() {
-    m_elevator.runPoseZeroingCommand();
+    m_elevator.zeroPoseCommand();
   }
 
   @Override

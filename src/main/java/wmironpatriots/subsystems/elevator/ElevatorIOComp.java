@@ -44,10 +44,10 @@ public class ElevatorIOComp extends Elevator {
 
     m_motorConf = new TalonFXConfiguration();
     m_motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    m_motorConf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    m_motorConf.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    m_motorConf.Slot0.withKP(0.0).withKI(0.0).withKD(0.0); // PID config
-    m_motorConf.Slot0.withKS(0.0).withKV(0.0).withKA(0.0); // feedforward config
+    m_motorConf.Slot0.withKP(1).withKI(0.0).withKD(0); // PID config
+    m_motorConf.Slot0.withKG(0.59).withKS(0.0).withKV(4.12).withKA(0.0); // feedforward config
 
     m_motorConf.CurrentLimits.StatorCurrentLimit = 80.0;
     m_motorConf.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -58,14 +58,16 @@ public class ElevatorIOComp extends Elevator {
     m_motorConf.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
     m_motorConf.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
 
-    m_motorConf.MotionMagic.MotionMagicCruiseVelocity = 0.0; // ! TODO
-    m_motorConf.MotionMagic.MotionMagicAcceleration = 0.0;
+    m_motorConf.MotionMagic.MotionMagicCruiseVelocity = 0.03; // ! TODO
+    m_motorConf.MotionMagic.MotionMagicAcceleration = 0.03;
     m_motorConf.MotionMagic.MotionMagicJerk = 0.0;
 
     // Conversion from rotations to meters
     // reduction * circumference
-    // reduction is 1/5 and radius of spool radius is 0.878350 meters
-    m_motorConf.Feedback.SensorToMechanismRatio = (1 / 5) * (2 * Math.PI * 0.878350);
+    // reduction is 1/5 and radius of spool radius is 0.878350 inches
+    // m_motorConf.Feedback.SensorToMechanismRatio = (1 / 3) * (2 * Math.PI * 0.02230223022);
+    // m_motorConf.Feedback.RotorToSensorRatio = m_motorConf.Feedback.SensorToMechanismRatio;
+    // m_motorConf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
     m_parentM.getConfigurator().apply(m_motorConf);
     m_childM.getConfigurator().apply(m_motorConf);
@@ -115,7 +117,7 @@ public class ElevatorIOComp extends Elevator {
                 m_RPoseSig, m_RVelSig, m_RAppliedVolts, m_RSCurrentSig, m_RTCurrentSig, m_RTemp)
             .isOK();
 
-    LMotorPoseMeters = Units.rotationsToRadians(m_LPoseSig.getValueAsDouble());
+    LMotorPoseMeters = m_LPoseSig.getValueAsDouble();
     LMotorVelMPS = Units.rotationsPerMinuteToRadiansPerSecond(m_LVelSig.getValueAsDouble());
     LMotorAppliedVolts = m_LAppliedVolts.getValueAsDouble();
     LMotorSupplyCurrentAmps = m_LSCurrentSig.getValueAsDouble();
@@ -131,6 +133,8 @@ public class ElevatorIOComp extends Elevator {
 
     poseMeters = (LMotorPoseMeters + RMotorPoseMeters) / 2;
     velMPS = (LMotorVelMPS + RMotorVelMPS) / 2;
+
+    System.out.println(LMotorPoseMeters);
   }
 
   @Override
@@ -140,7 +144,7 @@ public class ElevatorIOComp extends Elevator {
 
   @Override
   protected void setEncoderPose(double poseMeters) {
-    m_parentM.setPosition(0.0);
+    m_parentM.setPosition(poseMeters);
   }
 
   @Override
