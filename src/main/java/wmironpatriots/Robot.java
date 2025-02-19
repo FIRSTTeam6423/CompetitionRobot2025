@@ -14,10 +14,17 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import org.frc6423.frc2025.BuildConstants;
+
+import wmironpatriots.subsystems.Superstructure;
+import wmironpatriots.subsystems.Superstructure.StructState;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
@@ -32,6 +39,7 @@ public class Robot extends TimedRobot implements Logged {
 
   private final Elevator m_elevator;
   private final Swerve m_swerve;
+  private final Superstructure m_superstructure;
 
   public Robot() {
     startupMonologue();
@@ -43,12 +51,21 @@ public class Robot extends TimedRobot implements Logged {
     m_swerve = new Swerve(new CompBotSwerveConfigs());
     m_elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
 
-    // Default Commands
+
     m_swerve.setDefaultCommand(
         m_swerve.teleopSwerveCommmand(
             ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
             ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
             ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
+    
+    m_elevator.setDefaultCommand(m_elevator.runTargetPoseCommand(0.0));
+
+
+    // Init superstructure
+    Map<StructState, Trigger> triggerMap = new HashMap<Superstructure.StructState, Trigger>();
+    triggerMap.put(StructState.L2_SETUP, m_driveController.a());
+
+    m_superstructure = new Superstructure(m_elevator, triggerMap);
 
     // Debug triggers
     m_driveController.a().whileTrue(m_elevator.runTargetPoseCommand(1.717));
