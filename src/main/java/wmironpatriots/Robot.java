@@ -24,7 +24,7 @@ import monologue.Monologue;
 import org.frc6423.frc2025.BuildConstants;
 
 import wmironpatriots.subsystems.Superstructure;
-import wmironpatriots.subsystems.Superstructure.StructState;
+import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
@@ -62,8 +62,8 @@ public class Robot extends TimedRobot implements Logged {
 
 
     // Init superstructure
-    Map<StructState, Trigger> triggerMap = new HashMap<Superstructure.StructState, Trigger>();
-    triggerMap.put(StructState.L2_SETUP, m_driveController.a());
+    Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
+    triggerMap.put(Requests.L2_SETUP, m_driveController.a());
 
     m_superstructure = new Superstructure(m_elevator, triggerMap);
 

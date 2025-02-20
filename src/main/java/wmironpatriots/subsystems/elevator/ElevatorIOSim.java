@@ -20,59 +20,59 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 public class ElevatorIOSim extends Elevator {
-  private final TalonFX m_parentM, m_childM;
-  private final TalonFXConfiguration m_motorConf;
+  private final TalonFX parent, child;
+  private final TalonFXConfiguration motorConf;
 
-  private final ElevatorSim m_simulatedElevator;
+  private final ElevatorSim simulatedElevator;
 
   public ElevatorIOSim() {
-    m_parentM = new TalonFX(14, kCANbus);
-    m_childM = new TalonFX(15, kCANbus); // ! ID
+    parent = new TalonFX(14, kCANbus);
+    child = new TalonFX(15, kCANbus); // ! ID
 
     // register to global talonfx array
     // Robot.talonHandler.registerTalon(m_parentM);
     // Robot.talonHandler.registerTalon(m_childM);
 
-    m_motorConf = new TalonFXConfiguration();
-    m_motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    m_motorConf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    motorConf = new TalonFXConfiguration();
+    motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motorConf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    m_motorConf.Slot0.withKP(0.0).withKI(0.0).withKD(0.0); // PID config
-    m_motorConf.Slot0.withKS(0.0).withKV(0.0).withKA(0.0); // feedforward config
+    motorConf.Slot0.withKP(0.0).withKI(0.0).withKD(0.0); // PID config
+    motorConf.Slot0.withKS(0.0).withKV(0.0).withKA(0.0); // feedforward config
 
-    m_motorConf.CurrentLimits.StatorCurrentLimit = 80.0;
-    m_motorConf.CurrentLimits.StatorCurrentLimitEnable = true;
-    m_motorConf.CurrentLimits.SupplyCurrentLimit = 80.0;
-    m_motorConf.CurrentLimits.SupplyCurrentLowerLimit = -80.0;
-    m_motorConf.CurrentLimits.SupplyCurrentLimitEnable = true;
+    motorConf.CurrentLimits.StatorCurrentLimit = 80.0;
+    motorConf.CurrentLimits.StatorCurrentLimitEnable = true;
+    motorConf.CurrentLimits.SupplyCurrentLimit = 80.0;
+    motorConf.CurrentLimits.SupplyCurrentLowerLimit = -80.0;
+    motorConf.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    m_motorConf.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-    m_motorConf.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+    motorConf.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
+    motorConf.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
 
-    m_motorConf.MotionMagic.MotionMagicCruiseVelocity = 0.0; // ! TODO
-    m_motorConf.MotionMagic.MotionMagicAcceleration = 0.0;
-    m_motorConf.MotionMagic.MotionMagicJerk = 0.0;
+    motorConf.MotionMagic.MotionMagicCruiseVelocity = 0.0; // ! TODO
+    motorConf.MotionMagic.MotionMagicAcceleration = 0.0;
+    motorConf.MotionMagic.MotionMagicJerk = 0.0;
 
     // Conversion from rotations to meters
     // reduction * circumference
     // reduction is 1/5 and radius of spool radius is 0.878350 meters
-    m_motorConf.Feedback.SensorToMechanismRatio = (1 / 5) * (2 * Math.PI * 0.878350);
+    motorConf.Feedback.SensorToMechanismRatio = (1 / 5) * (2 * Math.PI * 0.878350);
 
-    m_parentM.getConfigurator().apply(m_motorConf);
-    m_childM.getConfigurator().apply(m_motorConf);
+    parent.getConfigurator().apply(motorConf);
+    child.getConfigurator().apply(motorConf);
 
-    m_childM.setControl(new Follower(m_parentM.getDeviceID(), true));
-    m_childM.optimizeBusUtilization();
-    m_parentM.optimizeBusUtilization();
+    child.setControl(new Follower(parent.getDeviceID(), true));
+    child.optimizeBusUtilization();
+    parent.optimizeBusUtilization();
 
-    m_simulatedElevator =
+    simulatedElevator =
         new ElevatorSim( // ! These are BS constants
             DCMotor.getKrakenX60Foc(2),
-            Elevator.kReduction,
-            Units.kilogramsToLbs(Elevator.kMassKg),
-            Elevator.kSpoolRadiusMeters,
+            Elevator.REDUCTION,
+            Units.kilogramsToLbs(Elevator.MASS_KG),
+            Elevator.SPOOL_RADIUS_M,
             0.0,
-            Elevator.kRangeMeters,
+            Elevator.RANGE_ROTS,
             true,
             0.0);
   }
@@ -81,23 +81,23 @@ public class ElevatorIOSim extends Elevator {
   public void periodic() {
     super.periodic();
 
-    TalonFXSimState parentSimState = new TalonFXSimState(m_parentM);
-    m_simulatedElevator.setInput(parentSimState.getMotorVoltage());
+    TalonFXSimState parentSimState = new TalonFXSimState(parent);
+    simulatedElevator.setInput(parentSimState.getMotorVoltage());
 
-    m_simulatedElevator.update(0.02);
+    simulatedElevator.update(0.02);
     parentSimState.setRotorVelocity(
-        (m_simulatedElevator.getVelocityMetersPerSecond())
-            / m_motorConf
+        (simulatedElevator.getVelocityMetersPerSecond())
+            / motorConf
                 .Feedback
                 .SensorToMechanismRatio); // I have no clue if this is correct lmfao
 
-    pose = m_simulatedElevator.getPositionMeters();
-    velRPM = m_simulatedElevator.getVelocityMetersPerSecond();
+    poseRots = simulatedElevator.getPositionMeters();
+    velRPM = simulatedElevator.getVelocityMetersPerSecond();
   }
 
   @Override
   protected void runMotorControl(ControlRequest request) {
-    m_parentM.setControl(request);
+    parent.setControl(request);
   }
 
   @Override
@@ -107,7 +107,7 @@ public class ElevatorIOSim extends Elevator {
 
   @Override
   protected void stopMotors() {
-    m_parentM.setVoltage(0.0);
+    parent.setVoltage(0.0);
   }
 
   @Override

@@ -11,74 +11,68 @@ import java.util.Map;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import wmironpatriots.subsystems.elevator.Elevator;
 
-/** Possibly one of the most cursed superstructures fr */
+/** Cursed superstructure ahh frfr */
 public class Superstructure {
-    public static enum StructState {
-        IDLE,
-        INTAKE_CHUTE,
+    public static enum Requests {
         INTAKE_GROUND,
-        L1_SETUP,
-        L2_SETUP,
-        L3_SETUP,
-        L4_SETUP,
+        INTAKE_CHUTE,
         REEF_SCORE,
-        CORAL_OUTTAKE,
-        ALGAE_HIGHER,
-        ALGAE_LOWER,
-        PROCESSOR_SETUP,
         PROCESSOR_SCORE,
-        ALGAE_OUTTAKE
+        OUTTAKE_CORAL,
+        OUTTAKE_ALGAE,
+        REMOVE_ALGAE_H,
+        REMOVE_ALGAE_L,
     }
 
-    private final Map<StructState, Trigger> m_triggerMap = new HashMap<StructState, Trigger>();
-    private StructState m_currentState = StructState.IDLE;
+    public static enum State {
+        IDLE,
+        INTAKING_GROUND,
+        INTAKING_CHUTE,
+        L1_SCORING,
+        L2_SCORING,
+        L3_SCORING,
+        L4_SCORING,
+        PROCESSOR_SCORE
+    }
 
-    public Superstructure(Elevator elevator, Map<StructState, Trigger> triggerMap) {
-        for (var state : StructState.values()) {
-            Trigger trigger = triggerMap.get(state);
-            if (trigger == null) {
-                m_triggerMap.put(state, new Trigger(() -> this.m_currentState == state));
-            } else {
-                m_triggerMap.put(state, trigger);
-            }
-        } // This is really dumb yippe
+    private final Map<State, Trigger> m_stateMap = new HashMap<State, Trigger>();
+    private State m_currentState = State.IDLE;
 
-        /** INTAKING GAMEPIECES */
+    private boolean m_hasCoral = false;
+    private boolean m_hasAlgae = false;
+
+    public Superstructure(Elevator elevator, Map<Requests, Trigger> requestMap) {
+        for (var state : State.values()) {
+            m_stateMap.put(state, new Trigger(() -> this.m_currentState == state));
+        }
+
+        /** REQUEST TRIGGERS */
+        requestMap
+            .get(Requests.INTAKE_CHUTE)
+            .and(() -> !m_hasCoral)
+            .onTrue(setCurrentStateCommand(State.INTAKING_CHUTE));
         
-        /** CORAL SCORING SETUP */
-        triggerMap
-            .get(StructState.L1_SETUP)
-            .onTrue(new WaitCommand(0.0)) // Tail logic
-            .toggleOnFalse(setCurrentStateCommand(StructState.IDLE)); 
+        requestMap
+            .get(Requests.INTAKE_GROUND)
+            .and(() -> !m_hasAlgae)
+            .onTrue(setCurrentStateCommand(State.INTAKING_GROUND));
 
-        triggerMap
-            .get(StructState.L2_SETUP)
-            .whileTrue(elevator.runTargetPoseCommand(Elevator.kL2Pose))
-            .and(elevator::inSetpointRange)
-            .onTrue(new WaitCommand(0.0)) // Tail logic
-            .toggleOnFalse(setCurrentStateCommand(StructState.IDLE)); 
+        requestMap
+            .get(Requests.REEF_SCORE)
+            .and(() -> m_hasCoral)
+            .onTrue(setCurrentStateCommand(State.L4_SCORING)); // TODO take operator selected target into consideration
 
-        triggerMap
-            .get(StructState.L3_SETUP)
-            .whileTrue(elevator.runTargetPoseCommand(Elevator.kL3Pose))
-            .and(elevator::inSetpointRange)
-            .onTrue(new WaitCommand(0.0)) // Tail logic
-            .toggleOnFalse(setCurrentStateCommand(StructState.IDLE)); 
-
-        triggerMap
-            .get(StructState.L4_SETUP)
-            .whileTrue(elevator.runTargetPoseCommand(Elevator.kL4Pose))
-            .and(elevator::inSetpointRange)
-            .onTrue(new WaitCommand(0.0)) // Tail logic
-            .toggleOnFalse(setCurrentStateCommand(StructState.IDLE)); 
+        requestMap
+            .get(Requests.PROCESSOR_SCORE)
+            .and(() -> m_hasAlgae)
+            .onTrue(setCurrentStateCommand(State.PROCESSOR_SCORE)); // Processor logic
     }
 
     /** Set current state */
-    public Command setCurrentStateCommand(StructState desiredState) {
+    public Command setCurrentStateCommand(State desiredState) {
         return Commands.run(() -> {
             m_currentState = desiredState;
         });

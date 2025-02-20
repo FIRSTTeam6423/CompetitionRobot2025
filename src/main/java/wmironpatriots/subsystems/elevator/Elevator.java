@@ -17,58 +17,57 @@ import monologue.Annotations.Log;
 public abstract class Elevator extends SubsystemBase {
   /** ELEVATOR CONSTANTS */
   // mech constants
-  public static final double kMassKg = 5.6 + 1.8; // Carriage + 1 stage
+  public static final double MASS_KG = 5.6 + 1.8; // Carriage + 1 stage
 
-  public static final double kReduction = 3;
-  public static final double kSpoolRadiusMeters = 0.878350;
-  public static final double kRangeMeters = 1.218;
+  public static final double REDUCTION = 3;
+  public static final double SPOOL_RADIUS_M = 0.878350;
+  public static final double RANGE_ROTS = 1.218;
 
   // Non-scoring poses
-  public static final double kLowerAlgaeRemovePose = 0.0;
-  public static final double kHigherAlgaeRemovePose = 0.0;
+  public static final double POSE_ALGAE_H = 0.0; // Remove algae high
+  public static final double POSE_ALGAE_L = 0.0; // Remove algae low
 
   // Scoring poses
-  public static final double kIdlePose = 0.0;
-  public static final double kL2Pose = 3.16;
-  public static final double kL3Pose = 10.81;
-  public static final double kL4Pose = 24;
+  public static final double POSE_L2 = 3.16;
+  public static final double POSE_L3 = 10.81;
+  public static final double POSE_L4 = 24;
 
   /** LOGGED VALUES */
-  @Log protected boolean LMotorOk = false;
-  @Log protected boolean RMotorOk = false;
+  @Log protected boolean parentOk = false;
+  @Log protected boolean childOk = false;
 
-  @Log protected double setpointPose;
-  @Log protected double pose;
+  @Log protected double setpointPoseRots;
+  @Log protected double poseRots;
   @Log protected double velRPM;
   @Log protected boolean isZeroed = false;
 
-  @Log protected double LMotorPose;
-  @Log protected double LMotorVelRPM;
-  @Log protected double LMotorAppliedVolts;
-  @Log protected double LMotorSupplyCurrentAmps;
-  @Log protected double LMotorTorqueCurrentAmps;
-  @Log protected double LMotorTempCelsius;
+  @Log protected double parentPoseRots;
+  @Log protected double parentVelRPM;
+  @Log protected double parentAppliedVolts;
+  @Log protected double parentSupplyCurrentAmps;
+  @Log protected double parentTorqueCurrentAmps;
+  @Log protected double parentTempCelsius;
 
-  @Log protected double RMotorPose;
-  @Log protected double RMotorVelRPM;
-  @Log protected double RMotorAppliedVolts;
-  @Log protected double RMotorSupplyCurrentAmps;
-  @Log protected double RMotorTorqueCurrentAmps;
-  @Log protected double RMotorTempCelsius;
+  @Log protected double childPoseRots;
+  @Log protected double childVelRPM;
+  @Log protected double childAppliedVolts;
+  @Log protected double childSupplyCurrentAmps;
+  @Log protected double childTorqueCurrentAmps;
+  @Log protected double childTempCelsius;
 
   /** VARIABLES */
-  private final PositionVoltage m_motorPoseOutReq =
+  private final PositionVoltage reqMotorPose =
       new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
-  private final VoltageOut m_motorVoltOutReq =
+  private final VoltageOut reqMotorVolt =
       new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
   /** Run target position in rotations from current zeroed pose */
   public Command runTargetPoseCommand(double pose) {
     return this.run(
         () -> {
-          setpointPose = pose;
-          runMotorControl(m_motorPoseOutReq.withPosition(pose).withEnableFOC(true));
+          setpointPoseRots = pose;
+          runMotorControl(reqMotorPose.withPosition(pose).withEnableFOC(true));
         });
   }
 
@@ -83,8 +82,8 @@ public abstract class Elevator extends SubsystemBase {
 
   /** Runs elevator down until current spikes above threshold */
   public Command runPoseZeroingCommand() {
-    return this.run(() -> runMotorControl(m_motorVoltOutReq.withOutput(-1.0)))
-        .until(() -> LMotorSupplyCurrentAmps > 20.0)
+    return this.run(() -> runMotorControl(reqMotorVolt.withOutput(-1.0)))
+        .until(() -> parentSupplyCurrentAmps > 20.0)
         .finallyDo(
             (interrupted) -> {
               System.out.println("Zeroed");
@@ -106,7 +105,7 @@ public abstract class Elevator extends SubsystemBase {
 
   /** Checks if elevator is around a specific range of the setpoint */
   public boolean inSetpointRange() {
-    return Math.abs(setpointPose - LMotorPose) < 0.05; // TODO tweak range if needed
+    return Math.abs(setpointPoseRots - parentPoseRots) < 0.05; // TODO tweak range if needed
   }
 
   /** HARDWARE METHODS */
