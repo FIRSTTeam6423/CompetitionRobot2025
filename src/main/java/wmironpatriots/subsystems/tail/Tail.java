@@ -32,15 +32,26 @@ public abstract class Tail extends SubsystemBase {
     @Log protected double rollerTorqueCurrentAmps;
 
     /** HARDWARE METHODS */
-    public abstract void runPivotVolts(double volts);
+    /** Run pivot voltage */
+    protected abstract void runPivotVolts(double volts);
 
-    public abstract void runPivotSetpoint(double setpointRadians);
+    /** Run pivot to specific setpoint in rads */
+    protected abstract void runPivotSetpoint(double setpointRadians);
 
-    public abstract void runRollerSpeed(double speed);
+    /** Set roller speed */
+    protected abstract void runRollerSpeed(double speed);
 
-    public abstract void setEncoderPose(double poseMeters);
+    /** Reset encoder to specific pose in rads */
+    protected abstract void setEncoderPose(double poseMeters);
 
-    public abstract void stopRollers();
+    /** Zeros pivot at current pose */
+    private void resetEncoderPose() {
+        setEncoderPose(0.0);
+    }
 
-    public abstract void pivotCoasting(boolean enabled);
+    /** Stop roller motor */
+    protected abstract void stopRollers();
+
+    /** Set tail to coast mode for easier movement */
+    protected abstract void pivotCoasting(boolean enabled);
 }

@@ -62,32 +62,32 @@ public class TailIOComp extends Tail {
     }
 
     @Override
-    public void runPivotVolts(double volts) {
+    protected void runPivotVolts(double volts) {
         pivot.setVoltage(volts);
     }
 
     @Override
-    public void runPivotSetpoint(double setpointRadians) {
+    protected void runPivotSetpoint(double setpointRadians) {
         pivotFeedback.setReference(setpointRadians, ControlType.kMAXMotionPositionControl);
     }
 
     @Override
-    public void runRollerSpeed(double speed) {
+    protected void runRollerSpeed(double speed) {
         roller.set(speed);
     }
 
     @Override
-    public void setEncoderPose(double poseMeters) {
+    protected void setEncoderPose(double poseMeters) {
         pivot.getEncoder().setPosition(poseMeters);
     }
 
     @Override
-    public void stopRollers() {
+    protected void stopRollers() {
         roller.stopMotor();
     }
 
     @Override
-    public void pivotCoasting(boolean enabled) {
+    protected void pivotCoasting(boolean enabled) {
         IdleMode idleMode = enabled ? IdleMode.kCoast : IdleMode.kBrake;
         pivotConf.idleMode(idleMode);
         pivot.configure(pivotConf, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
