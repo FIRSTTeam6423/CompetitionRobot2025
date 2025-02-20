@@ -24,3 +24,5 @@
 ### RIO loop
 | ID | Note |
 |----|------|
+| 1 | Tail Pivot |
+| 2 | Tail Roller |
