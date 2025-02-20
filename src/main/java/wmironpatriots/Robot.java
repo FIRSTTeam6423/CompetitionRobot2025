@@ -26,9 +26,9 @@ import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
-import wmironpatriots.subsystems.swerve.Swerve;
-import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
-import wmironpatriots.util.ControllerUtil;
+import wmironpatriots.subsystems.tail.Tail;
+import wmironpatriots.subsystems.tail.TailIOComp;
+import wmironpatriots.subsystems.tail.TailIOSim;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
@@ -36,7 +36,8 @@ public class Robot extends TimedRobot implements Logged {
   private final CommandXboxController driveController;
 
   private final Elevator elevator;
-  private final Swerve swerve;
+  private final Tail tail;
+  // private final Swerve swerve;
   private final Superstructure superstructure;
 
   public Robot() {
@@ -46,21 +47,22 @@ public class Robot extends TimedRobot implements Logged {
 
     driveController = new CommandXboxController(0);
     // Subsystem init
-    swerve = new Swerve(new CompBotSwerveConfigs());
+    // swerve = new Swerve(new CompBotSwerveConfigs());
     elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
+    tail = Robot.isReal() ? new TailIOComp() : new TailIOSim();
 
-    swerve.setDefaultCommand(
-        swerve.teleopSwerveCommmand(
-            ControllerUtil.applyDeadband(driveController::getLeftY, false),
-            ControllerUtil.applyDeadband(driveController::getLeftX, false),
-            ControllerUtil.applyDeadband(driveController::getRightX, false)));
+    // swerve.setDefaultCommand(
+    //     swerve.teleopSwerveCommmand(
+    //         ControllerUtil.applyDeadband(driveController::getLeftY, false),
+    //         ControllerUtil.applyDeadband(driveController::getLeftX, false),
+    //         ControllerUtil.applyDeadband(driveController::getRightX, false)));
 
     elevator.setDefaultCommand(elevator.runTargetPoseCommand(0.0));
 
     // Init superstructure
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
-    superstructure = new Superstructure(elevator, triggerMap);
+    superstructure = new Superstructure(elevator, tail, triggerMap);
 
     // Debug triggers
     driveController.a().whileTrue(elevator.runTargetPoseCommand(1.717));

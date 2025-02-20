@@ -12,13 +12,18 @@ import monologue.Annotations.Log;
 
 public abstract class Tail extends SubsystemBase {
   /** CONSTANTS */
-  public static final double REDUCTION = 5 * 5 * 0.5;
+  public static final double REDUCTION = 50;
 
-  public static final double MASS_KG = 0.0;
+  public static final double MASS_KG = 0.0; // TODO CALCULATE VALUE IN CAD
+  public static final double LENGTH_INCHES = 10.0; // TODO CALCULATE VALUE IN CAD
+  public static final double JKG_METERS_SQRD = 3.0; // TODO CLACULATE VALUE IN CAD
 
-  public static final double MAX_POSE_RADS = 0.0;
+  public static final double POSE_MAX_RADS = Math.PI / 6;
+  public static final double POSE_LNONFOUR_RADS = 0.0;
+  public static final double POSE_L4_RADS = POSE_MAX_RADS;
+  public static final double POSE_ADVERSION_RADS = POSE_L4_RADS;
 
-  public static final double CURRENT_LIMIT = 0.0;
+  public static final double CURRENT_LIMIT = 40.0;
 
   /** LOGGED VALUES */
   @Log protected boolean isZeroed = false;
@@ -38,6 +43,10 @@ public abstract class Tail extends SubsystemBase {
   @Log protected double rollerVelRPM;
   @Log protected double rollerAppliedVolts;
   @Log protected double rollerSupplyCurrentAmps;
+
+  public Command runScoringRoutineCommand() {
+    return this.run(() -> {});
+  }
 
   /** Runs target position in radians from current zeroed pose */
   public Command runTargetPoseCommand(double pose) {

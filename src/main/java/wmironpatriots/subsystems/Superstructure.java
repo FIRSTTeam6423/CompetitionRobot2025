@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.Map;
 import wmironpatriots.subsystems.elevator.Elevator;
+import wmironpatriots.subsystems.tail.Tail;
 
 /** Cursed superstructure ahh frfr */
 public class Superstructure {
@@ -30,10 +31,11 @@ public class Superstructure {
     IDLE,
     INTAKING_GROUND,
     INTAKING_CHUTE,
-    L1_SCORING,
-    L2_SCORING,
-    L3_SCORING,
-    L4_SCORING,
+    L1_SETUP,
+    L2_SETUP,
+    L3_SETUP,
+    L4_SETUP,
+    REEF_SCORE,
     PROCESSOR_SCORE
   }
 
@@ -43,7 +45,13 @@ public class Superstructure {
   private boolean hasCoral = false;
   private boolean hasAlgae = false;
 
-  public Superstructure(Elevator elevator, Map<Requests, Trigger> requestMap) {
+  public Superstructure(Elevator elevator, Tail tail, Map<Requests, Trigger> requestMap) {
+    // Checks for null triggers in requestMap
+    for (var request : Requests.values()) {
+      if (requestMap.get(request) == null) {
+        requestMap.put(request, new Trigger(() -> false));
+      }
+    }
     for (var state : State.values()) {
       stateMap.put(state, new Trigger(() -> this.currentState == state));
     }
@@ -64,12 +72,24 @@ public class Superstructure {
         .and(() -> hasCoral)
         .onTrue(
             setCurrentStateCommand(
-                State.L4_SCORING)); // TODO take operator selected target into consideration
+                State.L4_SETUP)); // TODO take operator selected target into consideration
 
     requestMap
         .get(Requests.PROCESSOR_SCORE)
         .and(() -> hasAlgae)
         .onTrue(setCurrentStateCommand(State.PROCESSOR_SCORE)); // Processor logic
+
+    stateMap
+        .get(State.L4_SETUP)
+        .onTrue(tail.runTargetPoseCommand(Tail.POSE_ADVERSION_RADS))
+        .whileTrue(elevator.runTargetPoseCommand(Elevator.POSE_L4))
+        .and(() -> elevator.inSetpointRange())
+        .onTrue(setCurrentStateCommand(State.REEF_SCORE));
+
+    stateMap
+        .get(State.REEF_SCORE)
+        .onTrue(tail.runTargetPoseCommand(Tail.POSE_L4_RADS))
+        .whileTrue(tail.runRollersCommand(1));
   }
 
   /** Set current state */

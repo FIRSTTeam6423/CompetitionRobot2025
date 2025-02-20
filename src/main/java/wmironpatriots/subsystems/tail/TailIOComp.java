@@ -38,7 +38,7 @@ public class TailIOComp extends Tail {
 
     pivotConf
         .softLimit
-        .forwardSoftLimit(MAX_POSE_RADS)
+        .forwardSoftLimit(POSE_MAX_RADS)
         .reverseSoftLimit(0.0)
         .forwardSoftLimitEnabled(true)
         .reverseSoftLimitEnabled(true);
