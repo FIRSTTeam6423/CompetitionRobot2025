@@ -10,15 +10,22 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.wpilibj.DigitalOutput;
+
 public class TailIOComp extends Tail {
     private final SparkMax pivot, roller;
     private final SparkMaxConfig pivotConf, rollerConf;
+
+    private final DigitalOutput beamUno, beamDos;
 
     private final SparkClosedLoopController pivotFeedback;
 
     public TailIOComp() {
         pivot = new SparkMax(1, MotorType.kBrushless);
         roller = new SparkMax(2, MotorType.kBrushless);
+
+        beamUno = new DigitalOutput(0);
+        beamDos = new DigitalOutput(0); // TODO SET CHANNELS
 
         // Configure pivot
         pivotConf = new SparkMaxConfig();
@@ -62,6 +69,25 @@ public class TailIOComp extends Tail {
     }
 
     @Override
+    public void periodic() {
+        super.periodic();
+        pivotMotorOk = pivot.hasStickyFault();
+        rollerMotorOk = roller.hasStickyFault();
+
+        beamUnoTriggered = beamUno.get();
+        beamDosTriggered = beamDos.get();
+
+        pivotPoseRads = pivot.getEncoder().getPosition();
+        pivotVelRPM = pivot.getEncoder().getVelocity();
+        pivotAppliedVolts = pivot.getAppliedOutput() * pivot.getBusVoltage();
+        pivotSupplyCurrentAmps = pivot.getOutputCurrent();
+
+        rollerVelRPM = roller.getEncoder().getVelocity();
+        rollerAppliedVolts = roller.getAppliedOutput() * roller.getBusVoltage();
+        rollerSupplyCurrentAmps = roller.getOutputCurrent();
+    }
+
+    @Override
     protected void runPivotVolts(double volts) {
         pivot.setVoltage(volts);
     }
@@ -79,6 +105,11 @@ public class TailIOComp extends Tail {
     @Override
     protected void setEncoderPose(double poseMeters) {
         pivot.getEncoder().setPosition(poseMeters);
+    }
+
+    @Override
+    protected void stopPivot() {
+        pivot.stopMotor();
     }
 
     @Override

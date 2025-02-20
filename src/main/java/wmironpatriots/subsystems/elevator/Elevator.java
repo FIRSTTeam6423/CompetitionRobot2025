@@ -28,6 +28,7 @@ public abstract class Elevator extends SubsystemBase {
   public static final double POSE_ALGAE_L = 0.0; // Remove algae low
 
   // Scoring poses
+  // TODO CONVERT POSES TO RADIANS
   public static final double POSE_L2 = 3.16;
   public static final double POSE_L3 = 10.81;
   public static final double POSE_L4 = 24;
