@@ -33,46 +33,46 @@ import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
 import wmironpatriots.util.ControllerUtil;
 
 public class Robot extends TimedRobot implements Logged {
-  private final CommandScheduler m_scheduler = CommandScheduler.getInstance();
+  private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
-  private final CommandXboxController m_driveController;
+  private final CommandXboxController driveController;
 
-  private final Elevator m_elevator;
-  private final Swerve m_swerve;
-  private final Superstructure m_superstructure;
+  private final Elevator elevator;
+  private final Swerve swerve;
+  private final Superstructure superstructure;
 
   public Robot() {
     startupMonologue();
 
     RobotController.setBrownoutVoltage(.0);
 
-    m_driveController = new CommandXboxController(0);
+    driveController = new CommandXboxController(0);
     // Subsystem init
-    m_swerve = new Swerve(new CompBotSwerveConfigs());
-    m_elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
+    swerve = new Swerve(new CompBotSwerveConfigs());
+    elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
 
 
-    m_swerve.setDefaultCommand(
-        m_swerve.teleopSwerveCommmand(
-            ControllerUtil.applyDeadband(m_driveController::getLeftY, false),
-            ControllerUtil.applyDeadband(m_driveController::getLeftX, false),
-            ControllerUtil.applyDeadband(m_driveController::getRightX, false)));
+    swerve.setDefaultCommand(
+        swerve.teleopSwerveCommmand(
+            ControllerUtil.applyDeadband(driveController::getLeftY, false),
+            ControllerUtil.applyDeadband(driveController::getLeftX, false),
+            ControllerUtil.applyDeadband(driveController::getRightX, false)));
     
-    m_elevator.setDefaultCommand(m_elevator.runTargetPoseCommand(0.0));
+    elevator.setDefaultCommand(elevator.runTargetPoseCommand(0.0));
 
 
     // Init superstructure
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
-    triggerMap.put(Requests.L2_SETUP, m_driveController.a());
+    triggerMap.put(Requests.L2_SETUP, driveController.a());
 
-    m_superstructure = new Superstructure(m_elevator, triggerMap);
+    superstructure = new Superstructure(elevator, triggerMap);
 
     // Debug triggers
-    m_driveController.a().whileTrue(m_elevator.runTargetPoseCommand(1.717));
+    driveController.a().whileTrue(elevator.runTargetPoseCommand(1.717));
 
-    m_driveController.x().whileTrue(m_elevator.runTargetPoseCommand(5.88));
+    driveController.x().whileTrue(elevator.runTargetPoseCommand(5.88));
 
-    m_driveController.y().whileTrue(m_elevator.runTargetPoseCommand(12.9));
+    driveController.y().whileTrue(elevator.runTargetPoseCommand(12.9));
   }
 
   @Override
@@ -95,7 +95,7 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void teleopInit() {
-    m_elevator.zeroPoseCommand();
+    elevator.zeroPoseCommand();
   }
 
   @Override
@@ -126,15 +126,15 @@ public class Robot extends TimedRobot implements Logged {
         (Command command, Boolean active) -> {
           Monologue.log("Commands/" + command.getName(), active);
         };
-    m_scheduler.onCommandInitialize(
+    scheduler.onCommandInitialize(
         (Command command) -> {
           logCommandFunction.accept(command, true);
         });
-    m_scheduler.onCommandFinish(
+    scheduler.onCommandFinish(
         (Command command) -> {
           logCommandFunction.accept(command, false);
         });
-    m_scheduler.onCommandInterrupt(
+    scheduler.onCommandInterrupt(
         (Command command) -> {
           logCommandFunction.accept(command, false);
         });

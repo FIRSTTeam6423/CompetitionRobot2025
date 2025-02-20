@@ -38,43 +38,43 @@ public class Superstructure {
         PROCESSOR_SCORE
     }
 
-    private final Map<State, Trigger> m_stateMap = new HashMap<State, Trigger>();
-    private State m_currentState = State.IDLE;
+    private final Map<State, Trigger> stateMap = new HashMap<State, Trigger>();
+    private State currentState = State.IDLE;
 
-    private boolean m_hasCoral = false;
-    private boolean m_hasAlgae = false;
+    private boolean hasCoral = false;
+    private boolean hasAlgae = false;
 
     public Superstructure(Elevator elevator, Map<Requests, Trigger> requestMap) {
         for (var state : State.values()) {
-            m_stateMap.put(state, new Trigger(() -> this.m_currentState == state));
+            stateMap.put(state, new Trigger(() -> this.currentState == state));
         }
 
         /** REQUEST TRIGGERS */
         requestMap
             .get(Requests.INTAKE_CHUTE)
-            .and(() -> !m_hasCoral)
+            .and(() -> !hasCoral)
             .onTrue(setCurrentStateCommand(State.INTAKING_CHUTE));
         
         requestMap
             .get(Requests.INTAKE_GROUND)
-            .and(() -> !m_hasAlgae)
+            .and(() -> !hasAlgae)
             .onTrue(setCurrentStateCommand(State.INTAKING_GROUND));
 
         requestMap
             .get(Requests.REEF_SCORE)
-            .and(() -> m_hasCoral)
+            .and(() -> hasCoral)
             .onTrue(setCurrentStateCommand(State.L4_SCORING)); // TODO take operator selected target into consideration
 
         requestMap
             .get(Requests.PROCESSOR_SCORE)
-            .and(() -> m_hasAlgae)
+            .and(() -> hasAlgae)
             .onTrue(setCurrentStateCommand(State.PROCESSOR_SCORE)); // Processor logic
     }
 
     /** Set current state */
     public Command setCurrentStateCommand(State desiredState) {
         return Commands.run(() -> {
-            m_currentState = desiredState;
+            currentState = desiredState;
         });
     }
 }
