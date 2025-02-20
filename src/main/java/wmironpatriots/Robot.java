@@ -15,14 +15,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import org.frc6423.frc2025.BuildConstants;
-
 import wmironpatriots.subsystems.Superstructure;
 import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.elevator.Elevator;
@@ -51,19 +49,16 @@ public class Robot extends TimedRobot implements Logged {
     swerve = new Swerve(new CompBotSwerveConfigs());
     elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
 
-
     swerve.setDefaultCommand(
         swerve.teleopSwerveCommmand(
             ControllerUtil.applyDeadband(driveController::getLeftY, false),
             ControllerUtil.applyDeadband(driveController::getLeftX, false),
             ControllerUtil.applyDeadband(driveController::getRightX, false)));
-    
-    elevator.setDefaultCommand(elevator.runTargetPoseCommand(0.0));
 
+    elevator.setDefaultCommand(elevator.runTargetPoseCommand(0.0));
 
     // Init superstructure
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
-    triggerMap.put(Requests.L2_SETUP, driveController.a());
 
     superstructure = new Superstructure(elevator, triggerMap);
 

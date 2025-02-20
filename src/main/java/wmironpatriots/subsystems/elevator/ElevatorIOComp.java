@@ -103,11 +103,21 @@ public class ElevatorIOComp extends Elevator {
   public void periodic() {
     parentOk =
         BaseStatusSignal.refreshAll(
-                m_LPoseSig, parentVelSig, childAppliedVoltsSig, parentSCurrentSig, parentTCurrentSig, parentTempSig)
+                m_LPoseSig,
+                parentVelSig,
+                childAppliedVoltsSig,
+                parentSCurrentSig,
+                parentTCurrentSig,
+                parentTempSig)
             .isOK();
     childOk =
         BaseStatusSignal.refreshAll(
-                m_RPoseSig, childVelSig, childAppliedVoltsSig, childSCurrentSig, childTCurrentSig, childTemp)
+                m_RPoseSig,
+                childVelSig,
+                childAppliedVoltsSig,
+                childSCurrentSig,
+                childTCurrentSig,
+                childTemp)
             .isOK();
 
     parentPoseRots = m_LPoseSig.getValueAsDouble();

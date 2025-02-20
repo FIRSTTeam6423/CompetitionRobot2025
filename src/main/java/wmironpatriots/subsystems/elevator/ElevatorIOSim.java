@@ -87,9 +87,7 @@ public class ElevatorIOSim extends Elevator {
     simulatedElevator.update(0.02);
     parentSimState.setRotorVelocity(
         (simulatedElevator.getVelocityMetersPerSecond())
-            / motorConf
-                .Feedback
-                .SensorToMechanismRatio); // I have no clue if this is correct lmfao
+            / motorConf.Feedback.SensorToMechanismRatio); // I have no clue if this is correct lmfao
 
     poseRots = simulatedElevator.getPositionMeters();
     velRPM = simulatedElevator.getVelocityMetersPerSecond();

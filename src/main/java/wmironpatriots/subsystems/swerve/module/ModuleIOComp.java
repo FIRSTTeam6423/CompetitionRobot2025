@@ -14,10 +14,8 @@ import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import wmironpatriots.Robot;
 import wmironpatriots.util.swerveUtil.ModuleConfig;
 
 public class ModuleIOComp extends Module {

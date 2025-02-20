@@ -35,6 +35,7 @@ public abstract class Elevator extends SubsystemBase {
 
   /** LOGGED VALUES */
   @Log protected boolean parentOk = false;
+
   @Log protected boolean childOk = false;
 
   @Log protected double setpointPoseRots;
