@@ -65,11 +65,13 @@ public class Robot extends TimedRobot implements Logged {
     superstructure = new Superstructure(elevator, tail, triggerMap);
 
     // Debug triggers
-    driveController.a().whileTrue(elevator.runTargetPoseCommand(1.717));
+    driveController.a().whileTrue(tail.runTargetPoseCommand(Tail.POSE_L4_RADS));
+    driveController.b().whileTrue(tail.runTargetPoseCommand(Tail.POSE_LNONFOUR_RADS));
+    // driveController.a().whileTrue(elevator.runTargetPoseCommand(1.717));
 
-    driveController.x().whileTrue(elevator.runTargetPoseCommand(5.88));
+    // driveController.x().whileTrue(elevator.runTargetPoseCommand(5.88));
 
-    driveController.y().whileTrue(elevator.runTargetPoseCommand(12.9));
+    // driveController.y().whileTrue(elevator.runTargetPoseCommand(12.9));
   }
 
   @Override

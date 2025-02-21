@@ -6,6 +6,10 @@
 
 package wmironpatriots.subsystems.tail;
 
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Annotations.Log;
@@ -18,9 +22,10 @@ public abstract class Tail extends SubsystemBase {
   public static final double LENGTH_INCHES = 10.0; // TODO CALCULATE VALUE IN CAD
   public static final double JKG_METERS_SQRD = 3.0; // TODO CLACULATE VALUE IN CAD
 
-  public static final double POSE_MAX_RADS = Math.PI / 6;
-  public static final double POSE_LNONFOUR_RADS = 0.0;
-  public static final double POSE_L4_RADS = POSE_MAX_RADS;
+  public static final double POSE_MAX_RADS = Math.PI / 2;
+  public static final double POSE_MIN_RADS = Math.PI / 6;
+  public static final double POSE_LNONFOUR_RADS = POSE_MAX_RADS;
+  public static final double POSE_L4_RADS = POSE_MIN_RADS;
   public static final double POSE_ADVERSION_RADS = POSE_L4_RADS;
 
   public static final double CURRENT_LIMIT = 40.0;
@@ -43,6 +48,24 @@ public abstract class Tail extends SubsystemBase {
   @Log protected double rollerVelRPM;
   @Log protected double rollerAppliedVolts;
   @Log protected double rollerSupplyCurrentAmps;
+
+  /** Tail widget */
+  protected final Mechanism2d mechCanvas = new Mechanism2d(24, 24);
+  protected final MechanismRoot2d mechAnchor = mechCanvas.getRoot("Tail", 0, 5);
+  protected final MechanismLigament2d mechBase =
+      mechAnchor.append(new MechanismLigament2d("Arm", LENGTH_INCHES, 0));
+  protected final MechanismLigament2d mechFrontSide =
+      mechBase.append(new MechanismLigament2d("FrontSide", LENGTH_INCHES/4.5, -90));
+  protected final MechanismLigament2d mechBackSide =
+      mechFrontSide.append(
+          new MechanismLigament2d(
+              "bah",
+              Math.hypot(mechBase.getLength(), mechFrontSide.getLength()),
+              180 + (Math.atan(mechBase.getLength() / mechFrontSide.getLength()) * (180)/Math.PI)));
+
+  public Tail() {
+    SmartDashboard.putData("Tail/Mech2d", this.mechCanvas);
+  }
 
   public Command runScoringRoutineCommand() {
     return this.run(() -> {});
@@ -81,7 +104,7 @@ public abstract class Tail extends SubsystemBase {
         .finallyDo(
             (interrupted) -> {
               runPivotVolts(0.0);
-              resetEncoderPose();
+              setEncoderPose(POSE_MIN_RADS);
               isZeroed = true;
             });
   }
@@ -102,7 +125,7 @@ public abstract class Tail extends SubsystemBase {
   protected abstract void runRollerSpeed(double speed);
 
   /** Reset encoder to specific pose in rads */
-  protected abstract void setEncoderPose(double poseMeters);
+  protected abstract void setEncoderPose(double poseRads);
 
   /** Zeros pivot at current pose */
   private void resetEncoderPose() {

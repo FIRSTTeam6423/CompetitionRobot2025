@@ -82,6 +82,8 @@ public class TailIOComp extends Tail {
     rollerVelRPM = roller.getEncoder().getVelocity();
     rollerAppliedVolts = roller.getAppliedOutput() * roller.getBusVoltage();
     rollerSupplyCurrentAmps = roller.getOutputCurrent();
+
+    mechBase.setAngle(pivotPoseRads * (180 / Math.PI));
   }
 
   @Override
@@ -100,8 +102,8 @@ public class TailIOComp extends Tail {
   }
 
   @Override
-  protected void setEncoderPose(double poseMeters) {
-    pivot.getEncoder().setPosition(poseMeters);
+  protected void setEncoderPose(double poseRads) {
+    pivot.getEncoder().setPosition(poseRads / (2 * Math.PI));
   }
 
   @Override

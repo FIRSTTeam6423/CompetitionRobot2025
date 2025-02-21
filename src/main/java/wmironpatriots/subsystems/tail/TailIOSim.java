@@ -6,38 +6,42 @@
 
 package wmironpatriots.subsystems.tail;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import java.util.Random;
 
 public class TailIOSim extends Tail {
   private final SingleJointedArmSim tailSim;
   private double pivotInputVoltage;
-  private final PIDController pivotFeedback;
-
-  private final double initPoseRads;
+  private final ProfiledPIDController pivotFeedback;
+  private final ArmFeedforward pivotFeedforward;
 
   public TailIOSim() {
-    initPoseRads = new Random().nextDouble(POSE_MAX_RADS); // generates random starting pose
+    super();
+    // pivotPoseRads = new Random().nextDouble(POSE_MAX_RADS); // generates random starting pose
     tailSim =
         new SingleJointedArmSim(
             DCMotor.getNEO(1),
             REDUCTION,
-            3.0,
+            1.0,
             Units.inchesToMeters(LENGTH_INCHES),
-            0.0,
+            POSE_MIN_RADS,
             POSE_MAX_RADS,
             true,
-            initPoseRads);
+            POSE_MIN_RADS);
 
-    pivotFeedback = new PIDController(1, 0, 0);
+    pivotFeedforward = new ArmFeedforward(0.0, 0.0, 0.0);
+    pivotFeedback =
+        new ProfiledPIDController(100, 0, 6.0, new TrapezoidProfile.Constraints(10, 10));
   }
 
   @Override
   public void periodic() {
+    tailSim.update(0.02);
+
     pivotMotorOk = true;
     rollerMotorOk = true;
 
@@ -48,25 +52,30 @@ public class TailIOSim extends Tail {
     pivotVelRPM = Units.radiansPerSecondToRotationsPerMinute(tailSim.getAngleRads());
     pivotAppliedVolts = pivotInputVoltage;
     pivotSupplyCurrentAmps = tailSim.getCurrentDrawAmps();
+
+    mechBase.setAngle(pivotPoseRads * (180 / Math.PI));
   }
 
   @Override
   protected void runPivotVolts(double volts) {
-    pivotAppliedVolts = MathUtil.clamp(volts, -12, 12);
+    pivotAppliedVolts = volts;
     tailSim.setInputVoltage(pivotAppliedVolts);
   }
 
   @Override
   protected void runPivotSetpoint(double setpointRadians) {
-    pivotSetpointRads = setpointRadians;
-    runPivotVolts(pivotFeedback.calculate(pivotPoseRads, setpointRadians));
+    runPivotVolts(
+        pivotFeedback.calculate(pivotPoseRads, setpointRadians)
+            + pivotFeedforward.calculate(
+                pivotFeedback.getSetpoint().position, pivotFeedback.getSetpoint().velocity));
+    System.out.println(pivotFeedback.getSetpoint().velocity);
   }
 
   @Override
   protected void runRollerSpeed(double speed) {} // No rollers
 
   @Override
-  protected void setEncoderPose(double poseMeters) {}
+  protected void setEncoderPose(double poseRads) {}
 
   @Override
   protected void stopPivot() {
