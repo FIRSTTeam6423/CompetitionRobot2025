@@ -24,14 +24,23 @@ public abstract class Elevator extends SubsystemBase {
   public static final double RANGE_ROTS = 1.218;
 
   // Non-scoring poses
+  public static final double POSE_INTAKING = 0.0;
   public static final double POSE_ALGAE_H = 0.0; // Remove algae high
   public static final double POSE_ALGAE_L = 0.0; // Remove algae low
 
   // Scoring poses
   // TODO CONVERT POSES TO RADIANS
+  public static final double POSE_L1 = 0.0;
   public static final double POSE_L2 = 3.16;
   public static final double POSE_L3 = 10.81;
   public static final double POSE_L4 = 24;
+
+  // Visualizer constants
+  public static final double MAX_ELEVATOR_HEIGHT_INCHES = 57;
+  public static final double STAGE_ZERO_HEIGHT_INCHES = 32;
+  public static final double STAGE_ONE_HEIGHT_INCHES = 24;
+  public static final double POSE_MAX_CARRIAGE_STAGE_ONE =
+      12; // TODO change value because tail will expload if wrong
 
   /** LOGGED VALUES */
   @Log protected boolean parentOk = false;
@@ -65,7 +74,7 @@ public abstract class Elevator extends SubsystemBase {
       new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
   /** Run target position in rotations from current zeroed pose */
-  public Command runTargetPoseCommand(double pose) {
+  public Command setTargetPoseCommand(double pose) {
     return this.run(
         () -> {
           setpointPoseRots = pose;
@@ -103,6 +112,16 @@ public abstract class Elevator extends SubsystemBase {
   /** Set elevator pose to 0.0 rotations */
   private void resetPose() {
     setEncoderPose(0.0);
+  }
+
+  /** Returns pose in rotations */
+  public double getPose() {
+    return poseRots;
+  }
+
+  /** Gets velocity in rotations per minute */
+  public double getVelocity() {
+    return velRPM;
   }
 
   /** Checks if elevator is around a specific range of the setpoint */

@@ -25,6 +25,7 @@ public class Superstructure {
     OUTTAKE_ALGAE,
     REMOVE_ALGAE_H,
     REMOVE_ALGAE_L,
+    CANCEL
   }
 
   public static enum State {
@@ -60,16 +61,19 @@ public class Superstructure {
     requestMap
         .get(Requests.INTAKE_CHUTE)
         .and(() -> !hasCoral)
+        .and(() -> currentState == State.IDLE)
         .onTrue(setCurrentStateCommand(State.INTAKING_CHUTE));
 
     requestMap
         .get(Requests.INTAKE_GROUND)
         .and(() -> !hasAlgae)
+        .and(() -> currentState == State.IDLE)
         .onTrue(setCurrentStateCommand(State.INTAKING_GROUND));
 
     requestMap
         .get(Requests.REEF_SCORE)
         .and(() -> hasCoral)
+        .and(() -> currentState == State.IDLE)
         .onTrue(
             setCurrentStateCommand(
                 State.L4_SETUP)); // TODO take operator selected target into consideration
@@ -79,21 +83,83 @@ public class Superstructure {
         .and(() -> hasAlgae)
         .onTrue(setCurrentStateCommand(State.PROCESSOR_SCORE)); // Processor logic
 
+    /** STATE TRIGGER */
+    stateMap
+        .get(State.IDLE)
+        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_OUT_RADS))
+        .whileTrue(elevator.setTargetPoseCommand(0.0));
+
+    // Coral manipulation
+    stateMap
+        .get(State.INTAKING_CHUTE)
+        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_INTAKING))
+        .and(() -> isTailSafe(elevator, tail))
+        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS))
+        .and(() -> elevator.inSetpointRange())
+        .whileTrue(tail.runRollersCommand(Tail.INTAKING_SPEEDS)) // TODO run chute
+        .and(() -> tail.hasCoral())
+        .onTrue(setCoralStatus(true))
+        .onTrue(setCurrentStateCommand(State.IDLE));
+
+    stateMap
+        .get(State.L1_SETUP)
+        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_L1))
+        .and(() -> isTailSafe(elevator, tail))
+        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS))
+        .and(() -> elevator.inSetpointRange())
+        .onTrue(setCurrentStateCommand(State.REEF_SCORE));
+
+    stateMap
+        .get(State.L2_SETUP)
+        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_L2))
+        .and(() -> isTailSafe(elevator, tail))
+        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS))
+        .and(() -> elevator.inSetpointRange())
+        .onTrue(setCurrentStateCommand(State.REEF_SCORE));
+
+    stateMap
+        .get(State.L3_SETUP)
+        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_L3))
+        .and(() -> isTailSafe(elevator, tail))
+        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS))
+        .and(() -> elevator.inSetpointRange())
+        .onTrue(setCurrentStateCommand(State.REEF_SCORE));
+
     stateMap
         .get(State.L4_SETUP)
-        .onTrue(tail.runTargetPoseCommand(Tail.POSE_ADVERSION_RADS))
-        .whileTrue(elevator.runTargetPoseCommand(Elevator.POSE_L4))
+        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_L4))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.REEF_SCORE)
-        .onTrue(tail.runTargetPoseCommand(Tail.POSE_L4_RADS))
-        .whileTrue(tail.runRollersCommand(1));
+        .whileTrue(tail.runRollersCommand(Tail.OUTTAKING_SPEEDS))
+        .and(() -> !tail.hasCoral())
+        .onTrue(setCoralStatus(false))
+        .onTrue(setCurrentStateCommand(State.IDLE));
+  }
+
+  /** Checks to see if tail will hit top of carriage when stowed */
+  private boolean isTailSafe(Elevator elevator, Tail tail) {
+    double vel = elevator.getVelocity();
+    if (vel > 0 && elevator.getPose() < Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
+      return false;
+    } else if (vel < 0 && elevator.getPose() > Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
+      return false;
+    }
+    return true;
+  }
+
+  private Command setCoralStatus(boolean hasCoral) {
+    return Commands.runOnce(() -> this.hasCoral = hasCoral);
+  }
+
+  private Command setAlgaeStatus(boolean hasAlgae) {
+    return Commands.runOnce(() -> this.hasAlgae = hasAlgae);
   }
 
   /** Set current state */
-  public Command setCurrentStateCommand(State desiredState) {
+  private Command setCurrentStateCommand(State desiredState) {
     return Commands.run(
         () -> {
           currentState = desiredState;

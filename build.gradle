@@ -116,7 +116,7 @@ project.compileJava.dependsOn(createVersionFile)
 gversion {
     srcDir = "src/main/java/"
 
-    classPackage = "org.frc6423.frc2025"
+    classPackage = "wmironpatriots"
     className = "BuildConstants"
     dateFormat = "yyyy-MM-dd HH:mm:ss z"
     timeZone = "UTC"

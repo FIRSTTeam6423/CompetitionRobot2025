@@ -28,12 +28,18 @@
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Alerts": "Alerts",
+      "/SmartDashboard/Elevator/mech2d": "Mechanism2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Tail/Mech2d": "Mechanism2d",
       "/SmartDashboard/test": "Mechanism2d"
     },
     "windows": {
       "/FMSInfo": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Elevator/mech2d": {
         "window": {
           "visible": true
         }

@@ -35,6 +35,7 @@ public class ElevatorIOComp extends Elevator {
       childTemp;
 
   public ElevatorIOComp() {
+    super();
     parent = new TalonFX(14, kCANbus);
     child = new TalonFX(15, kCANbus); // ! ID
 

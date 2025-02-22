@@ -22,11 +22,14 @@ public abstract class Tail extends SubsystemBase {
   public static final double LENGTH_INCHES = 10.0; // TODO CALCULATE VALUE IN CAD
   public static final double JKG_METERS_SQRD = 3.0; // TODO CLACULATE VALUE IN CAD
 
-  public static final double POSE_MAX_RADS = Math.PI / 2;
-  public static final double POSE_MIN_RADS = Math.PI / 6;
-  public static final double POSE_LNONFOUR_RADS = POSE_MAX_RADS;
-  public static final double POSE_L4_RADS = POSE_MIN_RADS;
-  public static final double POSE_ADVERSION_RADS = POSE_L4_RADS;
+  public static final double POSE_IN_RADS = Math.PI / 2;
+  public static final double POSE_OUT_RADS = Math.PI / 6;
+  public static final double POSE_LNONFOUR_RADS = POSE_IN_RADS;
+  public static final double POSE_L4_RADS = POSE_OUT_RADS;
+
+  // Roller speeds
+  public static final double INTAKING_SPEEDS = 5;
+  public static final double OUTTAKING_SPEEDS = 5;
 
   public static final double CURRENT_LIMIT = 40.0;
 
@@ -51,28 +54,28 @@ public abstract class Tail extends SubsystemBase {
 
   /** Tail widget */
   protected final Mechanism2d mechCanvas = new Mechanism2d(24, 24);
+
   protected final MechanismRoot2d mechAnchor = mechCanvas.getRoot("Tail", 0, 5);
   protected final MechanismLigament2d mechBase =
       mechAnchor.append(new MechanismLigament2d("Arm", LENGTH_INCHES, 0));
   protected final MechanismLigament2d mechFrontSide =
-      mechBase.append(new MechanismLigament2d("FrontSide", LENGTH_INCHES/4.5, -90));
+      mechBase.append(new MechanismLigament2d("FrontSide", LENGTH_INCHES / 4.5, -90));
   protected final MechanismLigament2d mechBackSide =
       mechFrontSide.append(
           new MechanismLigament2d(
               "bah",
               Math.hypot(mechBase.getLength(), mechFrontSide.getLength()),
-              180 + (Math.atan(mechBase.getLength() / mechFrontSide.getLength()) * (180)/Math.PI)));
+              180
+                  + (Math.atan(mechBase.getLength() / mechFrontSide.getLength())
+                      * (180)
+                      / Math.PI)));
 
   public Tail() {
     SmartDashboard.putData("Tail/Mech2d", this.mechCanvas);
   }
 
-  public Command runScoringRoutineCommand() {
-    return this.run(() -> {});
-  }
-
   /** Runs target position in radians from current zeroed pose */
-  public Command runTargetPoseCommand(double pose) {
+  public Command setTargetPoseCommand(double pose) {
     return this.run(
         () -> {
           pivotSetpointRads = pose;
@@ -104,9 +107,14 @@ public abstract class Tail extends SubsystemBase {
         .finallyDo(
             (interrupted) -> {
               runPivotVolts(0.0);
-              setEncoderPose(POSE_MIN_RADS);
+              setEncoderPose(POSE_OUT_RADS);
               isZeroed = true;
             });
+  }
+
+  /** Checks if pivot pose is +- PI/8 rads from specified pose */
+  public boolean inRange(double pose) {
+    return Math.abs(pose - pivotPoseRads) < Math.PI / 8;
   }
 
   /** Checks if both tail beambreaks are triggered */

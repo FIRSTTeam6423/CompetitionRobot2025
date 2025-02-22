@@ -25,7 +25,10 @@ public class ElevatorIOSim extends Elevator {
 
   private final ElevatorSim simulatedElevator;
 
+  private final double conversion = (1 / 5) * (2 * Math.PI * 0.878350);
+
   public ElevatorIOSim() {
+    super();
     parent = new TalonFX(14, kCANbus);
     child = new TalonFX(15, kCANbus); // ! ID
 
@@ -72,7 +75,7 @@ public class ElevatorIOSim extends Elevator {
             Units.kilogramsToLbs(Elevator.MASS_KG),
             Elevator.SPOOL_RADIUS_M,
             0.0,
-            Elevator.RANGE_ROTS,
+            Elevator.RANGE_ROTS * conversion,
             true,
             0.0);
   }

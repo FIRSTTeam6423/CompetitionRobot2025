@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
-import org.frc6423.frc2025.BuildConstants;
 import wmironpatriots.subsystems.Superstructure;
 import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.elevator.Elevator;
@@ -57,21 +56,10 @@ public class Robot extends TimedRobot implements Logged {
     //         ControllerUtil.applyDeadband(driveController::getLeftX, false),
     //         ControllerUtil.applyDeadband(driveController::getRightX, false)));
 
-    elevator.setDefaultCommand(elevator.runTargetPoseCommand(0.0));
-
     // Init superstructure
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
     superstructure = new Superstructure(elevator, tail, triggerMap);
-
-    // Debug triggers
-    driveController.a().whileTrue(tail.runTargetPoseCommand(Tail.POSE_L4_RADS));
-    driveController.b().whileTrue(tail.runTargetPoseCommand(Tail.POSE_LNONFOUR_RADS));
-    // driveController.a().whileTrue(elevator.runTargetPoseCommand(1.717));
-
-    // driveController.x().whileTrue(elevator.runTargetPoseCommand(5.88));
-
-    // driveController.y().whileTrue(elevator.runTargetPoseCommand(12.9));
   }
 
   @Override

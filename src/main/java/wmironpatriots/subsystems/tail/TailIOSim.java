@@ -28,10 +28,10 @@ public class TailIOSim extends Tail {
             REDUCTION,
             1.0,
             Units.inchesToMeters(LENGTH_INCHES),
-            POSE_MIN_RADS,
-            POSE_MAX_RADS,
+            POSE_OUT_RADS,
+            POSE_OUT_RADS,
             true,
-            POSE_MIN_RADS);
+            POSE_OUT_RADS);
 
     pivotFeedforward = new ArmFeedforward(0.0, 0.0, 0.0);
     pivotFeedback =
@@ -45,8 +45,8 @@ public class TailIOSim extends Tail {
     pivotMotorOk = true;
     rollerMotorOk = true;
 
-    beamUnoTriggered = false;
-    beamDosTriggered = false;
+    beamUnoTriggered = true;
+    beamDosTriggered = true;
 
     pivotPoseRads = tailSim.getAngleRads();
     pivotVelRPM = Units.radiansPerSecondToRotationsPerMinute(tailSim.getAngleRads());
