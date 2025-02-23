@@ -61,19 +61,16 @@ public class Superstructure {
     requestMap
         .get(Requests.INTAKE_CHUTE)
         .and(() -> !hasCoral)
-        .and(() -> currentState == State.IDLE)
         .onTrue(setCurrentStateCommand(State.INTAKING_CHUTE));
 
     requestMap
         .get(Requests.INTAKE_GROUND)
         .and(() -> !hasAlgae)
-        .and(() -> currentState == State.IDLE)
         .onTrue(setCurrentStateCommand(State.INTAKING_GROUND));
 
     requestMap
         .get(Requests.REEF_SCORE)
         .and(() -> hasCoral)
-        .and(() -> currentState == State.IDLE)
         .onTrue(
             setCurrentStateCommand(
                 State.L4_SETUP)); // TODO take operator selected target into consideration
@@ -97,7 +94,7 @@ public class Superstructure {
         .whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS))
         .and(() -> elevator.inSetpointRange())
         .whileTrue(tail.runRollersCommand(Tail.INTAKING_SPEEDS)) // TODO run chute
-        .and(() -> tail.hasCoral())
+        .and(() -> tail.hasCoral(true))
         .onTrue(setCoralStatus(true))
         .onTrue(setCurrentStateCommand(State.IDLE));
 
@@ -134,7 +131,7 @@ public class Superstructure {
     stateMap
         .get(State.REEF_SCORE)
         .whileTrue(tail.runRollersCommand(Tail.OUTTAKING_SPEEDS))
-        .and(() -> !tail.hasCoral())
+        .and(() -> !tail.hasCoral(false))
         .onTrue(setCoralStatus(false))
         .onTrue(setCurrentStateCommand(State.IDLE));
   }
@@ -160,8 +157,9 @@ public class Superstructure {
 
   /** Set current state */
   private Command setCurrentStateCommand(State desiredState) {
-    return Commands.run(
+    return Commands.runOnce(
         () -> {
+          System.out.println("new state " + desiredState);
           currentState = desiredState;
         });
   }

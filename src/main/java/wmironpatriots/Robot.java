@@ -59,6 +59,9 @@ public class Robot extends TimedRobot implements Logged {
     // Init superstructure
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
+    triggerMap.put(Requests.INTAKE_CHUTE, driveController.a());
+    triggerMap.put(Requests.REEF_SCORE, driveController.b());
+
     superstructure = new Superstructure(elevator, tail, triggerMap);
   }
 

@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Annotations.Log;
+import wmironpatriots.Robot;
 
 public abstract class Tail extends SubsystemBase {
   /** CONSTANTS */
@@ -118,8 +119,8 @@ public abstract class Tail extends SubsystemBase {
   }
 
   /** Checks if both tail beambreaks are triggered */
-  public boolean hasCoral() {
-    return beamUnoTriggered && beamDosTriggered;
+  public boolean hasCoral(boolean simReturn) {
+    return (Robot.isReal()) ? beamUnoTriggered && beamDosTriggered : simReturn;
   }
 
   /** HARDWARE METHODS */

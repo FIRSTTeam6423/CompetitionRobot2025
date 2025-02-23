@@ -68,7 +68,6 @@ public class TailIOSim extends Tail {
         pivotFeedback.calculate(pivotPoseRads, setpointRadians)
             + pivotFeedforward.calculate(
                 pivotFeedback.getSetpoint().position, pivotFeedback.getSetpoint().velocity));
-    System.out.println(pivotFeedback.getSetpoint().velocity);
   }
 
   @Override
