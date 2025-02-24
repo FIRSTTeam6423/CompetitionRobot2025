@@ -209,6 +209,7 @@ public class CompBotSwerveConfigs extends SwerveConfig {
 
     config.MotionMagic.MotionMagicCruiseVelocity = (5500 / 60) / getPivotReduction();
     config.MotionMagic.MotionMagicAcceleration = (5500 / 60) / (getPivotReduction() * 0.1);
+    config.ClosedLoopGeneral.ContinuousWrap = true;
 
     return config;
   }
@@ -229,7 +230,7 @@ public class CompBotSwerveConfigs extends SwerveConfig {
     config.Feedback.SensorToMechanismRatio =
         getDriveReduction() / (getWheelRadiusInches() * 2 * Math.PI);
 
-    // config.Slot0.kS = 8.5;
+    config.Slot0.kS = 14;
     config.Slot0.kP = 100.0;
     config.Slot0.kD = 1.0;
 
