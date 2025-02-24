@@ -11,11 +11,14 @@ import static wmironpatriots.Constants.kCANbus;
 import org.dyn4j.BinarySearchTreeSearchCriteria;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import wmironpatriots.util.swerveUtil.ModuleConfig;
@@ -25,6 +28,7 @@ public class ModuleIOComp extends Module {
   private final CANcoder m_pivotEncoder;
 
   private final TalonFXConfiguration m_pivotConf, m_driveConf;
+  private final CANcoderConfiguration m_cancoderConf;
 
   // Signals
   private final BaseStatusSignal m_sigPivotABSPoseRots,
@@ -43,13 +47,20 @@ public class ModuleIOComp extends Module {
     super(config);
     m_pivotM = new TalonFX(config.kPivotID, kCANbus);
     m_driveM = new TalonFX(config.kDriveID, kCANbus);
+    m_pivotEncoder = new CANcoder(config.kPivotABSID);
 
     // Robot.talonHandler.registerTalon(m_pivotM);
     // Robot.talonHandler.registerTalon(m_driveM);
 
     m_pivotConf = config.kPivotConfigTalonFX;
     m_driveConf = config.kDriveConfigTalonFX;
-    m_pivotEncoder = new CANcoder(config.kPivotABSID);
+    m_cancoderConf = config.kCANcoderConfig;
+
+    m_cancoderConf.MagnetSensor.MagnetOffset = config.kPivotOffset.getRotations();
+    m_cancoderConf.MagnetSensor.SensorDirection =
+      config.kPivotInverted
+        ? SensorDirectionValue.CounterClockwise_Positive
+        : SensorDirectionValue.Clockwise_Positive;
 
     m_pivotM.getConfigurator().apply(m_pivotConf);
     m_driveM.getConfigurator().apply(m_driveConf);
