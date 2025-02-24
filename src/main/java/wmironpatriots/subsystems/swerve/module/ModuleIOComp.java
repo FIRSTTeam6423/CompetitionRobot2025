@@ -8,6 +8,8 @@ package wmironpatriots.subsystems.swerve.module;
 
 import static wmironpatriots.Constants.kCANbus;
 
+import org.dyn4j.BinarySearchTreeSearchCriteria;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
@@ -47,8 +49,11 @@ public class ModuleIOComp extends Module {
 
     m_pivotConf = config.kPivotConfigTalonFX;
     m_driveConf = config.kDriveConfigTalonFX;
-
     m_pivotEncoder = new CANcoder(config.kPivotABSID);
+
+    m_pivotM.getConfigurator().apply(m_pivotConf);
+    m_driveM.getConfigurator().apply(m_driveConf);
+    m_pivotEncoder.getConfigurator().apply(config.kCANcoderConfig);
 
     m_sigPivotABSPoseRots = m_pivotEncoder.getAbsolutePosition();
     m_sigPivotPoseRots = m_pivotM.getPosition();
@@ -63,17 +68,14 @@ public class ModuleIOComp extends Module {
     m_sigDriveSupplyCurrent = m_driveM.getStatorCurrent();
     m_sigDriveTorqueCurrent = m_driveM.getTorqueCurrent();
 
-    // ! Register to odo thread
-
+    BaseStatusSignal.setUpdateFrequencyForAll(250.0, m_sigPivotPoseRots, m_sigDrivePoseRots);
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
         m_sigPivotABSPoseRots,
-        m_sigPivotPoseRots,
         m_sigPivotVelRPM,
         m_sigPivotAppliedVolts,
         m_sigPivotSupplyCurrent,
         m_sigPivotTorqueCurrent,
-        m_sigDrivePoseRots,
         m_sigDriveVelRPM,
         m_sigDriveAppliedVolts,
         m_sigDriveSupplyCurrent,
