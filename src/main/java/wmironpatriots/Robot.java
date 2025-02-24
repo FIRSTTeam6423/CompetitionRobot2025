@@ -42,8 +42,6 @@ public class Robot extends TimedRobot implements Logged {
   public Robot() {
     startupMonologue();
 
-    RobotController.setBrownoutVoltage(.0);
-
     driveController = new CommandXboxController(0);
     // Subsystem init
     // swerve = new Swerve(new CompBotSwerveConfigs());
@@ -59,8 +57,11 @@ public class Robot extends TimedRobot implements Logged {
     // Init superstructure
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
-    triggerMap.put(Requests.INTAKE_CHUTE, driveController.a());
-    triggerMap.put(Requests.REEF_SCORE, driveController.b());
+    // triggerMap.put(Requests.INTAKE_CHUTE, driveController.a());
+    // triggerMap.put(Requests.REEF_SCORE, driveController.b());
+
+    driveController.x().whileTrue(tail.setTargetPoseCommand(Tail.POSE_OUT_RADS));
+    driveController.a().whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS));
 
     superstructure = new Superstructure(elevator, tail, triggerMap);
   }
@@ -86,6 +87,7 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void teleopInit() {
     elevator.zeroPoseCommand();
+    tail.set
   }
 
   @Override

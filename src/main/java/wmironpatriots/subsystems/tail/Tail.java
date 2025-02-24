@@ -97,7 +97,7 @@ public abstract class Tail extends SubsystemBase {
     return this.run(
         () -> {
           isZeroed = true;
-          resetEncoderPose();
+          setEncoderPose(POSE_OUT_RADS);
         });
   }
 
