@@ -8,8 +8,6 @@ package wmironpatriots.subsystems.swerve.module;
 
 import static wmironpatriots.Constants.kCANbus;
 
-import org.dyn4j.BinarySearchTreeSearchCriteria;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -117,8 +115,7 @@ public class ModuleIOComp extends Module {
     driveOk = true;
 
     pivotABSPose =
-        Rotation2d.fromRotations(m_sigPivotABSPoseRots.getValueAsDouble())
-            .minus(new Rotation2d()); // ! Minus offset
+        Rotation2d.fromRotations(m_sigPivotABSPoseRots.getValueAsDouble());
     pivotPose = Rotation2d.fromRotations(m_sigPivotPoseRots.getValueAsDouble());
     pivotVelRadsPerSec =
         Units.rotationsPerMinuteToRadiansPerSecond(m_sigPivotVelRPM.getValueAsDouble());

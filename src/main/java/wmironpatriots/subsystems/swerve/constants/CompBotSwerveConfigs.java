@@ -26,12 +26,13 @@ public class CompBotSwerveConfigs extends SwerveConfig {
   @Override
   public double getMaxLinearSpeedMetersPerSec() {
     // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
-    return Units.rotationsToRadians(6000 / 60) / getDriveReduction() * getWheelRadiusInches();
+    return Units.feetToMeters(2);
+    // return Units.rotationsToRadians(6000 / 60) / getDriveReduction() * getWheelRadiusInches();
   }
 
   @Override
   public double getMaxLinearAccelMetersPerSecSqrd() {
-    return Units.feetToMeters(16.0);
+    return Units.feetToMeters(2);
   }
 
   // Robot characteristics
@@ -206,9 +207,8 @@ public class CompBotSwerveConfigs extends SwerveConfig {
     config.Slot0.kA = 0.031543;
     config.Slot0.kS = 0.28;
 
-    config.MotionMagic.MotionMagicCruiseVelocity = 1;
-    config.MotionMagic.MotionMagicAcceleration = 1;
-    config.MotionMagic.MotionMagicJerk = 1;
+    config.MotionMagic.MotionMagicCruiseVelocity = (5500 / 60) / getPivotReduction();
+    config.MotionMagic.MotionMagicAcceleration = (5500 / 60) / (getPivotReduction() * 0.1);
 
     return config;
   }
