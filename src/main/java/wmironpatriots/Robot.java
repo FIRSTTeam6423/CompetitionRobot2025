@@ -80,6 +80,8 @@ public class Robot extends TimedRobot implements Logged {
     // Return to normal thread priority
     Threads.setCurrentThreadPriority(false, 10);
 
+    Monologue.updateAll();
+
     visualizer.periodic();
   }
 
