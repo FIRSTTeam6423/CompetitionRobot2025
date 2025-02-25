@@ -34,7 +34,7 @@ public class TailIOComp extends Tail {
     // Configure pivot
     pivotConf = new SparkMaxConfig();
 
-    pivotConf.idleMode(IdleMode.kBrake).smartCurrentLimit((int) 0.0);
+    pivotConf.idleMode(IdleMode.kBrake).smartCurrentLimit(40);
 
     pivotConf
         .softLimit
@@ -64,7 +64,7 @@ public class TailIOComp extends Tail {
     // Config roller
     rollerConf = new SparkMaxConfig();
 
-    rollerConf.idleMode(IdleMode.kBrake).smartCurrentLimit((int) 0.0);
+    rollerConf.idleMode(IdleMode.kBrake).smartCurrentLimit(20);
 
     roller.configure(rollerConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
