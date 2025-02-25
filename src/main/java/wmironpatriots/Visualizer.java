@@ -34,7 +34,7 @@ public class Visualizer {
 
   private final MechanismLigament2d stageTwo =
       stageTwoRoot.append(
-          new MechanismLigament2d("StageTwo", 6.973556/2, 90, 5.0, new Color8Bit(Color.kGreen)));
+          new MechanismLigament2d("StageTwo", 6.973556 / 2, 90, 5.0, new Color8Bit(Color.kGreen)));
 
   private final MechanismLigament2d tailPivot =
       stageTwo.append(new MechanismLigament2d("Tail", Tail.LENGTH_INCHES, 0));
@@ -42,8 +42,9 @@ public class Visualizer {
   public Visualizer(Elevator elevator, Tail tail) {
     this.elevator = elevator;
     this.tail = tail;
-    
-    stageTwo.append(new MechanismLigament2d("w", 6.973556/2, 0, 5.0, new Color8Bit(Color.kGreen)));
+
+    stageTwo.append(
+        new MechanismLigament2d("w", 6.973556 / 2, 0, 5.0, new Color8Bit(Color.kGreen)));
 
     SmartDashboard.putData("Visualizer", canvas);
   }

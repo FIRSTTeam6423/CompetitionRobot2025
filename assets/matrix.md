@@ -18,7 +18,7 @@
 | 12 | Back Right CANcoder |
 | 13 | Elevator 1 |
 | 14 | Elevator 2 |
-| 15 | Arm Pivot |
+| 15 | Algae Pivot |
 
 ---
 ### RIO loop
@@ -26,3 +26,5 @@
 |----|------|
 | 1 | Tail Pivot |
 | 2 | Tail Roller |
+| 3 | chute roller |
+| 4 | algae roller |
