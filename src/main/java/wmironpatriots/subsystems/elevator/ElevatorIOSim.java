@@ -73,7 +73,7 @@ public class ElevatorIOSim extends Elevator {
             DCMotor.getKrakenX60Foc(2),
             Elevator.REDUCTION,
             Units.kilogramsToLbs(Elevator.MASS_KG),
-            Elevator.SPOOL_RADIUS_M,
+            Elevator.SPOOL_RADIUS_INCHES,
             0.0,
             Elevator.RANGE_ROTS * conversion,
             true,

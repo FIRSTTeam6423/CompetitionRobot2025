@@ -20,13 +20,15 @@ public abstract class Elevator extends SubsystemBase {
   public static final double MASS_KG = 5.6 + 1.8; // Carriage + 1 stage
 
   public static final double REDUCTION = 3;
-  public static final double SPOOL_RADIUS_M = 0.878350;
+  public static final double SPOOL_RADIUS_INCHES = 0.878350;
   public static final double RANGE_ROTS = 1.218;
 
   // Non-scoring poses
   public static final double POSE_INTAKING = 0.0;
   public static final double POSE_ALGAE_H = 0.0; // Remove algae high
   public static final double POSE_ALGAE_L = 0.0; // Remove algae low
+  public static final double POSE_MAX_CARRIAGE_STAGE_ONE =
+      1.39903980829; // TODO change value because tail will expload if wrong
 
   // Scoring poses
   // TODO CONVERT POSES TO RADIANS
@@ -39,8 +41,6 @@ public abstract class Elevator extends SubsystemBase {
   public static final double MAX_ELEVATOR_HEIGHT_INCHES = 57;
   public static final double STAGE_ZERO_HEIGHT_INCHES = 32;
   public static final double STAGE_ONE_HEIGHT_INCHES = 24;
-  public static final double POSE_MAX_CARRIAGE_STAGE_ONE =
-      12; // TODO change value because tail will expload if wrong
 
   /** LOGGED VALUES */
   @Log protected boolean parentOk = false;

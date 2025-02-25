@@ -16,7 +16,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import wmironpatriots.util.swerveUtil.ModuleConfig;
@@ -56,9 +55,9 @@ public class ModuleIOComp extends Module {
 
     m_cancoderConf.MagnetSensor.MagnetOffset = config.kPivotOffset.getRotations();
     m_cancoderConf.MagnetSensor.SensorDirection =
-      config.kPivotInverted
-        ? SensorDirectionValue.CounterClockwise_Positive
-        : SensorDirectionValue.Clockwise_Positive;
+        config.kPivotInverted
+            ? SensorDirectionValue.CounterClockwise_Positive
+            : SensorDirectionValue.Clockwise_Positive;
 
     m_pivotM.getConfigurator().apply(m_pivotConf);
     m_driveM.getConfigurator().apply(m_driveConf);
@@ -114,8 +113,7 @@ public class ModuleIOComp extends Module {
     pivotOk = true; // ! needs debouncers
     driveOk = true;
 
-    pivotABSPose =
-        Rotation2d.fromRotations(m_sigPivotABSPoseRots.getValueAsDouble());
+    pivotABSPose = Rotation2d.fromRotations(m_sigPivotABSPoseRots.getValueAsDouble());
     pivotPose = Rotation2d.fromRotations(m_sigPivotPoseRots.getValueAsDouble());
     pivotVelRadsPerSec =
         Units.rotationsPerMinuteToRadiansPerSecond(m_sigPivotVelRPM.getValueAsDouble());

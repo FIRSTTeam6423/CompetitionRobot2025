@@ -44,12 +44,13 @@ public class TailIOComp extends Tail {
         .reverseSoftLimitEnabled(true);
 
     pivotConf
-      .closedLoop
-      .pid(0.0, 0.0, 0.0).feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .maxMotion
-      .maxVelocity(0.01)
-      .maxAcceleration(0.01)
-      .allowedClosedLoopError(0.1);
+        .closedLoop
+        .pid(0.0, 0.0, 0.0)
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .maxMotion
+        .maxVelocity(0.01)
+        .maxAcceleration(0.01)
+        .allowedClosedLoopError(0.1);
 
     pivotConf
         .encoder

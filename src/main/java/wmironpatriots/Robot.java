@@ -8,7 +8,6 @@ package wmironpatriots;
 
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -39,6 +38,8 @@ public class Robot extends TimedRobot implements Logged {
   // private final Swerve swerve;
   private final Superstructure superstructure;
 
+  private final Visualizer visualizer;
+
   public Robot() {
     startupMonologue();
 
@@ -47,6 +48,8 @@ public class Robot extends TimedRobot implements Logged {
     // swerve = new Swerve(new CompBotSwerveConfigs());
     elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
     tail = Robot.isReal() ? new TailIOComp() : new TailIOSim();
+
+    visualizer = new Visualizer(elevator, tail);
 
     // swerve.setDefaultCommand(
     //     swerve.teleopSwerveCommmand(
@@ -76,6 +79,8 @@ public class Robot extends TimedRobot implements Logged {
 
     // Return to normal thread priority
     Threads.setCurrentThreadPriority(false, 10);
+
+    visualizer.periodic();
   }
 
   @Override
@@ -87,7 +92,6 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void teleopInit() {
     elevator.zeroPoseCommand();
-    tail.set
   }
 
   @Override

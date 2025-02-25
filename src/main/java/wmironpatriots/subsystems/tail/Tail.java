@@ -113,6 +113,11 @@ public abstract class Tail extends SubsystemBase {
             });
   }
 
+  /** Returns pivot pose in radians */
+  public double getPose() {
+    return pivotPoseRads;
+  }
+
   /** Checks if pivot pose is +- PI/8 rads from specified pose */
   public boolean inRange(double pose) {
     return Math.abs(pose - pivotPoseRads) < Math.PI / 8;
