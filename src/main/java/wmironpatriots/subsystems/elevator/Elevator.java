@@ -11,10 +11,11 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import monologue.Logged;
 import monologue.Annotations.Log;
 
 /** Elevator subsytem for raising and lower tail subsystem for scoring */
-public abstract class Elevator extends SubsystemBase {
+public abstract class Elevator extends SubsystemBase implements Logged {
   /** ELEVATOR CONSTANTS */
   // mech constants
   public static final double MASS_KG = 5.6 + 1.8; // Carriage + 1 stage

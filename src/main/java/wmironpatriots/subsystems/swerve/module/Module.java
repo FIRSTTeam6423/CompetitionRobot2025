@@ -15,10 +15,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import monologue.Logged;
 import monologue.Annotations.Log;
 import wmironpatriots.util.swerveUtil.ModuleConfig;
 
-public abstract class Module {
+public abstract class Module implements Logged {
   /** LOGGED VALUES */
   @Log protected boolean pivotOk = false;
 

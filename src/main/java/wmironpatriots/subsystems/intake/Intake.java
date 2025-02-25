@@ -5,9 +5,10 @@ import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import monologue.Logged;
 import monologue.Annotations.Log;
 
-public abstract class Intake extends SubsystemBase {
+public abstract class Intake extends SubsystemBase implements Logged{
     /** INTAKE CONSTANTS */
     public static final double REDUCTION = 25;
     public static final double OFFSET_RADS = 0.0; // TODO MEASURE ABS OFFSET
