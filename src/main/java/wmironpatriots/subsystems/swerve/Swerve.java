@@ -6,6 +6,7 @@
 
 package wmironpatriots.subsystems.swerve;
 
+import static wmironpatriots.Constants.kCANbus;
 import static wmironpatriots.Constants.kTickSpeed;
 
 import edu.wpi.first.math.MathUtil;
@@ -25,6 +26,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
+
+import com.ctre.phoenix6.hardware.Pigeon2;
+
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
@@ -35,6 +39,7 @@ public class Swerve extends SubsystemBase {
   private final SwerveConfig m_config;
 
   private final Module[] m_modules;
+  private final Pigeon2 m_pigeon;
 
   private SwerveDriveKinematics m_kinematics;
   private SwerveDrivePoseEstimator m_odo;
@@ -54,7 +59,7 @@ public class Swerve extends SubsystemBase {
       m_modules = new Module[moduleConfigs.length];
       Arrays.stream(moduleConfigs).forEach((c) -> m_modules[c.kIndex - 1] = new ModuleIOSim(c));
     }
-
+    m_pigeon = new Pigeon2(0, kCANbus);
     m_simHeading = new Rotation2d();
 
     // Create math objects
@@ -179,7 +184,6 @@ public class Swerve extends SubsystemBase {
   }
 
   // GETTERS
-
   /** Returns an array of module field positions */
   public SwerveModulePosition[] getModulePoses() {
     return Arrays.stream(m_modules).map(Module::getModulePose).toArray(SwerveModulePosition[]::new);
@@ -192,7 +196,7 @@ public class Swerve extends SubsystemBase {
 
   /** Gets current robot heading */
   public Rotation2d getHeading() {
-    return m_simHeading;
+    return m_pigeon.getRotation2d();
   }
 
   /** Gets current robot field pose */
