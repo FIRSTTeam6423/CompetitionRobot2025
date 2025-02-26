@@ -6,7 +6,7 @@
 
 package wmironpatriots.subsystems.elevator;
 
-import static wmironpatriots.Constants.kCANbus;
+import static wmironpatriots.Constants.CANIVORE;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -36,8 +36,8 @@ public class ElevatorIOComp extends Elevator {
 
   public ElevatorIOComp() {
     super();
-    parent = new TalonFX(14, kCANbus);
-    child = new TalonFX(15, kCANbus); // ! ID
+    parent = new TalonFX(14, CANIVORE);
+    child = new TalonFX(15, CANIVORE); // ! ID
 
     // register to global talonfx array
     // Robot.talonHandler.registerTalon(m_parentM);

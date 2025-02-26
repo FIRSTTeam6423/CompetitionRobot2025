@@ -19,14 +19,18 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
+import monologue.Monologue.MonologueConfig;
 import wmironpatriots.subsystems.Superstructure;
 import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
+import wmironpatriots.subsystems.swerve.Swerve;
+import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
 import wmironpatriots.subsystems.tail.Tail;
 import wmironpatriots.subsystems.tail.TailIOComp;
 import wmironpatriots.subsystems.tail.TailIOSim;
+import wmironpatriots.util.ControllerUtil;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
@@ -35,78 +39,22 @@ public class Robot extends TimedRobot implements Logged {
 
   private final Elevator elevator;
   private final Tail tail;
-  // private final Swerve swerve;
-  private final Superstructure superstructure;
+  private final Swerve swerve;
 
   private final Visualizer visualizer;
 
   public Robot() {
-    startupMonologue();
-
-    driveController = new CommandXboxController(0);
-    // Subsystem init
-    // swerve = new Swerve(new CompBotSwerveConfigs());
-    elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
-    tail = Robot.isReal() ? new TailIOComp() : new TailIOSim();
-
-    visualizer = new Visualizer(elevator, tail);
-
-    // swerve.setDefaultCommand(
-    //     swerve.teleopSwerveCommmand(
-    //         ControllerUtil.applyDeadband(driveController::getLeftY, false),
-    //         ControllerUtil.applyDeadband(driveController::getLeftX, false),
-    //         ControllerUtil.applyDeadband(driveController::getRightX, false)));
-
-    // Init superstructure
-    Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
-
-    // triggerMap.put(Requests.INTAKE_CHUTE, driveController.a());
-    // triggerMap.put(Requests.REEF_SCORE, driveController.b());
-
-    driveController.x().whileTrue(tail.setTargetPoseCommand(Tail.POSE_OUT_RADS));
-    driveController.a().whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS));
-
-    superstructure = new Superstructure(elevator, tail, triggerMap);
-  }
-
-  @Override
-  public void robotPeriodic() {
-    // Switch thread to high priority to improve loop timing
-    Threads.setCurrentThreadPriority(true, 99);
-
-    // Run command scheduler
-    CommandScheduler.getInstance().run();
-
-    // Return to normal thread priority
-    Threads.setCurrentThreadPriority(false, 10);
-
-    Monologue.updateAll();
-
-    visualizer.periodic();
-  }
-
-  @Override
-  public void autonomousInit() {}
-
-  @Override
-  public void autonomousPeriodic() {}
-
-  @Override
-  public void teleopInit() {
-    elevator.zeroPoseCommand();
-  }
-
-  @Override
-  public void testInit() {
-    CommandScheduler.getInstance().cancelAll();
-  }
-
-  private void startupMonologue() {
+    // * MONOLOGUE SETUP
     DriverStation.silenceJoystickConnectionWarning(true);
 
     if (isReal()) {
       SignalLogger.enableAutoLogging(false);
     }
+
+    Monologue.setupMonologue(
+        this,
+        "/Robot",
+        new MonologueConfig(DriverStation::isFMSAttached, "", false, false).withLazyLogging(true));
 
     // logs build data to the datalog
     final String meta = "/BuildData/";
@@ -136,5 +84,55 @@ public class Robot extends TimedRobot implements Logged {
         (Command command) -> {
           logCommandFunction.accept(command, false);
         });
+
+    // * SUBSYSTEM INIT
+    driveController = new CommandXboxController(0);
+
+    swerve = new Swerve(new CompBotSwerveConfigs());
+    tail = Robot.isReal() ? new TailIOComp() : new TailIOSim();
+    elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
+
+    swerve.setDefaultCommand(
+        swerve.teleopSwerveCommmand(
+            ControllerUtil.applyDeadband(driveController::getLeftY, false),
+            ControllerUtil.applyDeadband(driveController::getLeftX, false),
+            ControllerUtil.applyDeadband(driveController::getRightX, false)));
+
+    // * SUPERSTRUCTURE INIT
+    Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
+
+    driveController.x().whileTrue(tail.setTargetPoseCommand(Tail.POSE_OUT_RADS));
+    driveController.a().whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS));
+
+    new Superstructure(elevator, tail, triggerMap);
+
+    // Create new superstructure visualizer
+    visualizer = new Visualizer(elevator, tail);
+  }
+
+  @Override
+  public void robotPeriodic() {
+    Threads.setCurrentThreadPriority(true, 99);
+    CommandScheduler.getInstance().run();
+    Threads.setCurrentThreadPriority(false, 10);
+
+    Monologue.updateAll();
+    visualizer.periodic();
+  }
+
+  @Override
+  public void autonomousInit() {}
+
+  @Override
+  public void autonomousPeriodic() {}
+
+  @Override
+  public void teleopInit() {
+    elevator.zeroPoseCommand();
+  }
+
+  @Override
+  public void testInit() {
+    CommandScheduler.getInstance().cancelAll();
   }
 }

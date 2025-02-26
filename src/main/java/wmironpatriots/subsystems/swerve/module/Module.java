@@ -15,8 +15,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
-import monologue.Logged;
 import monologue.Annotations.Log;
+import monologue.Logged;
 import wmironpatriots.util.swerveUtil.ModuleConfig;
 
 public abstract class Module implements Logged {
@@ -39,20 +39,20 @@ public abstract class Module implements Logged {
   @Log protected double driveTorqueCurrent;
 
   /** VARIABLES */
-  private final VoltageOut m_motorVoltsOutReq =
+  private final VoltageOut reqMotorVolts =
       new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
-  private final VelocityVoltage m_motorVelocityOutReq =
+  private final VelocityVoltage reqMotorVel =
       new VelocityVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
-  private final PositionVoltage m_motorPositionOutReq =
+  private final PositionVoltage reqMotorPose =
       new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
-  private final SimpleMotorFeedforward m_driveFF = new SimpleMotorFeedforward(0.14, 0.134);
+  private final SimpleMotorFeedforward driveff = new SimpleMotorFeedforward(0.14, 0.134);
 
-  private ModuleConfig m_config;
+  protected ModuleConfig config;
 
   public Module(ModuleConfig config) {
-    m_config = config;
+    this.config = config;
   }
 
   /** Periodically ran logic */
@@ -64,14 +64,14 @@ public abstract class Module implements Logged {
     setpoint.speedMetersPerSecond *= Math.cos(setpoint.angle.minus(pivotABSPose).getRadians());
 
     double speedMPS = setpoint.speedMetersPerSecond;
-    runPivotControl(m_motorPositionOutReq.withPosition(setpoint.angle.getRotations()));
+    runPivotControl(reqMotorPose.withPosition(setpoint.angle.getRotations()));
     runDriveControl(
-        m_motorVelocityOutReq
+        reqMotorVel
             .withVelocity(speedMPS)
             .withFeedForward(
-                m_driveFF.calculate(
-                    (speedMPS / m_config.kWheelRadiusMeters)
-                        * (m_config.kDriveReduction / DCMotor.getKrakenX60Foc(1).KtNMPerAmp))));
+                driveff.calculate(
+                    (speedMPS / config.kWheelRadiusMeters)
+                        * (config.kDriveReduction / DCMotor.getKrakenX60Foc(1).KtNMPerAmp))));
 
     return new SwerveModuleState();
   }
@@ -92,8 +92,8 @@ public abstract class Module implements Logged {
         Math.cos(setpointState.angle.minus(pivotABSPose).getRadians());
 
     double speedMPS = setpointState.speedMetersPerSecond;
-    runPivotControl(m_motorPositionOutReq.withPosition(setpointState.angle.getRotations()));
-    runDriveControl(m_motorVoltsOutReq.withOutput(speedMPS).withEnableFOC(FOCEnabled)); // !
+    runPivotControl(reqMotorPose.withPosition(setpointState.angle.getRotations()));
+    runDriveControl(reqMotorVolts.withOutput(speedMPS).withEnableFOC(FOCEnabled)); // !
     return new SwerveModuleState();
   }
 
@@ -114,12 +114,12 @@ public abstract class Module implements Logged {
 
   /** Converts drive motor speed to mps */
   public double getModuleSpeedMPS() {
-    return driveVelRadsPerSec * m_config.kWheelRadiusMeters;
+    return driveVelRadsPerSec * config.kWheelRadiusMeters;
   }
 
   /** Returns module field pose */
   public SwerveModulePosition getModulePose() {
-    return new SwerveModulePosition(drivePoseRads * m_config.kWheelRadiusMeters, pivotPose);
+    return new SwerveModulePosition(drivePoseRads * config.kWheelRadiusMeters, pivotPose);
   }
 
   /** Returns current module pivot & drive motor state */

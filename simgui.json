@@ -27,6 +27,7 @@
     "types": {
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
       "/FMSInfo": "FMSInfo",
+      "/Field": "Field2d",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Elevator/mech2d": "Mechanism2d",
       "/SmartDashboard/Field": "Field2d",

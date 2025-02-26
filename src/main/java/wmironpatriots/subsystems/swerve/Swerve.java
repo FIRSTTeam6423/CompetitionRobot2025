@@ -6,9 +6,10 @@
 
 package wmironpatriots.subsystems.swerve;
 
-import static wmironpatriots.Constants.kCANbus;
+import static wmironpatriots.Constants.CANIVORE;
 import static wmironpatriots.Constants.kTickSpeed;
 
+import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,9 +27,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
-
-import com.ctre.phoenix6.hardware.Pigeon2;
-
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
@@ -59,7 +57,7 @@ public class Swerve extends SubsystemBase {
       m_modules = new Module[moduleConfigs.length];
       Arrays.stream(moduleConfigs).forEach((c) -> m_modules[c.kIndex - 1] = new ModuleIOSim(c));
     }
-    m_pigeon = new Pigeon2(0, kCANbus);
+    m_pigeon = new Pigeon2(0, CANIVORE);
     m_simHeading = new Rotation2d();
 
     // Create math objects
