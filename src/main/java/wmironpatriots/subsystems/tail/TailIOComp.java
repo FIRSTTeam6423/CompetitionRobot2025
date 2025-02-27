@@ -78,8 +78,8 @@ public class TailIOComp extends Tail {
     pivotMotorOk = pivot.hasStickyFault();
     rollerMotorOk = roller.hasStickyFault();
 
-    beamUnoTriggered = beamUno.get();
-    beamDosTriggered = beamDos.get();
+    beamITriggered = beamUno.get();
+    beamIITriggered = beamDos.get();
 
     pivotPoseRads = pivot.getEncoder().getPosition();
     pivotVelRPM = pivot.getEncoder().getVelocity();
@@ -89,8 +89,6 @@ public class TailIOComp extends Tail {
     rollerVelRPM = roller.getEncoder().getVelocity();
     rollerAppliedVolts = roller.getAppliedOutput() * roller.getBusVoltage();
     rollerSupplyCurrentAmps = roller.getOutputCurrent();
-
-    mechBase.setAngle(pivotPoseRads * (180 / Math.PI));
   }
 
   @Override
@@ -124,7 +122,7 @@ public class TailIOComp extends Tail {
   }
 
   @Override
-  protected void pivotCoasting(boolean enabled) {
+  protected void pivotCoastingEnabled(boolean enabled) {
     IdleMode idleMode = enabled ? IdleMode.kCoast : IdleMode.kBrake;
     pivotConf.idleMode(idleMode);
     pivot.configure(pivotConf, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);

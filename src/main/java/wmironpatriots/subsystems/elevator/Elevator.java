@@ -6,15 +6,11 @@
 
 package wmironpatriots.subsystems.elevator;
 
-import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Annotations.Log;
 import monologue.Logged;
 
-/** Elevator subsytem for raising and lower tail subsystem for scoring */
 public abstract class Elevator extends SubsystemBase implements Logged {
   /** ELEVATOR CONSTANTS */
   // mech constants
@@ -24,15 +20,13 @@ public abstract class Elevator extends SubsystemBase implements Logged {
   public static final double SPOOL_RADIUS_INCHES = 0.878350;
   public static final double RANGE_ROTS = 1.218;
 
-  // Non-scoring poses
+  // Poses
+  // TODO check values in CAD
   public static final double POSE_INTAKING = 0.0;
   public static final double POSE_ALGAE_H = 0.0; // Remove algae high
   public static final double POSE_ALGAE_L = 0.0; // Remove algae low
-  public static final double POSE_MAX_CARRIAGE_STAGE_ONE =
-      1.39903980829; // TODO change value because tail will expload if wrong
+  public static final double POSE_MAX_CARRIAGE_STAGE_ONE = 1.39903980829;
 
-  // Scoring poses
-  // TODO CONVERT POSES TO RADIANS
   public static final double POSE_L1 = 0.0;
   public static final double POSE_L2 = 3.16;
   public static final double POSE_L3 = 10.81;
@@ -49,42 +43,35 @@ public abstract class Elevator extends SubsystemBase implements Logged {
   @Log protected boolean childOk = false;
 
   @Log protected double setpointPoseRots;
-  @Log protected double poseRots;
+  @Log protected double poseRevs;
   @Log protected double velRPM;
   @Log protected boolean isZeroed = false;
 
-  @Log protected double parentPoseRots;
+  @Log protected double parentPoseRevs;
   @Log protected double parentVelRPM;
   @Log protected double parentAppliedVolts;
   @Log protected double parentSupplyCurrentAmps;
   @Log protected double parentTorqueCurrentAmps;
   @Log protected double parentTempCelsius;
 
-  @Log protected double childPoseRots;
+  @Log protected double childPoseRevs;
   @Log protected double childVelRPM;
   @Log protected double childAppliedVolts;
   @Log protected double childSupplyCurrentAmps;
   @Log protected double childTorqueCurrentAmps;
   @Log protected double childTempCelsius;
 
-  /** VARIABLES */
-  private final PositionVoltage reqMotorPose =
-      new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
-
-  private final VoltageOut reqMotorVolt =
-      new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
-
-  /** Run target position in rotations from current zeroed pose */
-  public Command setTargetPoseCommand(double pose) {
+  /** Run target position in revs from current zeroed pose */
+  public Command setTargetPoseCmmd(double pose) {
     return this.run(
         () -> {
           setpointPoseRots = pose;
-          runMotorControl(reqMotorPose.withPosition(pose).withEnableFOC(true));
+          runMotorPose(pose);;
         });
   }
 
-  /** Zero elevator encoders at current pose */
-  public Command zeroPoseCommand() {
+  /** Zero elevator encoder to current pose */
+  public Command zeroPoseCmmd() {
     return this.run(
         () -> {
           setEncoderPose(0);
@@ -93,8 +80,8 @@ public abstract class Elevator extends SubsystemBase implements Logged {
   }
 
   /** Runs elevator down until current spikes above threshold */
-  public Command runPoseZeroingCommand() {
-    return this.run(() -> runMotorControl(reqMotorVolt.withOutput(-1.0)))
+  public Command runPoseZeroingCmmd() {
+    return this.run(() -> runMotorVolts(-1.0))
         .until(() -> parentSupplyCurrentAmps > 20.0)
         .finallyDo(
             (interrupted) -> {
@@ -105,19 +92,23 @@ public abstract class Elevator extends SubsystemBase implements Logged {
             });
   }
 
-  /** Enable coast mode to move elevator easier */
-  public Command elevatorCoasting(boolean enabled) {
-    return this.runOnce(() -> motorCoasting(enabled));
+  public Command stopMotorInputCmmd() {
+    return this.runOnce(() -> runMotorVolts(0.0));
   }
 
-  /** Set elevator pose to 0.0 rotations */
+  /** Enable coast mode to move elevator easier */
+  public Command setMotorCoastingCmmd(boolean enabled) {
+    return this.runOnce(() -> motorCoastingEnabled(enabled));
+  }
+
+  /** Set elevator pose to 0.0 revs */
   private void resetPose() {
     setEncoderPose(0.0);
   }
 
-  /** Returns pose in rotations */
+  /** Returns pose in revs */
   public double getPose() {
-    return poseRots;
+    return poseRevs;
   }
 
   /** Gets velocity in rotations per minute */
@@ -125,14 +116,22 @@ public abstract class Elevator extends SubsystemBase implements Logged {
     return velRPM;
   }
 
+  /** Checks if elevator has been zeroed */
+  public boolean isZeroed() {
+    return isZeroed;
+  }
+
   /** Checks if elevator is around a specific range of the setpoint */
   public boolean inSetpointRange() {
-    return Math.abs(setpointPoseRots - parentPoseRots) < 0.05; // TODO tweak range if needed
+    return Math.abs(setpointPoseRots - parentPoseRevs) < 0.05; // TODO tweak range if needed
   }
 
   /** HARDWARE METHODS */
-  /** Run elevator motor with control request */
-  protected abstract void runMotorControl(ControlRequest request);
+  /** Run elevator motor with voltage request */
+  protected abstract void runMotorVolts(double volts);
+
+  /** Run elevator motor with position request */
+  protected abstract void runMotorPose(double poseRevs);
 
   /** Set elevator encoder position in rotations */
   protected abstract void setEncoderPose(double poseMeters);
@@ -141,5 +140,5 @@ public abstract class Elevator extends SubsystemBase implements Logged {
   protected abstract void stopMotors();
 
   /** Enable or disable motor coasting */
-  protected abstract void motorCoasting(boolean enabled);
+  protected abstract void motorCoastingEnabled(boolean enabled);
 }

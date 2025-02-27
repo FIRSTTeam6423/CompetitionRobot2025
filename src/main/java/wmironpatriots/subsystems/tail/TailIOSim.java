@@ -45,15 +45,13 @@ public class TailIOSim extends Tail {
     pivotMotorOk = true;
     rollerMotorOk = true;
 
-    beamUnoTriggered = true;
-    beamDosTriggered = true;
+    beamITriggered = true;
+    beamIITriggered = true;
 
     pivotPoseRads = tailSim.getAngleRads();
     pivotVelRPM = Units.radiansPerSecondToRotationsPerMinute(tailSim.getAngleRads());
     pivotAppliedVolts = pivotInputVoltage;
     pivotSupplyCurrentAmps = tailSim.getCurrentDrawAmps();
-
-    mechBase.setAngle(pivotPoseRads * (180 / Math.PI));
   }
 
   @Override
@@ -85,5 +83,5 @@ public class TailIOSim extends Tail {
   protected void stopRollers() {} // no rollers
 
   @Override
-  protected void pivotCoasting(boolean enabled) {} // Sim motors can't coast
+  protected void pivotCoastingEnabled(boolean enabled) {} // Sim motors can't coast
 }

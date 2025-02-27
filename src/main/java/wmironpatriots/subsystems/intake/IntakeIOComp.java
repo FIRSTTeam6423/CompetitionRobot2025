@@ -9,7 +9,7 @@ package wmironpatriots.subsystems.intake;
 import static wmironpatriots.Constants.CANIVORE;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -17,6 +17,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 public class IntakeIOComp extends Intake {
   private final TalonFX pivot;
   private final TalonFXConfiguration pivotConf;
+
+  private final PositionTorqueCurrentFOC reqMotorPose = new PositionTorqueCurrentFOC(0.0);
 
   public IntakeIOComp() {
     pivot = new TalonFX(15, CANIVORE);
@@ -46,10 +48,13 @@ public class IntakeIOComp extends Intake {
   }
 
   @Override
-  protected void runPivotControl(ControlRequest request) {
-    pivot.setControl(request);
+  protected void runPivotPose(double poseRads) {
+    pivot.setControl(reqMotorPose.withPosition(poseRads));
   }
 
   @Override
-  protected void enablePivotCoasting(boolean booleanEnable) {}
+  protected void pivotCoastingEnabled(boolean enabled) {
+    NeutralModeValue idleMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
+    pivot.setNeutralMode(idleMode);
+  }
 }

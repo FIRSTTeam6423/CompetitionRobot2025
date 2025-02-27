@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public abstract class Chute extends SubsystemBase {
-  public Command runChuteVolts(double volts) {
+  public Command runChuteSpeedCmmd(double speed) {
     return this.run(() -> {});
   }
 }

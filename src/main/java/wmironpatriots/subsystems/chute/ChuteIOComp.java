@@ -27,10 +27,10 @@ public class ChuteIOComp extends Chute {
   }
 
   @Override
-  public Command runChuteVolts(double volts) {
+  public Command runChuteSpeedCmmd(double speed) {
     return this.run(
         () -> {
-          roller.setVoltage(volts);
+          roller.set(speed);
         });
   }
 }

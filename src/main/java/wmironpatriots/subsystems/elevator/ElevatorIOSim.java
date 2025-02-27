@@ -11,6 +11,8 @@ import static wmironpatriots.Constants.CANIVORE;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -26,6 +28,12 @@ public class ElevatorIOSim extends Elevator {
   private final ElevatorSim simulatedElevator;
 
   private final double conversion = (1 / 5) * (2 * Math.PI * 0.878350);
+
+  private final PositionVoltage reqMotorPose =
+      new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+
+  private final VoltageOut reqMotorVolt =
+      new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
   public ElevatorIOSim() {
     super();
@@ -92,13 +100,18 @@ public class ElevatorIOSim extends Elevator {
         (simulatedElevator.getVelocityMetersPerSecond())
             / motorConf.Feedback.SensorToMechanismRatio); // I have no clue if this is correct lmfao
 
-    poseRots = simulatedElevator.getPositionMeters();
+    poseRevs = simulatedElevator.getPositionMeters();
     velRPM = simulatedElevator.getVelocityMetersPerSecond();
   }
 
   @Override
-  protected void runMotorControl(ControlRequest request) {
-    parent.setControl(request);
+  protected void runMotorVolts(double volts) {
+    parent.setControl(reqMotorVolt.withEnableFOC(true).withOutput(volts));
+  }
+
+  @Override
+  protected void runMotorPose(double poseRevs) {
+    parent.setControl(reqMotorPose.withEnableFOC(true).withPosition(poseRevs));
   }
 
   @Override
@@ -112,7 +125,7 @@ public class ElevatorIOSim extends Elevator {
   }
 
   @Override
-  protected void motorCoasting(boolean enabled) {
+  protected void motorCoastingEnabled(boolean enabled) {
     // Bah, humbug
   }
 }

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.Map;
 import wmironpatriots.subsystems.elevator.Elevator;
+import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.tail.Tail;
 
 /** Cursed superstructure ahh frfr */
@@ -46,7 +47,7 @@ public class Superstructure {
   private boolean hasCoral = false;
   private boolean hasAlgae = false;
 
-  public Superstructure(Elevator elevator, Tail tail, Map<Requests, Trigger> requestMap) {
+  public Superstructure(Swerve swerve, Elevator elevator, Tail tail, Map<Requests, Trigger> requestMap) {
     // Checks for null triggers in requestMap
     for (var request : Requests.values()) {
       if (requestMap.get(request) == null) {
@@ -83,54 +84,54 @@ public class Superstructure {
     /** STATE TRIGGER */
     stateMap
         .get(State.IDLE)
-        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_OUT_RADS))
-        .whileTrue(elevator.setTargetPoseCommand(0.0));
+        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS))
+        .whileTrue(elevator.setTargetPoseCmmd(0.0));
 
     // Coral manipulation
     stateMap
         .get(State.INTAKING_CHUTE)
-        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_INTAKING))
+        .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING))
         .and(() -> isTailSafe(elevator, tail))
-        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS))
+        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
         .and(() -> elevator.inSetpointRange())
-        .whileTrue(tail.runRollersCommand(Tail.INTAKING_SPEEDS)) // TODO run chute
+        .whileTrue(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS)) // TODO run chute
         .and(() -> tail.hasCoral(true))
         .onTrue(setCoralStatus(true))
         .onTrue(setCurrentStateCommand(State.IDLE));
 
     stateMap
         .get(State.L1_SETUP)
-        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_L1))
+        .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L1))
         .and(() -> isTailSafe(elevator, tail))
-        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS))
+        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.L2_SETUP)
-        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_L2))
+        .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L2))
         .and(() -> isTailSafe(elevator, tail))
-        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS))
+        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.L3_SETUP)
-        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_L3))
+        .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L3))
         .and(() -> isTailSafe(elevator, tail))
-        .whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS))
+        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.L4_SETUP)
-        .whileTrue(elevator.setTargetPoseCommand(Elevator.POSE_L4))
+        .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L4))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.REEF_SCORE)
-        .whileTrue(tail.runRollersCommand(Tail.OUTTAKING_SPEEDS))
+        .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTTAKING_SPEEDS))
         .and(() -> !tail.hasCoral(false))
         .onTrue(setCoralStatus(false))
         .onTrue(setCurrentStateCommand(State.IDLE));

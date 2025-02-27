@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
@@ -92,29 +93,34 @@ public class Robot extends TimedRobot implements Logged {
     tail = Robot.isReal() ? new TailIOComp() : new TailIOSim();
     elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
 
+    // Create new superstructure visualizer
+    visualizer = new Visualizer(elevator, tail);
+
+    // Default commands
     swerve.setDefaultCommand(
         swerve.teleopSwerveCommmand(
             ControllerUtil.applyDeadband(driveController::getLeftY, false),
             ControllerUtil.applyDeadband(driveController::getLeftX, false),
             ControllerUtil.applyDeadband(driveController::getRightX, false)));
 
+    elevator.setDefaultCommand(Commands.sequence(
+      elevator.runPoseZeroingCmmd().onlyIf(() -> !elevator.isZeroed()),
+      elevator.setTargetPoseCmmd(0.0).until(() -> elevator.inSetpointRange()),
+      elevator.stopMotorInputCmmd()
+    ));
+
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
-    driveController.x().whileTrue(tail.setTargetPoseCommand(Tail.POSE_OUT_RADS));
-    driveController.a().whileTrue(tail.setTargetPoseCommand(Tail.POSE_IN_RADS));
+    driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS));
+    driveController.a().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS));
 
-    new Superstructure(elevator, tail, triggerMap);
-
-    // Create new superstructure visualizer
-    visualizer = new Visualizer(elevator, tail);
+    new Superstructure(swerve, elevator, tail, triggerMap);
   }
 
   @Override
   public void robotPeriodic() {
-    Threads.setCurrentThreadPriority(true, 99);
     CommandScheduler.getInstance().run();
-    Threads.setCurrentThreadPriority(false, 10);
 
     Monologue.updateAll();
     visualizer.periodic();
@@ -128,7 +134,7 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void teleopInit() {
-    elevator.zeroPoseCommand();
+    elevator.zeroPoseCmmd();
   }
 
   @Override

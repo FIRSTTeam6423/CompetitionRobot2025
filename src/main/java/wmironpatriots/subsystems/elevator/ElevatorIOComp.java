@@ -10,8 +10,9 @@ import static wmironpatriots.Constants.CANIVORE;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -21,13 +22,19 @@ public class ElevatorIOComp extends Elevator {
   private final TalonFX parent, child;
   private final TalonFXConfiguration motorConf;
 
-  private final BaseStatusSignal m_LPoseSig,
+  private final PositionVoltage reqMotorPose =
+      new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+
+  private final VoltageOut reqMotorVolt =
+      new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+
+  private final BaseStatusSignal lPoseSig,
       parentVelSig,
       parentAppliedVoltsSig,
       parentSCurrentSig,
       parentTCurrentSig,
       parentTempSig;
-  private final BaseStatusSignal m_RPoseSig,
+  private final BaseStatusSignal rPoseSig,
       childVelSig,
       childAppliedVoltsSig,
       childSCurrentSig,
@@ -70,14 +77,14 @@ public class ElevatorIOComp extends Elevator {
     child.optimizeBusUtilization();
     parent.optimizeBusUtilization();
 
-    m_LPoseSig = parent.getPosition();
+    lPoseSig = parent.getPosition();
     parentVelSig = parent.getVelocity();
     parentAppliedVoltsSig = parent.getMotorVoltage();
     parentSCurrentSig = parent.getStatorCurrent();
     parentTCurrentSig = parent.getTorqueCurrent();
     parentTempSig = parent.getDeviceTemp();
 
-    m_RPoseSig = child.getPosition();
+    rPoseSig = child.getPosition();
     childVelSig = child.getVelocity();
     childAppliedVoltsSig = parent.getMotorVoltage();
     childSCurrentSig = child.getStatorCurrent();
@@ -86,13 +93,13 @@ public class ElevatorIOComp extends Elevator {
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         100.0,
-        m_LPoseSig,
+        lPoseSig,
         parentVelSig,
         parentAppliedVoltsSig,
         parentSCurrentSig,
         parentTCurrentSig,
         parentTempSig,
-        m_RPoseSig,
+        rPoseSig,
         childVelSig,
         childAppliedVoltsSig,
         childSCurrentSig,
@@ -104,7 +111,7 @@ public class ElevatorIOComp extends Elevator {
   public void periodic() {
     parentOk =
         BaseStatusSignal.refreshAll(
-                m_LPoseSig,
+                lPoseSig,
                 parentVelSig,
                 childAppliedVoltsSig,
                 parentSCurrentSig,
@@ -113,7 +120,7 @@ public class ElevatorIOComp extends Elevator {
             .isOK();
     childOk =
         BaseStatusSignal.refreshAll(
-                m_RPoseSig,
+                rPoseSig,
                 childVelSig,
                 childAppliedVoltsSig,
                 childSCurrentSig,
@@ -121,29 +128,32 @@ public class ElevatorIOComp extends Elevator {
                 childTemp)
             .isOK();
 
-    parentPoseRots = m_LPoseSig.getValueAsDouble();
+    parentPoseRevs = lPoseSig.getValueAsDouble();
     parentVelRPM = Units.rotationsPerMinuteToRadiansPerSecond(parentVelSig.getValueAsDouble());
     parentAppliedVolts = parentAppliedVoltsSig.getValueAsDouble();
     parentSupplyCurrentAmps = parentSCurrentSig.getValueAsDouble();
     parentTorqueCurrentAmps = parentTCurrentSig.getValueAsDouble();
     parentTempCelsius = parentTempSig.getValueAsDouble();
 
-    childPoseRots = Units.rotationsToRadians(m_RPoseSig.getValueAsDouble());
+    childPoseRevs = Units.rotationsToRadians(rPoseSig.getValueAsDouble());
     childVelRPM = Units.rotationsPerMinuteToRadiansPerSecond(childVelSig.getValueAsDouble());
     childAppliedVolts = childAppliedVoltsSig.getValueAsDouble();
     childSupplyCurrentAmps = childSCurrentSig.getValueAsDouble();
     childTorqueCurrentAmps = childTCurrentSig.getValueAsDouble();
     childTempCelsius = childTemp.getValueAsDouble();
 
-    poseRots = (parentPoseRots + childPoseRots) / 2;
+    poseRevs = (parentPoseRevs + childPoseRevs) / 2;
     velRPM = (parentVelRPM + childVelRPM) / 2;
-
-    System.out.println(parentPoseRots);
   }
 
   @Override
-  protected void runMotorControl(ControlRequest request) {
-    parent.setControl(request);
+  protected void runMotorVolts(double volts) {
+    parent.setControl(reqMotorVolt.withEnableFOC(true).withOutput(volts));
+  }
+
+  @Override
+  protected void runMotorPose(double poseRevs) {
+    parent.setControl(reqMotorPose.withEnableFOC(true).withPosition(poseRevs));
   }
 
   @Override
@@ -157,7 +167,7 @@ public class ElevatorIOComp extends Elevator {
   }
 
   @Override
-  protected void motorCoasting(boolean enabled) {
+  protected void motorCoastingEnabled(boolean enabled) {
     NeutralModeValue idleMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
     parent.setNeutralMode(idleMode);
   }

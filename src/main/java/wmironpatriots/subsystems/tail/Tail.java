@@ -6,10 +6,6 @@
 
 package wmironpatriots.subsystems.tail;
 
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Annotations.Log;
@@ -17,12 +13,15 @@ import wmironpatriots.Robot;
 
 public abstract class Tail extends SubsystemBase {
   /** CONSTANTS */
+  // mech constants
+  // TODO check values in CAD
   public static final double REDUCTION = 50;
+  public static final double MASS_KG = 0.0;
+  public static final double LENGTH_INCHES = 10.0;
+  public static final double JKG_METERS_SQRD = 3.0;
+  public static final double CURRENT_LIMIT = 40.0;
 
-  public static final double MASS_KG = 0.0; // TODO CALCULATE VALUE IN CAD
-  public static final double LENGTH_INCHES = 10.0; // TODO CALCULATE VALUE IN CAD
-  public static final double JKG_METERS_SQRD = 3.0; // TODO CLACULATE VALUE IN CAD
-
+  // Poses
   public static final double POSE_IN_RADS = Math.PI / 2;
   public static final double POSE_OUT_RADS = Math.PI / 6;
   public static final double POSE_LNONFOUR_RADS = POSE_IN_RADS;
@@ -32,16 +31,14 @@ public abstract class Tail extends SubsystemBase {
   public static final double INTAKING_SPEEDS = 5;
   public static final double OUTTAKING_SPEEDS = 5;
 
-  public static final double CURRENT_LIMIT = 40.0;
-
   /** LOGGED VALUES */
   @Log protected boolean isZeroed = false;
 
   @Log protected boolean pivotMotorOk = false;
   @Log protected boolean rollerMotorOk = false;
 
-  @Log protected boolean beamUnoTriggered = false;
-  @Log protected boolean beamDosTriggered = false;
+  @Log protected boolean beamITriggered = false;
+  @Log protected boolean beamIITriggered = false;
 
   @Log protected double pivotSetpointRads;
   @Log protected double pivotPoseRads;
@@ -53,30 +50,8 @@ public abstract class Tail extends SubsystemBase {
   @Log protected double rollerAppliedVolts;
   @Log protected double rollerSupplyCurrentAmps;
 
-  /** Tail widget */
-  protected final Mechanism2d mechCanvas = new Mechanism2d(24, 24);
-
-  protected final MechanismRoot2d mechAnchor = mechCanvas.getRoot("Tail", 0, 5);
-  protected final MechanismLigament2d mechBase =
-      mechAnchor.append(new MechanismLigament2d("Arm", LENGTH_INCHES, 0));
-  protected final MechanismLigament2d mechFrontSide =
-      mechBase.append(new MechanismLigament2d("FrontSide", LENGTH_INCHES / 4.5, -90));
-  protected final MechanismLigament2d mechBackSide =
-      mechFrontSide.append(
-          new MechanismLigament2d(
-              "bah",
-              Math.hypot(mechBase.getLength(), mechFrontSide.getLength()),
-              180
-                  + (Math.atan(mechBase.getLength() / mechFrontSide.getLength())
-                      * (180)
-                      / Math.PI)));
-
-  public Tail() {
-    SmartDashboard.putData("Tail/Mech2d", this.mechCanvas);
-  }
-
   /** Runs target position in radians from current zeroed pose */
-  public Command setTargetPoseCommand(double pose) {
+  public Command setTargetPoseCmmd(double pose) {
     return this.run(
         () -> {
           pivotSetpointRads = pose;
@@ -85,7 +60,7 @@ public abstract class Tail extends SubsystemBase {
   }
 
   /** Runs rollers at specific speed */
-  public Command runRollersCommand(double speed) {
+  public Command setRollerSpeedCmmd(double speed) {
     return this.run(
         () -> {
           runRollerSpeed(speed);
@@ -93,7 +68,7 @@ public abstract class Tail extends SubsystemBase {
   }
 
   /** Zeroes tail pivot at current pose */
-  public Command zeroPoseCommmand() {
+  public Command zeroPoseCmmd() {
     return this.run(
         () -> {
           isZeroed = true;
@@ -102,7 +77,7 @@ public abstract class Tail extends SubsystemBase {
   }
 
   /** Runs pivot backwards until current spikes above threshold */
-  public Command runPoseZeroingCommand() {
+  public Command runPoseZeroingCmmd() {
     return this.run(() -> runPivotVolts(0.5))
         .until(() -> pivotSupplyCurrentAmps > 20.0)
         .finallyDo(
@@ -125,17 +100,17 @@ public abstract class Tail extends SubsystemBase {
 
   /** Checks if both tail beambreaks are triggered */
   public boolean hasCoral(boolean simReturn) {
-    return (Robot.isReal()) ? beamUnoTriggered && beamDosTriggered : simReturn;
+    return (Robot.isReal()) ? beamITriggered && beamIITriggered : simReturn;
   }
 
   /** HARDWARE METHODS */
-  /** Run pivot voltage */
+  /** Run pivot motor with voltage request */
   protected abstract void runPivotVolts(double volts);
 
-  /** Run pivot to specific setpoint in rads */
+  /** Run pivot motor with pose request */
   protected abstract void runPivotSetpoint(double setpointRadians);
 
-  /** Set roller speed */
+  /** Run roller motor with speed request */
   protected abstract void runRollerSpeed(double speed);
 
   /** Reset encoder to specific pose in rads */
@@ -153,5 +128,5 @@ public abstract class Tail extends SubsystemBase {
   protected abstract void stopRollers();
 
   /** Set tail to coast mode for easier movement */
-  protected abstract void pivotCoasting(boolean enabled);
+  protected abstract void pivotCoastingEnabled(boolean enabled);
 }
