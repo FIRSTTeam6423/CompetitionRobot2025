@@ -47,7 +47,8 @@ public class Superstructure {
   private boolean hasCoral = false;
   private boolean hasAlgae = false;
 
-  public Superstructure(Swerve swerve, Elevator elevator, Tail tail, Map<Requests, Trigger> requestMap) {
+  public Superstructure(
+      Swerve swerve, Elevator elevator, Tail tail, Map<Requests, Trigger> requestMap) {
     // Checks for null triggers in requestMap
     for (var request : Requests.values()) {
       if (requestMap.get(request) == null) {

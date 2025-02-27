@@ -66,7 +66,8 @@ public abstract class Elevator extends SubsystemBase implements Logged {
     return this.run(
         () -> {
           setpointPoseRots = pose;
-          runMotorPose(pose);;
+          runMotorPose(pose);
+          ;
         });
   }
 

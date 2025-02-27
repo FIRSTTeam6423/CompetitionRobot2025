@@ -15,6 +15,7 @@ public abstract class Intake extends SubsystemBase implements Logged {
   /** INTAKE CONSTANTS */
   // mech constants
   public static final double REDUCTION = 25;
+
   public static final double OFFSET_RADS = 0.0; // TODO MEASURE ABS OFFSET
 
   // Poses
@@ -23,6 +24,7 @@ public abstract class Intake extends SubsystemBase implements Logged {
 
   /** LOGGED VALUES */
   @Log protected boolean pivotOk = false;
+
   @Log protected boolean rollerOk = false;
 
   @Log protected double pivotSetpointRads;
@@ -35,7 +37,6 @@ public abstract class Intake extends SubsystemBase implements Logged {
   @Log protected double pivotTempCelsius;
 
   /** VARIABLES */
-
   public Command setTargetPoseCommand(double pose) {
     return this.run(
         () -> {

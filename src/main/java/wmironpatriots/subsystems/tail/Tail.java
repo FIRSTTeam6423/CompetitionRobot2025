@@ -16,6 +16,7 @@ public abstract class Tail extends SubsystemBase {
   // mech constants
   // TODO check values in CAD
   public static final double REDUCTION = 50;
+
   public static final double MASS_KG = 0.0;
   public static final double LENGTH_INCHES = 10.0;
   public static final double JKG_METERS_SQRD = 3.0;

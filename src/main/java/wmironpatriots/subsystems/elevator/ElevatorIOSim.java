@@ -9,7 +9,6 @@ package wmironpatriots.subsystems.elevator;
 import static wmironpatriots.Constants.CANIVORE;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
