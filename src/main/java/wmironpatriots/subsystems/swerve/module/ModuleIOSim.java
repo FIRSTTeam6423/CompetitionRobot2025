@@ -7,15 +7,17 @@
 package wmironpatriots.subsystems.swerve.module;
 
 import static wmironpatriots.Constants.CANIVORE;
-import static wmironpatriots.Constants.kTickSpeed;
+import static wmironpatriots.Constants.TICKSPEED;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.sim.CANcoderSimState;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -51,6 +53,17 @@ public class ModuleIOSim extends Module {
             ? SensorDirectionValue.CounterClockwise_Positive
             : SensorDirectionValue.Clockwise_Positive;
 
+    pivotConf.Slot0.kP = 100.0;
+    pivotConf.Slot0.kI = 0.0;
+    pivotConf.Slot0.kD = 0.0;
+
+    pivotConf.Slot0.kV = 0.0;
+    pivotConf.Slot0.kA = 0.0;
+    pivotConf.Slot0.kS = 0.0;
+
+    pivotConf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+    pivotConf.Feedback.FeedbackRemoteSensorID = config.kPivotABSID;
+
     pivot.getConfigurator().apply(pivotConf);
     drive.getConfigurator().apply(driveConf);
     cancoder.getConfigurator().apply(config.kCANcoderConfig);
@@ -74,16 +87,22 @@ public class ModuleIOSim extends Module {
     // Update simulated hardware
     TalonFXSimState pivotSimState = new TalonFXSimState(pivot);
     TalonFXSimState driveSimState = new TalonFXSimState(drive);
+    CANcoderSimState cancoderSimState = new CANcoderSimState(cancoder);
+    cancoderSimState.setRawPosition(pivotABSPose.getRotations());
 
-    pivotSim.setInput(pivotSimState.getMotorVoltage());
-    driveSim.setInput(driveSimState.getMotorVoltage());
+    pivotSim.setInputVoltage(pivotSimState.getMotorVoltage());
+    driveSim.setInputVoltage(driveSimState.getMotorVoltage());
 
-    pivotSim.update(kTickSpeed);
-    driveSim.update(kTickSpeed);
+    pivotSim.update(TICKSPEED);
+    driveSim.update(TICKSPEED);
 
     pivotSimState.setRotorVelocity(
         (pivotSim.getAngularVelocityRPM() / 60) * config.kPivotReduction);
+    pivotSimState.setRawRotorPosition(
+        (pivotSim.getAngularVelocityRPM() / 60) * config.kPivotReduction);
     driveSimState.setRotorVelocity(
+        (driveSim.getAngularVelocityRPM() / 60) * config.kDriveReduction);
+    driveSimState.setRawRotorPosition(
         (driveSim.getAngularVelocityRPM() / 60) * config.kDriveReduction);
 
     // Update logged values

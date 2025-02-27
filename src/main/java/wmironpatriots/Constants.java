@@ -11,7 +11,7 @@ import com.ctre.phoenix6.CANBus;
 /** A class */
 public class Constants {
 
-  public static final double kTickSpeed = 0.02;
+  public static final double TICKSPEED = 0.02;
 
   public static final CANBus CANIVORE = new CANBus("CANchan"); // 3:
 }

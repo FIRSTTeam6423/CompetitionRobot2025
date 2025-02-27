@@ -7,7 +7,7 @@
 package wmironpatriots.subsystems.swerve;
 
 import static wmironpatriots.Constants.CANIVORE;
-import static wmironpatriots.Constants.kTickSpeed;
+import static wmironpatriots.Constants.TICKSPEED;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.MathUtil;
@@ -34,60 +34,62 @@ import wmironpatriots.subsystems.swerve.module.ModuleIOSim;
 import wmironpatriots.util.swerveUtil.SwerveConfig;
 
 public class Swerve extends SubsystemBase {
-  private final SwerveConfig m_config;
+  private final SwerveConfig config;
 
-  private final Module[] m_modules;
-  private final Pigeon2 m_pigeon;
+  private final Module[] modules;
+  private final Pigeon2 pigeon;
 
-  private SwerveDriveKinematics m_kinematics;
-  private SwerveDrivePoseEstimator m_odo;
+  private SwerveDriveKinematics kinematics;
+  private SwerveDrivePoseEstimator odo;
 
-  private Rotation2d m_simHeading;
+  private Rotation2d simHeading;
 
-  private final Field2d m_f2d;
+  private final Field2d f2d;
+
+  private final Visualizer visual;
 
   public Swerve(SwerveConfig config) {
     // Create modules
     if (Robot.isReal()) {
       var moduleConfigs = config.getModuleConfigs();
-      m_modules = new Module[moduleConfigs.length];
-      Arrays.stream(moduleConfigs).forEach((c) -> m_modules[c.kIndex - 1] = new ModuleIOComp(c));
+      modules = new Module[moduleConfigs.length];
+      Arrays.stream(moduleConfigs).forEach((c) -> modules[c.kIndex - 1] = new ModuleIOComp(c));
     } else {
       var moduleConfigs = config.getModuleConfigs();
-      m_modules = new Module[moduleConfigs.length];
-      Arrays.stream(moduleConfigs).forEach((c) -> m_modules[c.kIndex - 1] = new ModuleIOSim(c));
+      modules = new Module[moduleConfigs.length];
+      Arrays.stream(moduleConfigs).forEach((c) -> modules[c.kIndex - 1] = new ModuleIOSim(c));
     }
-    m_pigeon = new Pigeon2(0, CANIVORE);
-    m_simHeading = new Rotation2d();
+    pigeon = new Pigeon2(0, CANIVORE);
+    simHeading = new Rotation2d();
 
     // Create math objects
-    m_kinematics = new SwerveDriveKinematics(config.getModuleLocs());
-    m_odo =
-        new SwerveDrivePoseEstimator(m_kinematics, getHeading(), getModulePoses(), new Pose2d());
+    kinematics = new SwerveDriveKinematics(config.getModuleLocs());
+    odo = new SwerveDrivePoseEstimator(kinematics, getHeading(), getModulePoses(), new Pose2d());
 
-    m_f2d = new Field2d();
+    f2d = new Field2d();
+    visual = new Visualizer(100, 100);
 
-    m_config = config;
+    this.config = config;
   }
 
   @Override
   public void periodic() {
     // Update gyro and all modules
-    Arrays.stream(m_modules).forEach((m) -> m.periodic());
-    // m_gyro.updateInputs(m_gyroInputs);
+    Arrays.stream(modules).forEach((m) -> m.periodic());
 
     // Odo update
     updateOdometry();
-    m_f2d.setRobotPose(getPose());
-    SmartDashboard.putData(m_f2d);
+    f2d.setRobotPose(getPose());
+    SmartDashboard.putData(f2d);
 
     // Log swerve data
+    visual.updateReal(getModuleStates(), 35);
     // Logger.recordOutput("Swerve/ActualOutput", getVelocitiesRobotRelative());
     // Logger.recordOutput("Swerve/ActualStates", getModuleStates());
 
     // Stop module input when driverstation is disabled
     if (DriverStation.isDisabled()) {
-      for (Module module : m_modules) {
+      for (Module module : modules) {
         module.stop();
       }
     }
@@ -98,11 +100,9 @@ public class Swerve extends SubsystemBase {
     double clamped =
         MathUtil.clamp(
             getVelocitiesRobotRelative().omegaRadiansPerSecond,
-            -m_config.getMaxAngularSpeedRadsPerSec() / 10000,
-            m_config.getMaxAngularSpeedRadsPerSec() / 10000);
-    m_simHeading = m_simHeading.rotateBy(Rotation2d.fromRadians(clamped));
-
-    // Logger.recordOutput("Swerve/simRotation", m_simHeading.getDegrees());
+            -config.getMaxAngularSpeedRadsPerSec() / 10000,
+            config.getMaxAngularSpeedRadsPerSec() / 10000);
+    simHeading = simHeading.rotateBy(Rotation2d.fromRadians(clamped));
   }
 
   /**
@@ -117,13 +117,13 @@ public class Swerve extends SubsystemBase {
       DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
     return this.run(
         () -> {
-          double maxSpeed = m_config.getMaxLinearSpeedMetersPerSec();
+          double maxSpeed = config.getMaxLinearSpeedMetersPerSec();
 
           var fieldRelativeVelocities =
               new ChassisSpeeds(
                   xSupplier.getAsDouble() * maxSpeed,
                   ySupplier.getAsDouble() * maxSpeed,
-                  omegaSupplier.getAsDouble() * maxSpeed);
+                  omegaSupplier.getAsDouble() * config.getMaxAngularSpeedRadsPerSec());
           fieldRelativeVelocities =
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   fieldRelativeVelocities,
@@ -145,14 +145,15 @@ public class Swerve extends SubsystemBase {
    * @param openloopEnabled enable or disable open loop voltage control
    */
   public void runVelocities(ChassisSpeeds velocity, boolean openloopEnabled) {
-    velocity = ChassisSpeeds.discretize(velocity, kTickSpeed);
+    velocity = ChassisSpeeds.discretize(velocity, TICKSPEED);
 
-    SwerveModuleState[] desiredStates = m_kinematics.toSwerveModuleStates(velocity);
+    SwerveModuleState[] desiredStates = kinematics.toSwerveModuleStates(velocity);
     SwerveDriveKinematics.desaturateWheelSpeeds(
-        desiredStates, m_config.getMaxLinearSpeedMetersPerSec());
+        desiredStates, config.getMaxLinearSpeedMetersPerSec());
 
     // Logger.recordOutput("Swerve/desiredVelocity", velocity);
     // Logger.recordOutput("Swerve/desiredSetpoints", desiredStates);
+    visual.updateDesired(desiredStates, 35);
 
     for (int i = 0; i < desiredStates.length; i++) {
       if (openloopEnabled) {
@@ -163,48 +164,48 @@ public class Swerve extends SubsystemBase {
                         + Math.pow(
                             currentVelocities.vyMetersPerSecond,
                             2)) // converts linear velocity components to linear velocity
-                < 1 * m_config.getMaxLinearSpeedMetersPerSec();
+                < 1 * config.getMaxLinearSpeedMetersPerSec();
 
         // Converts desired motor velocity into input voltage
         // OmegaRadsPerSec/(KvRadsPerVolt)
         double driveVoltage =
             desiredStates[i].speedMetersPerSecond / DCMotor.getKrakenX60(1).KvRadPerSecPerVolt;
-        m_modules[i].runSetpointOpenloop(driveVoltage, desiredStates[i].angle, focEnabled);
+        modules[i].runSetpointOpenloop(driveVoltage, desiredStates[i].angle, focEnabled);
       } else {
-        m_modules[i].runSetpoint(desiredStates[i]);
+        modules[i].runSetpoint(desiredStates[i]);
       }
     }
   }
 
   /** update swerve pose estimator */
   public void updateOdometry() {
-    m_odo.update(getHeading(), getModulePoses());
+    odo.update(getHeading(), getModulePoses());
   }
 
   // GETTERS
   /** Returns an array of module field positions */
   public SwerveModulePosition[] getModulePoses() {
-    return Arrays.stream(m_modules).map(Module::getModulePose).toArray(SwerveModulePosition[]::new);
+    return Arrays.stream(modules).map(Module::getModulePose).toArray(SwerveModulePosition[]::new);
   }
 
   /** Returns an array of module states */
   public SwerveModuleState[] getModuleStates() {
-    return Arrays.stream(m_modules).map(Module::getModuleState).toArray(SwerveModuleState[]::new);
+    return Arrays.stream(modules).map(Module::getModuleState).toArray(SwerveModuleState[]::new);
   }
 
   /** Gets current robot heading */
   public Rotation2d getHeading() {
-    return m_pigeon.getRotation2d();
+    return pigeon.getRotation2d();
   }
 
   /** Gets current robot field pose */
   public Pose2d getPose() {
-    return m_odo.getEstimatedPosition();
+    return odo.getEstimatedPosition();
   }
 
   /** Gets current robot velocity (robot relative) */
   public ChassisSpeeds getVelocitiesRobotRelative() {
     return ChassisSpeeds.fromRobotRelativeSpeeds(
-        m_kinematics.toChassisSpeeds(getModuleStates()), getHeading());
+        kinematics.toChassisSpeeds(getModuleStates()), getHeading());
   }
 }

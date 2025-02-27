@@ -41,7 +41,7 @@ public class Robot extends TimedRobot implements Logged {
   private final Tail tail;
   private final Swerve swerve;
 
-  private final Visualizer visualizer;
+  private final RobotVisualizer visualizer;
 
   public Robot() {
     // * MONOLOGUE SETUP
@@ -107,7 +107,7 @@ public class Robot extends TimedRobot implements Logged {
     new Superstructure(elevator, tail, triggerMap);
 
     // Create new superstructure visualizer
-    visualizer = new Visualizer(elevator, tail);
+    visualizer = new RobotVisualizer(elevator, tail);
   }
 
   @Override

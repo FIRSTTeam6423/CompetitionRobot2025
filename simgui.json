@@ -31,6 +31,7 @@
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Elevator/mech2d": "Mechanism2d",
       "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/SwerveVisualizer": "Mechanism2d",
       "/SmartDashboard/Tail/Mech2d": "Mechanism2d",
       "/SmartDashboard/Visualizer": "Mechanism2d",
       "/SmartDashboard/test": "Mechanism2d"
@@ -48,6 +49,11 @@
         "right": 2961,
         "top": 79,
         "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/SwerveVisualizer": {
         "window": {
           "visible": true
         }
