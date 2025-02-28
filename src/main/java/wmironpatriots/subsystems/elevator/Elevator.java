@@ -21,7 +21,7 @@ public abstract class Elevator extends SubsystemBase implements Logged {
   public static final double RANGE_ROTS = 1.218;
 
   // Poses
-  // TODO check values in CAD
+  public static final double IDLE = 0.0;
   public static final double POSE_INTAKING = 0.0;
   public static final double POSE_ALGAE_H = 0.0; // Remove algae high
   public static final double POSE_ALGAE_L = 0.0; // Remove algae low

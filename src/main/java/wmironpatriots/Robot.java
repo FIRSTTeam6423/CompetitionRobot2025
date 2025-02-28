@@ -20,8 +20,11 @@ import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
+import wmironpatriots.Constants.ReefTarget;
 import wmironpatriots.subsystems.Superstructure;
 import wmironpatriots.subsystems.Superstructure.Requests;
+import wmironpatriots.subsystems.chute.Chute;
+import wmironpatriots.subsystems.chute.ChuteIOComp;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
@@ -37,9 +40,10 @@ public class Robot extends TimedRobot implements Logged {
 
   private final CommandXboxController driveController;
 
-  private final Elevator elevator;
-  private final Tail tail;
   private final Swerve swerve;
+  private final Tail tail;
+  private final Elevator elevator;
+  private final Chute chute;
 
   private final Visualizer visualizer;
 
@@ -89,8 +93,15 @@ public class Robot extends TimedRobot implements Logged {
     driveController = new CommandXboxController(0);
 
     swerve = new Swerve(new CompBotSwerveConfigs());
-    tail = Robot.isReal() ? new TailIOComp() : new TailIOSim();
-    elevator = Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOSim();
+    if (Robot.isReal()) {
+      tail = new TailIOComp();
+      elevator = new ElevatorIOComp();
+      chute = new ChuteIOComp();
+    } else {
+      tail = new TailIOSim();
+      elevator = new ElevatorIOSim();
+      chute = new Chute() {};
+    }
 
     // Create new superstructure visualizer
     visualizer = new Visualizer(elevator, tail);
@@ -105,16 +116,17 @@ public class Robot extends TimedRobot implements Logged {
     elevator.setDefaultCommand(
         Commands.sequence(
             elevator.runPoseZeroingCmmd().onlyIf(() -> !elevator.isZeroed()),
-            elevator.setTargetPoseCmmd(0.0).until(() -> elevator.inSetpointRange()),
+            elevator.setTargetPoseCmmd(Elevator.IDLE).until(() -> elevator.inSetpointRange()),
             elevator.stopMotorInputCmmd()));
-    
+
     tail.setDefaultCommand(
-      Commands.sequence(
-        tail.runPoseZeroingCmmd().onlyIf(() -> !tail.isZeroed() && Superstructure.isTailSafe(elevator, tail)),
-        tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS).until(() -> tail.inSetpointRange()),
-        tail.stopMotorInputCmmd()
-      )
-    );
+        Commands.sequence(
+            tail.runPoseZeroingCmmd()
+                .onlyIf(() -> !tail.isZeroed() && Superstructure.isTailSafe(elevator, tail)),
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+                .until(() -> Superstructure.isTailSafe(elevator, tail)),
+            tail.setTargetPoseCmmd(Tail.POSE_IN_RADS).until(() -> tail.inSetpointRange()),
+            tail.stopMotorInputCmmd()));
 
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
@@ -122,7 +134,7 @@ public class Robot extends TimedRobot implements Logged {
     driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS));
     driveController.a().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS));
 
-    new Superstructure(swerve, elevator, tail, triggerMap);
+    new Superstructure(swerve, elevator, tail, chute, triggerMap, () -> ReefTarget.L1);
   }
 
   @Override

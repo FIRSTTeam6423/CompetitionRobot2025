@@ -6,11 +6,15 @@
 
 package wmironpatriots.subsystems;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
+import wmironpatriots.Constants.ReefTarget;
+import wmironpatriots.subsystems.chute.Chute;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.tail.Tail;
@@ -42,13 +46,22 @@ public class Superstructure {
   }
 
   private final Map<State, Trigger> stateMap = new HashMap<State, Trigger>();
+  private State previousState = State.IDLE;
   private State currentState = State.IDLE;
+  private final Supplier<ReefTarget> scoringTarget;
+
+  private final Timer stateTimer;
 
   private boolean hasCoral = false;
   private boolean hasAlgae = false;
 
   public Superstructure(
-      Swerve swerve, Elevator elevator, Tail tail, Map<Requests, Trigger> requestMap) {
+      Swerve swerve,
+      Elevator elevator,
+      Tail tail,
+      Chute chute,
+      Map<Requests, Trigger> requestMap,
+      Supplier<ReefTarget> reefTargetSupplier) {
     // Checks for null triggers in requestMap
     for (var request : Requests.values()) {
       if (requestMap.get(request) == null) {
@@ -58,24 +71,40 @@ public class Superstructure {
     for (var state : State.values()) {
       stateMap.put(state, new Trigger(() -> this.currentState == state));
     }
+    scoringTarget = reefTargetSupplier;
+
+    stateTimer = new Timer();
 
     /** REQUEST TRIGGERS */
     requestMap
         .get(Requests.INTAKE_CHUTE)
-        .and(() -> !hasCoral)
+        .and(() -> !hasCoral && !stateTimer.isRunning())
         .onTrue(setCurrentStateCommand(State.INTAKING_CHUTE));
 
     requestMap
         .get(Requests.INTAKE_GROUND)
-        .and(() -> !hasAlgae)
+        .and(() -> !hasAlgae && !stateTimer.isRunning())
         .onTrue(setCurrentStateCommand(State.INTAKING_GROUND));
 
     requestMap
         .get(Requests.REEF_SCORE)
-        .and(() -> hasCoral)
-        .onTrue(
-            setCurrentStateCommand(
-                State.L4_SETUP)); // TODO take operator selected target into consideration
+        .and(() -> hasCoral && !stateTimer.isRunning() && scoringTarget.get() == ReefTarget.L1)
+        .onTrue(setCurrentStateCommand(State.L1_SETUP));
+
+    requestMap
+        .get(Requests.REEF_SCORE)
+        .and(() -> hasCoral && !stateTimer.isRunning() && scoringTarget.get() == ReefTarget.L2)
+        .onTrue(setCurrentStateCommand(State.L2_SETUP));
+
+    requestMap
+        .get(Requests.REEF_SCORE)
+        .and(() -> hasCoral && !stateTimer.isRunning() && scoringTarget.get() == ReefTarget.L3)
+        .onTrue(setCurrentStateCommand(State.L3_SETUP));
+
+    requestMap
+        .get(Requests.REEF_SCORE)
+        .and(() -> hasCoral && !stateTimer.isRunning() && scoringTarget.get() == ReefTarget.L4)
+        .onTrue(setCurrentStateCommand(State.L4_SETUP));
 
     requestMap
         .get(Requests.PROCESSOR_SCORE)
@@ -83,57 +112,68 @@ public class Superstructure {
         .onTrue(setCurrentStateCommand(State.PROCESSOR_SCORE)); // Processor logic
 
     /** STATE TRIGGER */
-    stateMap
-        .get(State.IDLE)
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS))
-        .whileTrue(elevator.setTargetPoseCmmd(0.0));
+    stateMap.get(State.IDLE);
+    // .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
+    // .whileTrue(elevator.setTargetPoseCmmd(0.0));
 
     // Coral manipulation
     stateMap
         .get(State.INTAKING_CHUTE)
+        .whileTrue(
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+                .until(() -> isTailSafe(elevator, tail))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING))
-        .and(() -> isTailSafe(elevator, tail))
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
         .and(() -> elevator.inSetpointRange())
-        .whileTrue(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS)) // TODO run chute
-        .and(() -> tail.hasCoral(true))
+        .whileTrue(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS))
+        .whileTrue(chute.runChuteSpeedCmmd(Chute.INTAKE_SPEED))
+        .and(() -> tail.hasCoral())
         .onTrue(setCoralStatus(true))
         .onTrue(setCurrentStateCommand(State.IDLE));
 
     stateMap
         .get(State.L1_SETUP)
+        .whileTrue(
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+                .until(() -> isTailSafe(elevator, tail))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L1))
-        .and(() -> isTailSafe(elevator, tail))
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.L2_SETUP)
+        .whileTrue(
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+                .until(() -> isTailSafe(elevator, tail))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L2))
-        .and(() -> isTailSafe(elevator, tail))
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.L3_SETUP)
+        .whileTrue(
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+                .until(() -> isTailSafe(elevator, tail))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L3))
-        .and(() -> isTailSafe(elevator, tail))
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.L4_SETUP)
+        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L4))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.REEF_SCORE)
+        .whileTrue(elevator.setTargetPoseCmmd(reefTargetSupplier.get().elevatorPoseRevs))
+        .whileTrue(tail.setTargetPoseCmmd(reefTargetSupplier.get().tailPoseRads))
         .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTTAKING_SPEEDS))
-        .and(() -> !tail.hasCoral(false))
+        .and(() -> !tail.hasCoral())
         .onTrue(setCoralStatus(false))
         .onTrue(setCurrentStateCommand(State.IDLE));
   }
@@ -161,8 +201,13 @@ public class Superstructure {
   private Command setCurrentStateCommand(State desiredState) {
     return Commands.runOnce(
         () -> {
+          previousState = currentState;
           System.out.println("new state " + desiredState);
           currentState = desiredState;
+
+          if (desiredState == State.IDLE) stateTimer.reset();
+          else if (previousState != State.IDLE) stateTimer.restart();
+          else stateTimer.start();
         });
   }
 }

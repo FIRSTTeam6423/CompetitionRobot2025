@@ -9,7 +9,6 @@ package wmironpatriots.subsystems.tail;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Annotations.Log;
-import wmironpatriots.Robot;
 
 public abstract class Tail extends SubsystemBase {
   /** CONSTANTS */
@@ -115,8 +114,8 @@ public abstract class Tail extends SubsystemBase {
   }
 
   /** Checks if both tail beambreaks are triggered */
-  public boolean hasCoral(boolean simReturn) {
-    return (Robot.isReal()) ? beamITriggered && beamIITriggered : simReturn;
+  public boolean hasCoral() {
+    return beamITriggered && beamIITriggered;
   }
 
   /** HARDWARE METHODS */
