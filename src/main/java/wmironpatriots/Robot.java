@@ -33,7 +33,7 @@ import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
 import wmironpatriots.subsystems.tail.Tail;
 import wmironpatriots.subsystems.tail.TailIOComp;
 import wmironpatriots.subsystems.tail.TailIOSim;
-import wmironpatriots.util.deviceUtil.ControllerUtil;
+import wmironpatriots.util.deviceUtil.InputStream;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
@@ -107,11 +107,12 @@ public class Robot extends TimedRobot implements Logged {
     visualizer = new Visualizer(elevator, tail);
 
     // Default commands
-    swerve.setDefaultCommand(
-        swerve.teleopSwerveCommmand(
-            ControllerUtil.applyDeadband(driveController::getLeftY, false),
-            ControllerUtil.applyDeadband(driveController::getLeftX, false),
-            ControllerUtil.applyDeadband(driveController::getRightX, false)));
+    InputStream x = InputStream.of(driveController::getLeftY).deadband(0.05, 1.0);
+    InputStream y = InputStream.of(driveController::getLeftX).deadband(0.05, 1.0);
+    InputStream omega = InputStream.of(driveController::getRightX).deadband(0.05, 1.0);
+    InputStream speed = InputStream.of(driveController::getRightTriggerAxis).deadband(0.1, 1.0);
+
+    swerve.setDefaultCommand(swerve.teleopSwerveCommmand(x, y, omega, speed));
 
     elevator.setDefaultCommand(
         Commands.sequence(

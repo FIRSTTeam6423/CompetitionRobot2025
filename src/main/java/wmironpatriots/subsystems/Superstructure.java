@@ -120,9 +120,9 @@ public class Superstructure {
     stateMap
         .get(State.INTAKING_CHUTE)
         .whileTrue(
-          tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
-            .until(() -> isTailSafe(elevator, tail))
-            .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+                .until(() -> isTailSafe(elevator, tail))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING))
         .and(() -> elevator.inSetpointRange())
         .whileTrue(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS))

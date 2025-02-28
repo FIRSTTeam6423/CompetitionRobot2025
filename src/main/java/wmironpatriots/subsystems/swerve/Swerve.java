@@ -26,11 +26,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
-import java.util.function.DoubleSupplier;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
 import wmironpatriots.subsystems.swerve.module.ModuleIOSim;
+import wmironpatriots.util.deviceUtil.InputStream;
 import wmironpatriots.util.swerveUtil.SwerveConfig;
 
 public class Swerve extends SubsystemBase {
@@ -106,24 +106,40 @@ public class Swerve extends SubsystemBase {
   }
 
   /**
-   * Takes axis inputs, scales them to velocties, and converts those velocties to field relative
-   * speeds
+   * Takes Input Streams, converts them into velocities, and converts those velocties to field
+   * relative speeds
    *
    * @param xSupplier + is towards alliance wall
    * @param ySupplier + is left of alliance side
    * @param omegaSupplier + is counterclockwise
    */
   public Command teleopSwerveCommmand(
-      DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
+      InputStream xSupplier,
+      InputStream ySupplier,
+      InputStream omegaSupplier,
+      InputStream speedSupplier) {
     return this.run(
         () -> {
           double maxSpeed = m_config.getMaxLinearSpeedMetersPerSec();
+          double maxAngularSpeed = m_config.getMaxAngularSpeedRadsPerSec();
 
-          var fieldRelativeVelocities =
-              new ChassisSpeeds(
-                  xSupplier.getAsDouble() * maxSpeed,
-                  ySupplier.getAsDouble() * maxSpeed,
-                  omegaSupplier.getAsDouble() * maxSpeed);
+          InputStream hypot =
+              InputStream.hypot(ySupplier, xSupplier)
+                  .scale(speedSupplier)
+                  .signedPow(2.0)
+                  .scale(maxSpeed);
+
+          InputStream theta = InputStream.arcTan(ySupplier, xSupplier);
+          InputStream x = hypot.scale(hypot.scale(theta.map(Math::cos)));
+          InputStream y = hypot.scale(hypot.scale(theta.map(Math::sin)));
+
+          InputStream omega =
+              InputStream.of(omegaSupplier)
+                  .scale(speedSupplier)
+                  .signedPow(2.0)
+                  .scale(maxAngularSpeed);
+
+          var fieldRelativeVelocities = new ChassisSpeeds(x.get(), y.get(), omega.get());
           fieldRelativeVelocities =
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   fieldRelativeVelocities,
