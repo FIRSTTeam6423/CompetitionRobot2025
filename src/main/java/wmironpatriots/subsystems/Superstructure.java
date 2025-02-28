@@ -41,6 +41,8 @@ public class Superstructure {
     L2_SETUP,
     L3_SETUP,
     L4_SETUP,
+    ALGAE_H,
+    ALGAE_L,
     REEF_SCORE,
     PROCESSOR_SCORE
   }
@@ -113,16 +115,14 @@ public class Superstructure {
 
     /** STATE TRIGGER */
     stateMap.get(State.IDLE);
-    // .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS))
-    // .whileTrue(elevator.setTargetPoseCmmd(0.0));
 
     // Coral manipulation
     stateMap
         .get(State.INTAKING_CHUTE)
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
-                .until(() -> isTailSafe(elevator, tail))
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
+          tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+            .until(() -> isTailSafe(elevator, tail))
+            .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING))
         .and(() -> elevator.inSetpointRange())
         .whileTrue(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS))
@@ -181,6 +181,9 @@ public class Superstructure {
   /** Checks to see if tail will hit top of carriage when stowed */
   public static boolean isTailSafe(Elevator elevator, Tail tail) {
     double vel = elevator.getVelocity();
+    // If carraige is below collision point with positive velocity
+    // or above collision point with negative velocity
+    // tail is not safe
     if (vel > 0 && elevator.getPose() < Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
       return false;
     } else if (vel < 0 && elevator.getPose() > Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {

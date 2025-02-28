@@ -33,7 +33,7 @@ import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
 import wmironpatriots.subsystems.tail.Tail;
 import wmironpatriots.subsystems.tail.TailIOComp;
 import wmironpatriots.subsystems.tail.TailIOSim;
-import wmironpatriots.util.ControllerUtil;
+import wmironpatriots.util.deviceUtil.ControllerUtil;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
