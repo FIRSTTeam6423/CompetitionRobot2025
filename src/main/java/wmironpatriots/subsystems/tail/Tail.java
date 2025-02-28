@@ -89,14 +89,29 @@ public abstract class Tail extends SubsystemBase {
             });
   }
 
+  /** Stop all elevator motor input */
+  public Command stopMotorInputCmmd() {
+    return this.runOnce(() -> runPivotVolts(0.0));
+  }
+
+  /** Enable coast mode to move elevator easier */
+  public Command enableMotorCoastingCmmd(boolean enabled) {
+    return this.runOnce(() -> pivotCoastingEnabled(enabled));
+  }
+
   /** Returns pivot pose in radians */
   public double getPose() {
     return pivotPoseRads;
   }
 
+  /** Checks if elevator has been zeroed */
+  public boolean isZeroed() {
+    return isZeroed;
+  }
+
   /** Checks if pivot pose is +- PI/8 rads from specified pose */
-  public boolean inRange(double pose) {
-    return Math.abs(pose - pivotPoseRads) < Math.PI / 8;
+  public boolean inSetpointRange() {
+    return Math.abs(pivotSetpointRads - pivotPoseRads) < Math.PI / 8;
   }
 
   /** Checks if both tail beambreaks are triggered */

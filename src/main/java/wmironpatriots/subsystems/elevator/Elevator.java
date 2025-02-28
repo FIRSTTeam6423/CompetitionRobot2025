@@ -93,12 +93,13 @@ public abstract class Elevator extends SubsystemBase implements Logged {
             });
   }
 
+  /** Stop all elevator motor input */
   public Command stopMotorInputCmmd() {
     return this.runOnce(() -> runMotorVolts(0.0));
   }
 
   /** Enable coast mode to move elevator easier */
-  public Command setMotorCoastingCmmd(boolean enabled) {
+  public Command enableMotorCoastingCmmd(boolean enabled) {
     return this.runOnce(() -> motorCoastingEnabled(enabled));
   }
 

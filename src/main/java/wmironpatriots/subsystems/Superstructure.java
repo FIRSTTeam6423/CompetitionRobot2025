@@ -139,7 +139,7 @@ public class Superstructure {
   }
 
   /** Checks to see if tail will hit top of carriage when stowed */
-  private boolean isTailSafe(Elevator elevator, Tail tail) {
+  public static boolean isTailSafe(Elevator elevator, Tail tail) {
     double vel = elevator.getVelocity();
     if (vel > 0 && elevator.getPose() < Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
       return false;

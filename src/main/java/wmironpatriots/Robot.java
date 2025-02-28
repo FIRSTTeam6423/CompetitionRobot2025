@@ -107,6 +107,14 @@ public class Robot extends TimedRobot implements Logged {
             elevator.runPoseZeroingCmmd().onlyIf(() -> !elevator.isZeroed()),
             elevator.setTargetPoseCmmd(0.0).until(() -> elevator.inSetpointRange()),
             elevator.stopMotorInputCmmd()));
+    
+    tail.setDefaultCommand(
+      Commands.sequence(
+        tail.runPoseZeroingCmmd().onlyIf(() -> !tail.isZeroed() && Superstructure.isTailSafe(elevator, tail)),
+        tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS).until(() -> tail.inSetpointRange()),
+        tail.stopMotorInputCmmd()
+      )
+    );
 
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
