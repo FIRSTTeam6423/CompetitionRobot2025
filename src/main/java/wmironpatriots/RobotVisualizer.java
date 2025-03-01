@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.tail.Tail;
 
-public class Visualizer {
+public class RobotVisualizer {
   private final Elevator elevator;
   private final Tail tail;
 
@@ -39,7 +39,7 @@ public class Visualizer {
   private final MechanismLigament2d tailPivot =
       stageTwo.append(new MechanismLigament2d("Tail", Tail.LENGTH_INCHES, 0));
 
-  public Visualizer(Elevator elevator, Tail tail) {
+  public RobotVisualizer(Elevator elevator, Tail tail) {
     this.elevator = elevator;
     this.tail = tail;
 

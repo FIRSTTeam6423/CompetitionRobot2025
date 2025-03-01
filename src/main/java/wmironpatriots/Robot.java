@@ -46,7 +46,7 @@ public class Robot extends TimedRobot implements Logged {
   private final Elevator elevator;
   private final Chute chute;
 
-  private final Visualizer visualizer;
+  private final RobotVisualizer visualizer;
 
   public Robot() {
     // * MONOLOGUE SETUP
@@ -105,9 +105,6 @@ public class Robot extends TimedRobot implements Logged {
       chute = new Chute() {};
     }
 
-    // Create new superstructure visualizer
-    visualizer = new Visualizer(elevator, tail);
-
     // Default commands
     InputStream x = InputStream.of(driveController::getLeftY).deadband(0.05, 1.0);
     InputStream y = InputStream.of(driveController::getLeftX).deadband(0.05, 1.0);
@@ -145,6 +142,9 @@ public class Robot extends TimedRobot implements Logged {
         triggerMap,
         () -> operatorController.getBranchTarget(),
         () -> operatorController.getLevelTarget());
+
+    // Create new superstructure visualizer
+    visualizer = new RobotVisualizer(elevator, tail);
   }
 
   @Override

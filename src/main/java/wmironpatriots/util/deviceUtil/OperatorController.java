@@ -18,6 +18,9 @@ public class OperatorController {
   private BranchTarget branchTarget;
 
   public OperatorController(int port) {
+    levelTarget = LevelTarget.L1;
+    branchTarget = BranchTarget.A;
+
     controller = new CommandXboxController(port);
 
     controller
