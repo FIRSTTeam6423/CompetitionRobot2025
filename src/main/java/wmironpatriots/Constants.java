@@ -16,16 +16,35 @@ public class Constants {
 
   public static final CANBus CANIVORE = new CANBus("CANchan"); // 3:
 
-  public static enum ReefTarget {
+  public static enum LevelTarget {
     L1(Elevator.POSE_L1, Tail.POSE_LNONFOUR_RADS),
     L2(Elevator.POSE_L2, Tail.POSE_LNONFOUR_RADS),
     L3(Elevator.POSE_L3, Tail.POSE_LNONFOUR_RADS),
     L4(Elevator.POSE_L4, Tail.POSE_L4_RADS);
     public final double elevatorPoseRevs, tailPoseRads;
 
-    private ReefTarget(double elevatorPoseRevs, double tailPoseRads) {
+    private LevelTarget(double elevatorPoseRevs, double tailPoseRads) {
       this.elevatorPoseRevs = elevatorPoseRevs;
       this.tailPoseRads = tailPoseRads;
     }
+  }
+
+  public static enum BranchTarget {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P
   }
 }

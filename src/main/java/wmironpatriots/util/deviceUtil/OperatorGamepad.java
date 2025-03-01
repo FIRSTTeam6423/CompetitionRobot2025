@@ -6,15 +6,6 @@
 
 package wmironpatriots.util.deviceUtil;
 
-import java.util.function.Supplier;
-import wmironpatriots.Constants.ReefTarget;
-
-public class OperatorGamepad implements Supplier<ReefTarget> {
-
+public class OperatorGamepad {
   public OperatorGamepad() {}
-
-  @Override
-  public ReefTarget get() {
-    return ReefTarget.L1;
-  }
 }

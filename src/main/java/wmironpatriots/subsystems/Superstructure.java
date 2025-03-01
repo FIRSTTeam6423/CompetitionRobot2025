@@ -13,7 +13,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import wmironpatriots.Constants.ReefTarget;
+import wmironpatriots.Constants.BranchTarget;
+import wmironpatriots.Constants.LevelTarget;
 import wmironpatriots.subsystems.chute.Chute;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.swerve.Swerve;
@@ -50,7 +51,8 @@ public class Superstructure {
   private final Map<State, Trigger> stateMap = new HashMap<State, Trigger>();
   private State previousState = State.IDLE;
   private State currentState = State.IDLE;
-  private final Supplier<ReefTarget> scoringTarget;
+  private final Supplier<BranchTarget> branchSupplier;
+  private final Supplier<LevelTarget> levelSupplier;
 
   private final Timer stateTimer;
 
@@ -63,7 +65,8 @@ public class Superstructure {
       Tail tail,
       Chute chute,
       Map<Requests, Trigger> requestMap,
-      Supplier<ReefTarget> reefTargetSupplier) {
+      Supplier<BranchTarget> branchSupplier,
+      Supplier<LevelTarget> levelSupplier) {
     // Checks for null triggers in requestMap
     for (var request : Requests.values()) {
       if (requestMap.get(request) == null) {
@@ -73,7 +76,8 @@ public class Superstructure {
     for (var state : State.values()) {
       stateMap.put(state, new Trigger(() -> this.currentState == state));
     }
-    scoringTarget = reefTargetSupplier;
+    this.branchSupplier = branchSupplier;
+    this.levelSupplier = levelSupplier;
 
     stateTimer = new Timer();
 
@@ -90,22 +94,22 @@ public class Superstructure {
 
     requestMap
         .get(Requests.REEF_SCORE)
-        .and(() -> hasCoral && !stateTimer.isRunning() && scoringTarget.get() == ReefTarget.L1)
+        .and(() -> hasCoral && !stateTimer.isRunning() && levelSupplier.get() == LevelTarget.L1)
         .onTrue(setCurrentStateCommand(State.L1_SETUP));
 
     requestMap
         .get(Requests.REEF_SCORE)
-        .and(() -> hasCoral && !stateTimer.isRunning() && scoringTarget.get() == ReefTarget.L2)
+        .and(() -> hasCoral && !stateTimer.isRunning() && levelSupplier.get() == LevelTarget.L2)
         .onTrue(setCurrentStateCommand(State.L2_SETUP));
 
     requestMap
         .get(Requests.REEF_SCORE)
-        .and(() -> hasCoral && !stateTimer.isRunning() && scoringTarget.get() == ReefTarget.L3)
+        .and(() -> hasCoral && !stateTimer.isRunning() && levelSupplier.get() == LevelTarget.L3)
         .onTrue(setCurrentStateCommand(State.L3_SETUP));
 
     requestMap
         .get(Requests.REEF_SCORE)
-        .and(() -> hasCoral && !stateTimer.isRunning() && scoringTarget.get() == ReefTarget.L4)
+        .and(() -> hasCoral && !stateTimer.isRunning() && levelSupplier.get() == LevelTarget.L4)
         .onTrue(setCurrentStateCommand(State.L4_SETUP));
 
     requestMap
@@ -170,8 +174,8 @@ public class Superstructure {
 
     stateMap
         .get(State.REEF_SCORE)
-        .whileTrue(elevator.setTargetPoseCmmd(reefTargetSupplier.get().elevatorPoseRevs))
-        .whileTrue(tail.setTargetPoseCmmd(reefTargetSupplier.get().tailPoseRads))
+        .whileTrue(elevator.setTargetPoseCmmd(levelSupplier.get().elevatorPoseRevs))
+        .whileTrue(tail.setTargetPoseCmmd(levelSupplier.get().tailPoseRads))
         .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTTAKING_SPEEDS))
         .and(() -> !tail.hasCoral())
         .onTrue(setCoralStatus(false))

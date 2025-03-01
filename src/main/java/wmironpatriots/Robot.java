@@ -20,7 +20,6 @@ import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
-import wmironpatriots.Constants.ReefTarget;
 import wmironpatriots.subsystems.Superstructure;
 import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.chute.Chute;
@@ -34,11 +33,13 @@ import wmironpatriots.subsystems.tail.Tail;
 import wmironpatriots.subsystems.tail.TailIOComp;
 import wmironpatriots.subsystems.tail.TailIOSim;
 import wmironpatriots.util.deviceUtil.InputStream;
+import wmironpatriots.util.deviceUtil.OperatorController;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
   private final CommandXboxController driveController;
+  private final OperatorController operatorController;
 
   private final Swerve swerve;
   private final Tail tail;
@@ -91,6 +92,7 @@ public class Robot extends TimedRobot implements Logged {
 
     // * SUBSYSTEM INIT
     driveController = new CommandXboxController(0);
+    operatorController = new OperatorController(1);
 
     swerve = new Swerve(new CompBotSwerveConfigs());
     if (Robot.isReal()) {
@@ -135,7 +137,14 @@ public class Robot extends TimedRobot implements Logged {
     driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS));
     driveController.a().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS));
 
-    new Superstructure(swerve, elevator, tail, chute, triggerMap, () -> ReefTarget.L1);
+    new Superstructure(
+        swerve,
+        elevator,
+        tail,
+        chute,
+        triggerMap,
+        () -> operatorController.getBranchTarget(),
+        () -> operatorController.getLevelTarget());
   }
 
   @Override
