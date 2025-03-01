@@ -26,8 +26,8 @@ public class CompBotSwerveConfigs extends SwerveConfig {
   @Override
   public double getMaxLinearSpeedMetersPerSec() {
     // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
-    // return Units.feetToMeters(2);
-    return Units.rotationsToRadians(6000 / 60) / getDriveReduction() * getWheelRadiusInches();
+    return Units.feetToMeters(2);
+    // return Units.rotationsToRadians(6000 / 60) / getDriveReduction() * getWheelRadiusInches();
   }
 
   @Override

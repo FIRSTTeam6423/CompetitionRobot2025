@@ -6,6 +6,7 @@
 
 package wmironpatriots.util.deviceUtil;
 
+import edu.wpi.first.math.MathUtil;
 import java.util.function.DoubleSupplier;
 import java.util.function.DoubleUnaryOperator;
 
@@ -31,23 +32,26 @@ public interface InputStream extends DoubleSupplier {
 
   /** Maps stream value by an operator */
   public default InputStream map(DoubleUnaryOperator operator) {
-    return () -> operator.applyAsDouble(get());
+    return () -> operator.applyAsDouble(getAsDouble());
   }
 
-  /** Scale stream value by factor */
-  public default InputStream scale(double factor) {
-    return () -> get() * factor;
+  public default InputStream clamp(double clamped) {
+    return map(x -> MathUtil.clamp(x, -clamped, clamped));
   }
 
   /** Scale stream value by factor */
   public default InputStream scale(DoubleSupplier factorSupplier) {
-    return () -> get() * factorSupplier.getAsDouble();
+    return map(x -> x * factorSupplier.getAsDouble());
+  }
+
+  /** Scale stream value by factor */
+  public default InputStream scale(double factor) {
+    return scale(() -> factor);
   }
 
   /** Returns the stream value to the power of specified exponent while keeping its sign */
   public default InputStream signedPow(double power) {
-    double value = get();
-    return () -> Math.pow(value, power) * Math.signum(value);
+    return map(x -> Math.copySign(Math.pow(x, power), x));
   }
 
   /**
@@ -55,7 +59,6 @@ public interface InputStream extends DoubleSupplier {
    * from 0
    */
   public default InputStream deadband(double deadband, double max) {
-    double value = get();
-    return () -> Math.abs(value) > deadband ? Math.max(-max, Math.min(value, max)) : 0.0;
+    return map(x -> MathUtil.applyDeadband(x, deadband, max));
   }
 }

@@ -105,13 +105,32 @@ public class Robot extends TimedRobot implements Logged {
       chute = new Chute() {};
     }
 
-    // Default commands
-    InputStream x = InputStream.of(driveController::getLeftY).deadband(0.05, 1.0);
-    InputStream y = InputStream.of(driveController::getLeftX).deadband(0.05, 1.0);
-    InputStream omega = InputStream.of(driveController::getRightX).deadband(0.05, 1.0);
+    // * DEFAULT COMMANDS
+    // Set up driver input streams
+    double maxSpeed = swerve.getConfig().getMaxLinearSpeedMetersPerSec();
+    double maxAngularSpeed = swerve.getConfig().getMaxAngularSpeedRadsPerSec();
+
+    InputStream x = InputStream.of(driveController::getLeftY);
+    InputStream y = InputStream.of(driveController::getLeftX);
     InputStream speed = InputStream.of(driveController::getRightTriggerAxis).deadband(0.1, 1.0);
 
-    swerve.setDefaultCommand(swerve.teleopSwerveCommmand(x, y, omega, speed));
+    InputStream hypot = InputStream.hypot(y, x)
+      .clamp(1)
+      .deadband(0.05, 1.0)
+      .signedPow(2)
+      .scale(maxSpeed);
+
+    InputStream theta = InputStream.arcTan(y, x);
+    x = hypot.scale(hypot.scale(theta.map(Math::cos)));
+    y = hypot.scale(hypot.scale(theta.map(Math::sin)));
+
+    InputStream omega =
+        InputStream.of(driveController::getRightX)
+            .deadband(0.05, 1.0)
+            .signedPow(2.0)
+            .scale(maxAngularSpeed);
+
+    swerve.setDefaultCommand(swerve.teleopSwerveCommmand(x, y, omega));
 
     elevator.setDefaultCommand(
         Commands.sequence(
