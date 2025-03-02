@@ -123,6 +123,7 @@ public class Robot extends TimedRobot implements Logged {
 
     InputStream omega =
         InputStream.of(driveController::getRightX)
+            .clamp(1.0)
             .deadband(0.05, 1.0)
             .signedPow(2.0)
             .scale(maxAngularSpeed);

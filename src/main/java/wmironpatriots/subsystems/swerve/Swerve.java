@@ -9,8 +9,10 @@ package wmironpatriots.subsystems.swerve;
 import static wmironpatriots.Constants.CANIVORE;
 import static wmironpatriots.Constants.kTickSpeed;
 
+import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -44,6 +46,8 @@ public class Swerve extends SubsystemBase {
   private SwerveDriveKinematics kinematics;
   private SwerveDrivePoseEstimator odo;
 
+  private final PIDController xTransFeedback, yTransFeedback, headingFeedback;
+
   private Rotation2d simHeading;
 
   private final Field2d f2d;
@@ -62,6 +66,11 @@ public class Swerve extends SubsystemBase {
       modules = new Module[moduleConfigs.length];
       Arrays.stream(moduleConfigs).forEach((c) -> modules[c.index - 1] = new ModuleIOSim(c));
     }
+
+    xTransFeedback = new PIDController(10.0, 0.0, 0.0);
+    yTransFeedback = new PIDController(10.0, 0.0, 0.0);
+    headingFeedback = new PIDController(7.5, 0.0, 0.0);
+
     pigeon = new Pigeon2(0, CANIVORE);
     simHeading = new Rotation2d();
 
@@ -124,6 +133,7 @@ public class Swerve extends SubsystemBase {
       DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
     return this.run(
         () -> {
+          System.out.println(omegaSupplier.getAsDouble());
           var fieldRelativeVelocities =
               new ChassisSpeeds(
                   xSupplier.getAsDouble(), ySupplier.getAsDouble(), omegaSupplier.getAsDouble());
@@ -179,7 +189,18 @@ public class Swerve extends SubsystemBase {
     }
   }
 
-  public void followTraj() {}
+  public void followTraj(SwerveSample sample) {
+    Pose2d pose = getPose();
+
+    ChassisSpeeds speeds =
+        new ChassisSpeeds(
+            sample.vx + xTransFeedback.calculate(pose.getX(), sample.x),
+            sample.vy + yTransFeedback.calculate(pose.getY(), sample.y),
+            sample.omega
+                + headingFeedback.calculate(pose.getRotation().getRadians(), sample.heading));
+
+    runVelocities(speeds, false);
+  }
 
   /** update swerve pose estimator */
   public void updateOdometry() {
@@ -199,7 +220,7 @@ public class Swerve extends SubsystemBase {
 
   /** Gets current robot heading */
   public Rotation2d getHeading() {
-    return pigeon.getRotation2d();
+    return Robot.isReal() ? pigeon.getRotation2d() : simHeading;
   }
 
   /** Gets current robot field pose */

@@ -112,7 +112,6 @@ public class ModuleIOSim extends Module {
 
   @Override
   protected void runDriveVel(double velMPS, double torqueff) {
-    System.out.println(torqueff);
     drive.setControl(reqMotorVel.withVelocity(velMPS).withFeedForward(torqueff));
   }
 
