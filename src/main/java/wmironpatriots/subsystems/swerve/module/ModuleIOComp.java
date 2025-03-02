@@ -11,12 +11,13 @@ import static wmironpatriots.Constants.CANIVORE;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import wmironpatriots.util.swerveUtil.ModuleConfig;
 
@@ -26,6 +27,13 @@ public class ModuleIOComp extends Module {
 
   private final TalonFXConfiguration pivotConf, driveConf;
   private final CANcoderConfiguration cancoderConf;
+
+  private final VoltageOut reqMotorVolts =
+      new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+  private final VelocityVoltage reqMotorVel =
+      new VelocityVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+  private final PositionVoltage reqMotorPose =
+      new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
   // Signals
   private final BaseStatusSignal sigPivotABSPoseRots,
@@ -42,26 +50,23 @@ public class ModuleIOComp extends Module {
 
   public ModuleIOComp(ModuleConfig config) {
     super(config);
-    pivot = new TalonFX(config.kPivotID, CANIVORE);
-    drive = new TalonFX(config.kDriveID, CANIVORE);
-    cancoder = new CANcoder(config.kPivotABSID);
+    pivot = new TalonFX(config.pivotID, CANIVORE);
+    drive = new TalonFX(config.driveID, CANIVORE);
+    cancoder = new CANcoder(config.pivotCancoderID);
 
-    // Robot.talonHandler.registerTalon(m_pivotM);
-    // Robot.talonHandler.registerTalon(m_driveM);
+    pivotConf = config.pivotConfig;
+    driveConf = config.driveConfig;
+    cancoderConf = config.cancoderConfig;
 
-    pivotConf = config.kPivotConfigTalonFX;
-    driveConf = config.kDriveConfigTalonFX;
-    cancoderConf = config.kCANcoderConfig;
-
-    cancoderConf.MagnetSensor.MagnetOffset = config.kPivotOffset.getRotations();
+    cancoderConf.MagnetSensor.MagnetOffset = config.pivotOffset.getRotations();
     cancoderConf.MagnetSensor.SensorDirection =
-        config.kPivotInverted
+        config.pivotInverted
             ? SensorDirectionValue.CounterClockwise_Positive
             : SensorDirectionValue.Clockwise_Positive;
 
     pivot.getConfigurator().apply(pivotConf);
     drive.getConfigurator().apply(driveConf);
-    cancoder.getConfigurator().apply(config.kCANcoderConfig);
+    cancoder.getConfigurator().apply(config.cancoderConfig);
 
     sigPivotABSPoseRots = cancoder.getAbsolutePosition();
     sigPivotPoseRots = pivot.getPosition();
@@ -113,30 +118,39 @@ public class ModuleIOComp extends Module {
     pivotOk = true; // ! needs debouncers
     driveOk = true;
 
-    pivotABSPose = Rotation2d.fromRotations(sigPivotABSPoseRots.getValueAsDouble());
-    pivotPose = Rotation2d.fromRotations(sigPivotPoseRots.getValueAsDouble());
+    pivotABSPoseRads = sigPivotABSPoseRots.getValueAsDouble() * 2 * Math.PI;
+    pivotPoseRads = sigPivotPoseRots.getValueAsDouble() * 2 * Math.PI;
     pivotVelRadsPerSec =
         Units.rotationsPerMinuteToRadiansPerSecond(sigPivotVelRPM.getValueAsDouble());
     pivotAppliedVolts = sigPivotAppliedVolts.getValueAsDouble();
     pivotSupplyCurrent = sigPivotSupplyCurrent.getValueAsDouble();
     pivotTorqueCurrent = sigPivotTorqueCurrent.getValueAsDouble();
 
-    drivePoseRads = Units.rotationsToRadians(sigDrivePoseRots.getValueAsDouble());
-    driveVelRadsPerSec =
-        Units.rotationsPerMinuteToRadiansPerSecond(sigDriveVelRPM.getValueAsDouble());
+    drivePoseMeters = sigDrivePoseRots.getValueAsDouble() * 2 * Math.PI * config.wheelRadiusMeters;
+    driveVelMPS = Units.rotationsPerMinuteToRadiansPerSecond(sigDriveVelRPM.getValueAsDouble());
     driveAppliedVolts = sigDriveAppliedVolts.getValueAsDouble();
     driveSupplyCurrent = sigDriveSupplyCurrent.getValueAsDouble();
     driveTorqueCurrent = sigDriveTorqueCurrent.getValueAsDouble();
   }
 
   @Override
-  protected void runPivotControl(ControlRequest request) {
-    pivot.setControl(request);
+  protected void runPivotPose(double poseRads) {
+    pivot.setControl(reqMotorPose.withPosition(poseRads / (2 * Math.PI)));
   }
 
   @Override
-  protected void runDriveControl(ControlRequest request) {
-    drive.setControl(request);
+  protected void runPivotVolts(double volts) {
+    pivot.setControl(reqMotorVolts.withOutput(volts).withEnableFOC(true));
+  }
+
+  @Override
+  protected void runDriveVolts(double volts, boolean focEnabled) {
+    drive.setControl(reqMotorVolts.withOutput(volts).withEnableFOC(focEnabled));
+  }
+
+  @Override
+  protected void runDriveVel(double velMPS, double torqueff) {
+    drive.setControl(reqMotorVel.withVelocity(velMPS).withFeedForward(torqueff));
   }
 
   @Override

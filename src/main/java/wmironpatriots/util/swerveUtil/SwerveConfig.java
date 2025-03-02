@@ -8,8 +8,6 @@ package wmironpatriots.util.swerveUtil;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.revrobotics.spark.config.AlternateEncoderConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -75,20 +73,6 @@ public abstract class SwerveConfig {
 
   public abstract TalonFXConfiguration getDriveConfigTalonFX();
 
-  // REV Configs
-  public abstract AlternateEncoderConfig getPivotABSEncoderConfig();
-
-  public abstract SparkMaxConfig getPivotConfigSparkMax();
-
-  public abstract SparkMaxConfig getDriveConfigSparkMax();
-
   // Gyro
-  public abstract GyroType getGyroType();
-
   public abstract int getGyroID();
-
-  public enum GyroType {
-    NAVX,
-    PIGEON
-  }
 }

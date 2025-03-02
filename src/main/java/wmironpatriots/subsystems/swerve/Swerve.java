@@ -19,6 +19,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -48,17 +50,19 @@ public class Swerve extends SubsystemBase {
 
   private final Visualizer visual;
 
+  private final StructArrayPublisher<SwerveModuleState> statesPublisher;
+
   public Swerve(SwerveConfig config) {
     System.out.println("Init swerve");
     // Create modules
     if (Robot.isReal()) {
       var moduleConfigs = config.getModuleConfigs();
       modules = new Module[moduleConfigs.length];
-      Arrays.stream(moduleConfigs).forEach((c) -> modules[c.kIndex - 1] = new ModuleIOComp(c));
+      Arrays.stream(moduleConfigs).forEach((c) -> modules[c.index - 1] = new ModuleIOComp(c));
     } else {
       var moduleConfigs = config.getModuleConfigs();
       modules = new Module[moduleConfigs.length];
-      Arrays.stream(moduleConfigs).forEach((c) -> modules[c.kIndex - 1] = new ModuleIOSim(c));
+      Arrays.stream(moduleConfigs).forEach((c) -> modules[c.index - 1] = new ModuleIOSim(c));
     }
     pigeon = new Pigeon2(0, CANIVORE);
     simHeading = new Rotation2d();
@@ -69,6 +73,11 @@ public class Swerve extends SubsystemBase {
 
     f2d = new Field2d();
     visual = new Visualizer(100, 100);
+
+    statesPublisher =
+        NetworkTableInstance.getDefault()
+            .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct)
+            .publish();
 
     this.config = config;
   }
@@ -84,6 +93,7 @@ public class Swerve extends SubsystemBase {
     SmartDashboard.putData(f2d);
 
     // Log swerve data
+    statesPublisher.set(getModuleStates());
     visual.updateReal(getModuleStates(), 35);
     // Logger.recordOutput("Swerve/ActualOutput", getVelocitiesRobotRelative());
     // Logger.recordOutput("Swerve/ActualStates", getModuleStates());

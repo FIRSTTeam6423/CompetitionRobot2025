@@ -86,7 +86,6 @@ public abstract class Elevator extends SubsystemBase implements Logged {
         .until(() -> parentSupplyCurrentAmps > 20.0)
         .finallyDo(
             (interrupted) -> {
-              System.out.println("Zeroed");
               stopMotors();
               resetPose();
               isZeroed = true;

@@ -10,8 +10,6 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.spark.config.AlternateEncoderConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -26,8 +24,7 @@ public class CompBotSwerveConfigs extends SwerveConfig {
   @Override
   public double getMaxLinearSpeedMetersPerSec() {
     // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
-    return Units.feetToMeters(2);
-    // return Units.rotationsToRadians(6000 / 60) / getDriveReduction() * getWheelRadiusInches();
+    return Units.rotationsToRadians(6000 / 60) / getDriveReduction() * getWheelRadiusInches();
   }
 
   @Override
@@ -179,11 +176,7 @@ public class CompBotSwerveConfigs extends SwerveConfig {
   @Override
   public TalonFXConfiguration getPivotConfigTalonFX() {
     TalonFXConfiguration config = new TalonFXConfiguration();
-
-    config.Audio.BeepOnBoot = true; // boop
-
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
     config.CurrentLimits.StatorCurrentLimit = getPivotCurrentLimitAmps();
     config.CurrentLimits.StatorCurrentLimitEnable = true;
 
@@ -194,8 +187,6 @@ public class CompBotSwerveConfigs extends SwerveConfig {
     // Feedback config
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     config.Feedback.RotorToSensorRatio = getPivotReduction();
-    config.Feedback.SensorToMechanismRatio = 1.0;
-    config.Feedback.FeedbackRotorOffset = 0.0;
     config.ClosedLoopGeneral.ContinuousWrap = true; // Takes the shortest path
 
     // Gains
@@ -217,16 +208,16 @@ public class CompBotSwerveConfigs extends SwerveConfig {
   @Override
   public TalonFXConfiguration getDriveConfigTalonFX() {
     TalonFXConfiguration config = new TalonFXConfiguration();
-
-    config.Audio.BeepOnBoot = true;
-
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    config.CurrentLimits.SupplyCurrentLimit = 60.0;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.CurrentLimits.StatorCurrentLimit = 120.0;
+    config.CurrentLimits.StatorCurrentLimit = getDriveCurrentLimitAmps();
     config.CurrentLimits.StatorCurrentLimitEnable = true;
 
-    config.Feedback.RotorToSensorRatio = getDriveReduction();
+    // Torque
+    config.TorqueCurrent.PeakForwardTorqueCurrent = getDriveCurrentLimitAmps();
+    config.TorqueCurrent.PeakReverseTorqueCurrent = -getDriveCurrentLimitAmps();
+    config.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
+
+    config.Feedback.SensorToMechanismRatio = getDriveReduction();
     config.Feedback.SensorToMechanismRatio =
         getDriveReduction() / (getWheelRadiusInches() * 2 * Math.PI);
 
@@ -242,28 +233,7 @@ public class CompBotSwerveConfigs extends SwerveConfig {
     return config;
   }
 
-  // REV Configs
-  @Override
-  public AlternateEncoderConfig getPivotABSEncoderConfig() {
-    return new AlternateEncoderConfig();
-  }
-
-  @Override
-  public SparkMaxConfig getPivotConfigSparkMax() {
-    return new SparkMaxConfig();
-  }
-
-  @Override
-  public SparkMaxConfig getDriveConfigSparkMax() {
-    return new SparkMaxConfig();
-  }
-
   // Gyro
-  @Override
-  public GyroType getGyroType() {
-    return GyroType.PIGEON;
-  }
-
   @Override
   public int getGyroID() {
     return 0;

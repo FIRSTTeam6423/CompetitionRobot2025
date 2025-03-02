@@ -56,7 +56,8 @@ public class Visualizer {
       System.out.println("Error: visualizer only supports 4 states");
       return;
     }
-    BLDesired.setLength(states[0].speedMetersPerSecond * scale);
+
+    BLDesired.setLength(states[0].speedMetersPerSecond);
     BLDesired.setAngle(states[0].angle);
 
     FLDesired.setLength(states[1].speedMetersPerSecond * scale);
