@@ -9,6 +9,7 @@ package wmironpatriots;
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,6 +25,7 @@ import wmironpatriots.subsystems.Superstructure;
 import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.chute.Chute;
 import wmironpatriots.subsystems.chute.ChuteIOComp;
+import wmironpatriots.subsystems.commands.Autonomous;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
@@ -47,6 +49,7 @@ public class Robot extends TimedRobot implements Logged {
   private final Chute chute;
 
   private final RobotVisualizer visualizer;
+  private final SendableChooser<Command> autonChooser;
 
   public Robot() {
     // * MONOLOGUE SETUP
@@ -162,6 +165,9 @@ public class Robot extends TimedRobot implements Logged {
 
     // Create new superstructure visualizer
     visualizer = new RobotVisualizer(elevator, tail);
+    
+    // Setup autons
+    autonChooser = Autonomous.configureAutons(swerve);
   }
 
   @Override
@@ -173,14 +179,20 @@ public class Robot extends TimedRobot implements Logged {
   }
 
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    Command auton = autonChooser.getSelected()
+      .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
+
+    if (auton != null) {
+      auton.schedule();
+    }
+  }
 
   @Override
   public void autonomousPeriodic() {}
 
   @Override
   public void teleopInit() {
-    elevator.zeroPoseCmmd();
   }
 
   @Override

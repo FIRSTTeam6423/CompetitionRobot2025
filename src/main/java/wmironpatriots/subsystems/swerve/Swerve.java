@@ -207,6 +207,10 @@ public class Swerve extends SubsystemBase {
     odo.update(getHeading(), getModulePoses());
   }
 
+  public void resetOdometry(Pose2d pose) {
+    odo.resetPose(pose);
+  }
+
   // GETTERS
   /** Returns an array of module field positions */
   public SwerveModulePosition[] getModulePoses() {
