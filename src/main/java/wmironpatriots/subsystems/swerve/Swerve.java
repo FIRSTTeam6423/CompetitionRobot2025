@@ -48,8 +48,6 @@ public class Swerve extends SubsystemBase {
 
   private final Field2d f2d;
 
-  private final Visualizer visual;
-
   private final StructArrayPublisher<SwerveModuleState> statesPublisher;
 
   public Swerve(SwerveConfig config) {
@@ -72,7 +70,6 @@ public class Swerve extends SubsystemBase {
     odo = new SwerveDrivePoseEstimator(kinematics, getHeading(), getModulePoses(), new Pose2d());
 
     f2d = new Field2d();
-    visual = new Visualizer(100, 100);
 
     statesPublisher =
         NetworkTableInstance.getDefault()
@@ -94,7 +91,6 @@ public class Swerve extends SubsystemBase {
 
     // Log swerve data
     statesPublisher.set(getModuleStates());
-    visual.updateReal(getModuleStates(), 35);
     // Logger.recordOutput("Swerve/ActualOutput", getVelocitiesRobotRelative());
     // Logger.recordOutput("Swerve/ActualStates", getModuleStates());
 
@@ -160,7 +156,6 @@ public class Swerve extends SubsystemBase {
 
     // Logger.recordOutput("Swerve/desiredVelocity", velocity);
     // Logger.recordOutput("Swerve/desiredSetpoints", desiredStates);
-    visual.updateDesired(desiredStates, 35);
 
     for (int i = 0; i < desiredStates.length; i++) {
       if (openloopEnabled) {
