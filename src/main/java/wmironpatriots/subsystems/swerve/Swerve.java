@@ -179,6 +179,8 @@ public class Swerve extends SubsystemBase {
     }
   }
 
+  public void followTraj() {}
+
   /** update swerve pose estimator */
   public void updateOdometry() {
     odo.update(getHeading(), getModulePoses());
