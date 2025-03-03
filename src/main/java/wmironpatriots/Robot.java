@@ -10,6 +10,7 @@ import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -21,16 +22,15 @@ import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
+import wmironpatriots.commands.Autonomous;
 import wmironpatriots.subsystems.Superstructure;
 import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.chute.Chute;
 import wmironpatriots.subsystems.chute.ChuteIOComp;
-import wmironpatriots.subsystems.commands.Autonomous;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
 import wmironpatriots.subsystems.swerve.Swerve;
-import wmironpatriots.subsystems.swerve.constants.CompBotSwerveConfigs;
 import wmironpatriots.subsystems.tail.Tail;
 import wmironpatriots.subsystems.tail.TailIOComp;
 import wmironpatriots.subsystems.tail.TailIOSim;
@@ -97,7 +97,7 @@ public class Robot extends TimedRobot implements Logged {
     driveController = new CommandXboxController(0);
     operatorController = new OperatorController(1);
 
-    swerve = new Swerve(new CompBotSwerveConfigs());
+    swerve = new Swerve();
     if (Robot.isReal()) {
       tail = new TailIOComp();
       elevator = new ElevatorIOComp();
@@ -110,8 +110,8 @@ public class Robot extends TimedRobot implements Logged {
 
     // * DEFAULT COMMANDS
     // Set up driver input streams
-    double maxSpeed = swerve.getConfig().getMaxLinearSpeedMetersPerSec();
-    double maxAngularSpeed = swerve.getConfig().getMaxAngularSpeedRadsPerSec();
+    double maxSpeed = swerve.MAX_LINEAR_SPEED_MPS;
+    double maxAngularSpeed = swerve.MAX_ANGULAR_SPEED_RADS_PER_SEC;
 
     InputStream x = InputStream.of(driveController::getLeftY);
     InputStream y = InputStream.of(driveController::getLeftX);
@@ -131,7 +131,7 @@ public class Robot extends TimedRobot implements Logged {
             .signedPow(2.0)
             .scale(maxAngularSpeed);
 
-    swerve.setDefaultCommand(swerve.teleopSwerveCommmand(x, y, omega));
+    swerve.setDefaultCommand(swerve.teleopSwerveCmmd(x, y, omega));
 
     elevator.setDefaultCommand(
         Commands.sequence(
@@ -151,8 +151,17 @@ public class Robot extends TimedRobot implements Logged {
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
+    triggerMap.put(Requests.INTAKE_CHUTE, new Trigger(() -> true));
+
     driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS));
     driveController.a().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS));
+
+    // Create new superstructure visualizer
+    visualizer = new RobotVisualizer(elevator, tail);
+
+    // * AUTON INIT
+    autonChooser = Autonomous.configureAutons(swerve);
+    SmartDashboard.putData("Select Auton", autonChooser);
 
     new Superstructure(
         swerve,
@@ -162,12 +171,6 @@ public class Robot extends TimedRobot implements Logged {
         triggerMap,
         () -> operatorController.getBranchTarget(),
         () -> operatorController.getLevelTarget());
-
-    // Create new superstructure visualizer
-    visualizer = new RobotVisualizer(elevator, tail);
-    
-    // Setup autons
-    autonChooser = Autonomous.configureAutons(swerve);
   }
 
   @Override
@@ -180,8 +183,10 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void autonomousInit() {
-    Command auton = autonChooser.getSelected()
-      .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
+    Command auton =
+        autonChooser
+            .getSelected()
+            .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
 
     if (auton != null) {
       auton.schedule();
@@ -192,8 +197,7 @@ public class Robot extends TimedRobot implements Logged {
   public void autonomousPeriodic() {}
 
   @Override
-  public void teleopInit() {
-  }
+  public void teleopInit() {}
 
   @Override
   public void testInit() {

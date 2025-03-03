@@ -12,7 +12,7 @@ import wmironpatriots.subsystems.tail.Tail;
 
 /** A class */
 public class Constants {
-  public static final double kTickSpeed = 0.02;
+  public static final double DT_TIME = 0.02;
 
   public static final CANBus CANIVORE = new CANBus("CANchan"); // 3:
 
