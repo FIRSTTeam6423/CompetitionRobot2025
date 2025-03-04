@@ -9,6 +9,7 @@ package wmironpatriots.subsystems.tail;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Annotations.Log;
+import wmironpatriots.util.ntUtils.TunableDouble;
 
 public abstract class Tail extends SubsystemBase {
   /** CONSTANTS */
@@ -30,6 +31,13 @@ public abstract class Tail extends SubsystemBase {
   // Roller speeds
   public static final double INTAKING_SPEEDS = 5;
   public static final double OUTTAKING_SPEEDS = 5;
+
+  public static final double PIVOT_P = 0.0;
+  public static final double PIVOT_I = 0.0;
+  public static final double PIVOT_D = 0.0;
+
+  public static final double PIVOT_VELOCITY = 0.0;
+  public static final double PIVOT_ACCELERATION = 0.0;
 
   /** LOGGED VALUES */
   @Log protected boolean isZeroed = false;

@@ -6,6 +6,7 @@
 
 package wmironpatriots.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -23,10 +24,8 @@ import wmironpatriots.subsystems.tail.Tail;
 /** Cursed superstructure ahh frfr */
 public class Superstructure {
   public static enum Requests {
-    INTAKE_GROUND,
     INTAKE_CHUTE,
     REEF_SCORE,
-    PROCESSOR_SCORE,
     OUTTAKE_CORAL,
     OUTTAKE_ALGAE,
     REMOVE_ALGAE_H,
@@ -36,7 +35,6 @@ public class Superstructure {
 
   public static enum State {
     IDLE,
-    INTAKING_GROUND,
     INTAKING_CHUTE,
     L1_SETUP,
     L2_SETUP,
@@ -45,7 +43,6 @@ public class Superstructure {
     ALGAE_H,
     ALGAE_L,
     REEF_SCORE,
-    PROCESSOR_SCORE
   }
 
   private final Map<State, Trigger> stateMap = new HashMap<State, Trigger>();
@@ -57,7 +54,6 @@ public class Superstructure {
   private final Timer stateTimer;
 
   private boolean hasCoral = false;
-  private boolean hasAlgae = false;
 
   public Superstructure(
       Swerve swerve,
@@ -88,11 +84,6 @@ public class Superstructure {
         .onTrue(setCurrentStateCommand(State.INTAKING_CHUTE));
 
     requestMap
-        .get(Requests.INTAKE_GROUND)
-        .and(() -> !hasAlgae && !stateTimer.isRunning())
-        .onTrue(setCurrentStateCommand(State.INTAKING_GROUND));
-
-    requestMap
         .get(Requests.REEF_SCORE)
         .and(() -> hasCoral && !stateTimer.isRunning() && levelSupplier.get() == LevelTarget.L1)
         .onTrue(setCurrentStateCommand(State.L1_SETUP));
@@ -111,11 +102,6 @@ public class Superstructure {
         .get(Requests.REEF_SCORE)
         .and(() -> hasCoral && !stateTimer.isRunning() && levelSupplier.get() == LevelTarget.L4)
         .onTrue(setCurrentStateCommand(State.L4_SETUP));
-
-    requestMap
-        .get(Requests.PROCESSOR_SCORE)
-        .and(() -> hasAlgae)
-        .onTrue(setCurrentStateCommand(State.PROCESSOR_SCORE)); // Processor logic
 
     /** STATE TRIGGER */
     stateMap.get(State.IDLE);
@@ -185,9 +171,8 @@ public class Superstructure {
   /** Checks to see if tail will hit top of carriage when stowed */
   public static boolean isTailSafe(Elevator elevator, Tail tail) {
     double vel = elevator.getVelocity();
-    // If carraige is below collision point with positive velocity
-    // or above collision point with negative velocity
-    // tail is not safe
+    vel = MathUtil.applyDeadband(vel, 0.2); // deadbands speed
+
     if (vel > 0 && elevator.getPose() < Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
       return false;
     } else if (vel < 0 && elevator.getPose() > Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
@@ -198,10 +183,6 @@ public class Superstructure {
 
   private Command setCoralStatus(boolean hasCoral) {
     return Commands.runOnce(() -> this.hasCoral = hasCoral);
-  }
-
-  private Command setAlgaeStatus(boolean hasAlgae) {
-    return Commands.runOnce(() -> this.hasAlgae = hasAlgae);
   }
 
   /** Set current state */

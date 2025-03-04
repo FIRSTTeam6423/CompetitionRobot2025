@@ -9,12 +9,12 @@ package wmironpatriots.subsystems.swerve;
 import static wmironpatriots.Constants.DT_TIME;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -89,7 +89,7 @@ public class Swerve implements IronSubsystem {
   private final Gyro gyro;
 
   private final SwerveDriveKinematics kinematics;
-  private final SwerveDriveOdometry odo;
+  private final SwerveDrivePoseEstimator odo;
 
   private final Field2d f2d;
   private final StructArrayPublisher<SwerveModuleState> publisher;
@@ -113,14 +113,17 @@ public class Swerve implements IronSubsystem {
     }
 
     kinematics = new SwerveDriveKinematics(MODULE_LOCS);
-    odo = new SwerveDriveOdometry(kinematics, getHeading(), getModulePoses(), new Pose2d());
+    odo = new SwerveDrivePoseEstimator(kinematics, getHeading(), getModulePoses(), new Pose2d());
 
     linearFeedback = new PIDController(LINEAR_P, LINEAR_I, LINEAR_D);
     angularFeedback = new PIDController(ANGULAR_P, ANGULAR_I, ANGULAR_D);
     headingFeedback = new PIDController(HEADING_P, HEADING_I, HEADING_D);
 
     f2d = new Field2d();
-    publisher = NetworkTableInstance.getDefault().getStructArrayTopic("states", SwerveModuleState.struct).publish();
+    publisher =
+        NetworkTableInstance.getDefault()
+            .getStructArrayTopic("states", SwerveModuleState.struct)
+            .publish();
 
     this.simulation = simulation;
   }
@@ -212,7 +215,7 @@ public class Swerve implements IronSubsystem {
   }
 
   public Pose2d getPose() {
-    return odo.getPoseMeters();
+    return odo.getEstimatedPosition();
   }
 
   public ChassisSpeeds getRobotRelativeVelocities() {

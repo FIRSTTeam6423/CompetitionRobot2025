@@ -104,7 +104,11 @@ public abstract class Module extends IronComponent {
   @Log public double driveSupplyCurrent = 0.0;
   @Log public double driveTorqueCurrent = 0.0;
 
-  protected Module(ModuleConfig config) {}
+  protected final ModuleConfig config;
+
+  protected Module(ModuleConfig config) {
+    this.config = config;
+  }
 
   public SwerveModuleState runSetpoint(SwerveModuleState state) {
     Rotation2d currentAngle = getCurrentAngle();

@@ -9,6 +9,7 @@ package wmironpatriots.util.deviceUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import java.util.function.Supplier;
 import wmironpatriots.Constants.BranchTarget;
 import wmironpatriots.Constants.LevelTarget;
 
@@ -120,11 +121,11 @@ public class OperatorController {
     return Commands.runOnce(() -> levelTarget = target);
   }
 
-  public BranchTarget getBranchTarget() {
-    return this.branchTarget;
+  public Supplier<BranchTarget> getBranchTarget() {
+    return () -> this.branchTarget;
   }
 
-  public LevelTarget getLevelTarget() {
-    return this.levelTarget;
+  public Supplier<LevelTarget> getLevelTarget() {
+    return () -> this.levelTarget;
   }
 }

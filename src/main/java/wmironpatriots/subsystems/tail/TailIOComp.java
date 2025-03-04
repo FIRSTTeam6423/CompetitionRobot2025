@@ -45,11 +45,11 @@ public class TailIOComp extends Tail {
 
     pivotConf
         .closedLoop
-        .pid(0.0, 0.0, 0.0)
+        .pid(PIVOT_P, PIVOT_I, PIVOT_D)
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .maxMotion
-        .maxVelocity(0.01)
-        .maxAcceleration(0.01)
+        .maxVelocity(PIVOT_VELOCITY)
+        .maxAcceleration(PIVOT_ACCELERATION)
         .allowedClosedLoopError(0.1);
 
     pivotConf

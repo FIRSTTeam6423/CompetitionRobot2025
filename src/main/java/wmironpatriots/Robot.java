@@ -27,7 +27,6 @@ import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
-
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import wmironpatriots.commands.Autonomous;
@@ -172,8 +171,6 @@ public class Robot extends TimedRobot implements Logged {
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
-    triggerMap.put(Requests.INTAKE_CHUTE, new Trigger(() -> true));
-
     driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS));
     driveController.a().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS));
 
@@ -190,8 +187,8 @@ public class Robot extends TimedRobot implements Logged {
         tail,
         chute,
         triggerMap,
-        () -> operatorController.getBranchTarget(),
-        () -> operatorController.getLevelTarget());
+        operatorController.getBranchTarget(),
+        operatorController.getLevelTarget());
   }
 
   @Override
