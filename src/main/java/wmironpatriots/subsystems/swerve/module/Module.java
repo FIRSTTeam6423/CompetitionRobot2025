@@ -38,7 +38,7 @@ public abstract class Module extends IronComponent {
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    config.Feedback.RotorToSensorRatio = PIVOT_REDUCTION;
+    config.Feedback.SensorToMechanismRatio = PIVOT_REDUCTION;
     config.Feedback.SensorToMechanismRatio = 1.0;
     config.Slot0.kP = 20.0;
     config.Slot0.kI = 0.0;

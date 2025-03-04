@@ -171,9 +171,6 @@ public class Robot extends TimedRobot implements Logged {
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
-    driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS));
-    driveController.a().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS));
-
     // Create new superstructure visualizer
     visualizer = new RobotVisualizer(elevator, tail);
 

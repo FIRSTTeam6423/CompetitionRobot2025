@@ -223,6 +223,10 @@ public class Swerve implements IronSubsystem {
         kinematics.toChassisSpeeds(getModuleStates()), getHeading());
   }
 
+  public ChassisSpeeds getFieldRelativeVelocities() {
+    return kinematics.toChassisSpeeds(getModuleStates());
+  }
+
   public SwerveModulePosition[] getModulePoses() {
     SwerveModulePosition[] poses = new SwerveModulePosition[modules.length];
     for (int i = 0; i < poses.length; i++) {

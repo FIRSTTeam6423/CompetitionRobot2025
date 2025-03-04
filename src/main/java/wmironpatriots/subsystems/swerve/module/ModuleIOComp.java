@@ -56,6 +56,7 @@ public class ModuleIOComp extends Module {
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
     pivotConf.Feedback.FeedbackRotorOffset = config.cancoderOffsetRads() / (2 * Math.PI);
+    pivotConf.Feedback.FeedbackRemoteSensorID = config.cancoderID();
 
     pivot.getConfigurator().apply(pivotConf);
     drive.getConfigurator().apply(driveConf);
