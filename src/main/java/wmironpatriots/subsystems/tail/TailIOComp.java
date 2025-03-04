@@ -38,7 +38,7 @@ public class TailIOComp extends Tail {
 
     pivotConf
         .softLimit
-        .forwardSoftLimit(POSE_IN_RADS)
+        .forwardSoftLimit(POSE_MIN_REVS)
         .reverseSoftLimit(POSE_OUT_RADS)
         .forwardSoftLimitEnabled(true)
         .reverseSoftLimitEnabled(true);
@@ -46,16 +46,10 @@ public class TailIOComp extends Tail {
     pivotConf
         .closedLoop
         .pid(PIVOT_P, PIVOT_I, PIVOT_D)
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .maxMotion
-        .maxVelocity(PIVOT_VELOCITY)
-        .maxAcceleration(PIVOT_ACCELERATION)
-        .allowedClosedLoopError(0.1);
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
 
     pivotConf
         .encoder
-        .positionConversionFactor(2 * Math.PI * REDUCTION)
-        .velocityConversionFactor(2 * Math.PI * REDUCTION)
         .uvwAverageDepth(16)
         .uvwMeasurementPeriod(32);
 
@@ -108,7 +102,7 @@ public class TailIOComp extends Tail {
 
   @Override
   protected void setEncoderPose(double poseRads) {
-    pivot.getEncoder().setPosition(poseRads / (2 * Math.PI));
+    pivot.getEncoder().setPosition(poseRads);
   }
 
   @Override

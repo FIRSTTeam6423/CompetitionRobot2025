@@ -117,6 +117,11 @@ public abstract class Elevator extends SubsystemBase implements Logged {
     return velRPM;
   }
 
+  /** Gets displacement from setpoint pose */
+  public double getSetpointDisplacement() {
+    return setpointPoseRots - poseRevs;
+  }
+
   /** Checks if elevator has been zeroed */
   public boolean isZeroed() {
     return isZeroed;

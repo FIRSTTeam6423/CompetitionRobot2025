@@ -56,7 +56,6 @@ public class Superstructure {
   private boolean hasCoral = false;
 
   public Superstructure(
-      Swerve swerve,
       Elevator elevator,
       Tail tail,
       Chute chute,
@@ -112,7 +111,7 @@ public class Superstructure {
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
                 .until(() -> isTailSafe(elevator, tail))
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING))
         .and(() -> elevator.inSetpointRange())
         .whileTrue(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS))
@@ -126,7 +125,7 @@ public class Superstructure {
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
                 .until(() -> isTailSafe(elevator, tail))
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L1))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
@@ -136,7 +135,7 @@ public class Superstructure {
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
                 .until(() -> isTailSafe(elevator, tail))
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L2))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
@@ -146,7 +145,7 @@ public class Superstructure {
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
                 .until(() -> isTailSafe(elevator, tail))
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_RADS)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L3))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
@@ -170,12 +169,11 @@ public class Superstructure {
 
   /** Checks to see if tail will hit top of carriage when stowed */
   public static boolean isTailSafe(Elevator elevator, Tail tail) {
-    double vel = elevator.getVelocity();
-    vel = MathUtil.applyDeadband(vel, 0.2); // deadbands speed
+    double SetpointDisplacement = elevator.getSetpointDisplacement();
 
-    if (vel > 0 && elevator.getPose() < Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
+    if (SetpointDisplacement > 0 && elevator.getPose() < Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
       return false;
-    } else if (vel < 0 && elevator.getPose() > Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
+    } else if (SetpointDisplacement < 0 && elevator.getPose() > Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
       return false;
     }
     return true;
