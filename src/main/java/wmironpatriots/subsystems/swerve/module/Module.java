@@ -8,6 +8,9 @@ package wmironpatriots.subsystems.swerve.module;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -16,11 +19,10 @@ import wmironpatriots.util.mechanismUtil.IronComponent;
 
 public abstract class Module extends IronComponent {
   /** MODULE CONSTANTS */
-  // mech constants
-  public static final double PIVOT_REDUCTION = 0.0;
+  public static final double PIVOT_REDUCTION = 150 / 7;
 
-  public static final double DRIVE_REDUCTION = 0.0;
-  public static final double WHEEL_RADIUS_METERS = 0.0;
+  public static final double DRIVE_REDUCTION = 6.21;
+  public static final double WHEEL_RADIUS_METERS = 0.0508;
 
   // configs
   public static final TalonFXConfiguration PIVOT_CONFIG = getPivotConfig();
@@ -29,11 +31,46 @@ public abstract class Module extends IronComponent {
 
   // static methods
   protected static TalonFXConfiguration getPivotConfig() {
-    return new TalonFXConfiguration();
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    config.CurrentLimits.SupplyCurrentLimit = 20.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+    config.Feedback.RotorToSensorRatio = PIVOT_REDUCTION;
+    config.Feedback.SensorToMechanismRatio = 1.0;
+    config.Slot0.kP = 20.0;
+    config.Slot0.kI = 0.0;
+    config.Slot0.kD = 0.68275;
+    config.Slot0.kV = 0.42962962963;
+    config.Slot0.kA = 0.031543;
+
+    config.MotionMagic.MotionMagicCruiseVelocity = (5500 / 60) / PIVOT_REDUCTION;
+    config.MotionMagic.MotionMagicAcceleration = (5500 / 60) / (PIVOT_REDUCTION * 0.005);
+    config.ClosedLoopGeneral.ContinuousWrap = true;
+
+    return config;
   }
 
   protected static TalonFXConfiguration getDriveConfig() {
-    return new TalonFXConfiguration();
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    config.CurrentLimits.SupplyCurrentLimit = 40.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimit = 120.0;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+
+    config.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION;
+    // TODO TUNE VALUES
+    config.Slot0.kA = 5.0;
+    config.Slot0.kS = 10.0;
+    config.Slot0.kP = 300.0;
+    config.Slot0.kD = 0.0;
+
+    return config;
   }
 
   protected static CANcoderConfiguration getCANcoderConfig() {

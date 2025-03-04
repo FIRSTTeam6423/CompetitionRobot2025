@@ -6,7 +6,11 @@
 
 package wmironpatriots;
 
+import static wmironpatriots.Constants.SWERVE_SIM_CONFIG;
+
 import com.ctre.phoenix6.SignalLogger;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -18,10 +22,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
+
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import wmironpatriots.commands.Autonomous;
 import wmironpatriots.subsystems.Superstructure;
 import wmironpatriots.subsystems.Superstructure.Requests;
@@ -97,7 +105,14 @@ public class Robot extends TimedRobot implements Logged {
     driveController = new CommandXboxController(0);
     operatorController = new OperatorController(1);
 
-    swerve = new Swerve();
+    Optional<SwerveDriveSimulation> swerveSim =
+        Robot.isSimulation()
+            ? Optional.of(
+                new SwerveDriveSimulation(
+                    SWERVE_SIM_CONFIG.get(), new Pose2d(3, 3, new Rotation2d())))
+            : Optional.empty();
+
+    swerve = new Swerve(swerveSim);
     if (Robot.isReal()) {
       tail = new TailIOComp();
       elevator = new ElevatorIOComp();
@@ -106,6 +121,12 @@ public class Robot extends TimedRobot implements Logged {
       tail = new TailIOSim();
       elevator = new ElevatorIOSim();
       chute = new Chute() {};
+    }
+
+    // Setup simulated arena if simulated
+    if (Robot.isSimulation()) {
+      SimulatedArena.getInstance().addDriveTrainSimulation(swerveSim.orElse(null));
+      swerve.resetOdo(swerveSim.get().getSimulatedDriveTrainPose());
     }
 
     // * DEFAULT COMMANDS

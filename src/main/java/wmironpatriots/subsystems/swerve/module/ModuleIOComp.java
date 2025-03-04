@@ -17,6 +17,7 @@ import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class ModuleIOComp extends Module {
@@ -49,6 +50,12 @@ public class ModuleIOComp extends Module {
     pivotConf = getPivotConfig();
     driveConf = getDriveConfig();
     cancoderConf = getCANcoderConfig();
+
+    pivotConf.MotorOutput.Inverted =
+        config.pivotInverted()
+            ? InvertedValue.Clockwise_Positive
+            : InvertedValue.CounterClockwise_Positive;
+    pivotConf.Feedback.FeedbackRotorOffset = config.cancoderOffsetRads() / (2 * Math.PI);
 
     pivot.getConfigurator().apply(pivotConf);
     drive.getConfigurator().apply(driveConf);

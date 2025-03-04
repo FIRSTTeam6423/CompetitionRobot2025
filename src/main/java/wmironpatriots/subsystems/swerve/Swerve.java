@@ -6,10 +6,8 @@
 
 package wmironpatriots.subsystems.swerve;
 
-import static wmironpatriots.Constants.CANIVORE;
 import static wmironpatriots.Constants.DT_TIME;
 
-import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,14 +18,23 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import wmironpatriots.Robot;
+import wmironpatriots.subsystems.swerve.gyro.Gyro;
+import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
+import wmironpatriots.subsystems.swerve.gyro.GyroIOSim;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.Module.ModuleConfig;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
+import wmironpatriots.subsystems.swerve.module.ModuleIOSim;
 import wmironpatriots.util.mechanismUtil.IronSubsystem;
 
 public class Swerve implements IronSubsystem {
@@ -37,8 +44,8 @@ public class Swerve implements IronSubsystem {
 
   public static final double MOI = 5.503;
   public static final double SIDE_LENGTH_METERS = 0.7239;
-  public static final double BUMPER_WIDTH_METER = 0.0; // TODO add value
-  public static final double TRACK_WIDTH_METERS = 0.4674662228;
+  public static final double BUMPER_WIDTH_METER = 0.0889; // TODO add value
+  public static final double TRACK_WIDTH_METERS = 0.596201754;
 
   public static final Translation2d[] MODULE_LOCS =
       new Translation2d[] {
@@ -79,22 +86,29 @@ public class Swerve implements IronSubsystem {
   /** VARIABLES */
   private final Module[] modules;
 
-  private final Pigeon2 pigeon; // TODO move to seperate class
+  private final Gyro gyro;
 
   private final SwerveDriveKinematics kinematics;
   private final SwerveDriveOdometry odo;
 
+  private final Field2d f2d;
+  private final StructArrayPublisher<SwerveModuleState> publisher;
+
   private final PIDController linearFeedback, angularFeedback, headingFeedback;
 
-  public Swerve() {
+  private final Optional<SwerveDriveSimulation> simulation;
+
+  public Swerve(Optional<SwerveDriveSimulation> simulation) {
     modules = new Module[4];
     if (Robot.isReal()) {
+      gyro = new GyroIOComp();
       for (int i = 0; i < modules.length; i++) {
         modules[i] = new ModuleIOComp(MODULE_CONFIGS[i]);
       }
     } else {
+      gyro = new GyroIOSim(simulation.get().getGyroSimulation());
       for (int i = 0; i < modules.length; i++) {
-        modules[i] = new ModuleIOComp(MODULE_CONFIGS[i]);
+        modules[i] = new ModuleIOSim(MODULE_CONFIGS[i], simulation.get().getModules()[i]);
       }
     }
 
@@ -105,7 +119,10 @@ public class Swerve implements IronSubsystem {
     angularFeedback = new PIDController(ANGULAR_P, ANGULAR_I, ANGULAR_D);
     headingFeedback = new PIDController(HEADING_P, HEADING_I, HEADING_D);
 
-    pigeon = new Pigeon2(0, CANIVORE);
+    f2d = new Field2d();
+    publisher = NetworkTableInstance.getDefault().getStructArrayTopic("states", SwerveModuleState.struct).publish();
+
+    this.simulation = simulation;
   }
 
   @Override
@@ -114,6 +131,8 @@ public class Swerve implements IronSubsystem {
       module.periodic();
 
       updateOdo();
+      f2d.setRobotPose(getPose());
+      publisher.set(getModuleStates());
 
       if (DriverStation.isDisabled()) {
         stop();
@@ -182,10 +201,14 @@ public class Swerve implements IronSubsystem {
 
   public void resetOdo(Pose2d pose) {
     odo.resetPose(pose);
+    if (simulation.isPresent()) {
+      simulation.get().setSimulationWorldPose(pose);
+      simulation.get().setRobotSpeeds(new ChassisSpeeds());
+    }
   }
 
   public Rotation2d getHeading() {
-    return pigeon.getRotation2d();
+    return gyro.getRotation2d();
   }
 
   public Pose2d getPose() {
