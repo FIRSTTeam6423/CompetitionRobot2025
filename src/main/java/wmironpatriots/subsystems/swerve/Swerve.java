@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -77,8 +78,7 @@ public class Swerve implements IronSubsystem {
 
   // TODO check with
   // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
-  public static double MAX_LINEAR_SPEED_MPS =
-      ((6000 / 60) * (2 * Math.PI)) / (Module.DRIVE_REDUCTION * Module.WHEEL_RADIUS_METERS);
+  public static double MAX_LINEAR_SPEED_MPS = Units.feetToMeters(3);
   public static double MAX_LINEAR_ACCEL_MPS_SQRD = 2;
   public static double MAX_ANGULAR_SPEED_RADS_PER_SEC =
       MAX_LINEAR_SPEED_MPS / (Math.hypot(TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0));
@@ -215,7 +215,9 @@ public class Swerve implements IronSubsystem {
   }
 
   public Pose2d getPose() {
-    return odo.getEstimatedPosition();
+    return Robot.isReal()
+        ? odo.getEstimatedPosition()
+        : simulation.get().getSimulatedDriveTrainPose();
   }
 
   public ChassisSpeeds getRobotRelativeVelocities() {

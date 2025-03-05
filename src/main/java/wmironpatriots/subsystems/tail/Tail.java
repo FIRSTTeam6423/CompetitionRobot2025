@@ -14,7 +14,7 @@ public abstract class Tail extends SubsystemBase {
   /** CONSTANTS */
   // mech constants
   // TODO check values in CAD
-  public static final double REDUCTION = 50;
+  public static final double GEAR_REDUCTION = 50;
 
   public static final double MASS_KG = 0.0;
   public static final double LENGTH_INCHES = 10.0;
@@ -23,7 +23,7 @@ public abstract class Tail extends SubsystemBase {
 
   // Poses
   public static final double POSE_MIN_REVS = -7.357;
-  public static final double POSE_OUT_RADS = 0;
+  public static final double POSE_MAX_REVS = 0;
 
   // Roller speeds
   public static final double INTAKING_SPEEDS = 5;
@@ -39,11 +39,10 @@ public abstract class Tail extends SubsystemBase {
   @Log protected boolean pivotMotorOk = false;
   @Log protected boolean rollerMotorOk = false;
 
-  @Log protected boolean beamITriggered = false;
-  @Log protected boolean beamIITriggered = false;
+  @Log protected boolean beamTriggered = false;
 
-  @Log protected double pivotSetpointRads;
-  @Log protected double pivotPoseRads;
+  @Log protected double pivotSetpointRevs;
+  @Log protected double pivotPoseRevs;
   @Log protected double pivotVelRPM;
   @Log protected double pivotAppliedVolts;
   @Log protected double pivotSupplyCurrentAmps;
@@ -53,11 +52,11 @@ public abstract class Tail extends SubsystemBase {
   @Log protected double rollerSupplyCurrentAmps;
 
   /** Runs target position in radians from current zeroed pose */
-  public Command setTargetPoseCmmd(double pose) {
+  public Command setTargetPoseCmmd(double poseRes) {
     return this.run(
         () -> {
-          pivotSetpointRads = pose;
-          runPivotSetpoint(pose);
+          pivotSetpointRevs = poseRes;
+          runPivotSetpoint(poseRes);
         });
   }
 
@@ -74,7 +73,7 @@ public abstract class Tail extends SubsystemBase {
     return this.run(
         () -> {
           isZeroed = true;
-          setEncoderPose(POSE_OUT_RADS);
+          setEncoderPose(POSE_MAX_REVS);
         });
   }
 
@@ -85,7 +84,7 @@ public abstract class Tail extends SubsystemBase {
         .finallyDo(
             (interrupted) -> {
               runPivotVolts(0.0);
-              setEncoderPose(POSE_OUT_RADS);
+              setEncoderPose(POSE_MAX_REVS);
               isZeroed = true;
             });
   }
@@ -102,7 +101,7 @@ public abstract class Tail extends SubsystemBase {
 
   /** Returns pivot pose in radians */
   public double getPose() {
-    return pivotPoseRads;
+    return pivotPoseRevs;
   }
 
   /** Checks if elevator has been zeroed */
@@ -112,12 +111,12 @@ public abstract class Tail extends SubsystemBase {
 
   /** Checks if pivot pose is +- PI/8 rads from specified pose */
   public boolean inSetpointRange() {
-    return Math.abs(pivotSetpointRads - pivotPoseRads) < Math.PI / 8;
+    return Math.abs(pivotSetpointRevs - pivotPoseRevs) < 0.2;
   }
 
   /** Checks if both tail beambreaks are triggered */
   public boolean hasCoral() {
-    return beamITriggered && beamIITriggered;
+    return beamTriggered;
   }
 
   /** HARDWARE METHODS */
@@ -125,7 +124,7 @@ public abstract class Tail extends SubsystemBase {
   protected abstract void runPivotVolts(double volts);
 
   /** Run pivot motor with pose request */
-  protected abstract void runPivotSetpoint(double setpointRadians);
+  protected abstract void runPivotSetpoint(double setpointRevs);
 
   /** Run roller motor with speed request */
   protected abstract void runRollerSpeed(double speed);

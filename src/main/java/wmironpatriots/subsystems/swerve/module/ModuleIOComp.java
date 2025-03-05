@@ -12,6 +12,8 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -29,7 +31,7 @@ public class ModuleIOComp extends Module {
 
   private final VoltageOut reqPivotVolts, reqDriveVolts;
   private final VelocityTorqueCurrentFOC reqDriveVel;
-  private final MotionMagicVoltage reqPivotFeedback;
+  private final PositionVoltage reqPivotFeedback;
   private final TorqueCurrentFOC reqDriveCurrent;
 
   private final BaseStatusSignal cancoderPose,
@@ -65,7 +67,7 @@ public class ModuleIOComp extends Module {
     reqPivotVolts = new VoltageOut(0.0).withEnableFOC(true);
     reqDriveVolts = new VoltageOut(0.0).withEnableFOC(true);
     reqDriveVel = new VelocityTorqueCurrentFOC(0.0).withSlot(0);
-    reqPivotFeedback = new MotionMagicVoltage(0.0).withEnableFOC(true);
+    reqPivotFeedback = new PositionVoltage(0.0).withEnableFOC(true);
     reqDriveCurrent = new TorqueCurrentFOC(0.0);
 
     cancoderPose = cancoder.getAbsolutePosition();

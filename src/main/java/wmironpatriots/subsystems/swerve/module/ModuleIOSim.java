@@ -155,6 +155,7 @@ public class ModuleIOSim extends Module {
 
   @Override
   protected void runPivotPose(double poseRads) {
+    System.out.println(poseRads);
     pivot.setControl(reqPivotFeedback.withPosition(poseRads / (2 * Math.PI)));
   }
 
@@ -165,7 +166,6 @@ public class ModuleIOSim extends Module {
 
   @Override
   protected void runDriveVel(double velMPS, double ff) {
-    System.out.println(velMPS);
     drive.setControl(
         reqDriveVel
             .withVelocity(velMPS / (2 * Math.PI * WHEEL_RADIUS_METERS))

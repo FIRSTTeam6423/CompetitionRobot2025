@@ -6,7 +6,6 @@
 
 package wmironpatriots.subsystems;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -18,7 +17,6 @@ import wmironpatriots.Constants.BranchTarget;
 import wmironpatriots.Constants.LevelTarget;
 import wmironpatriots.subsystems.chute.Chute;
 import wmironpatriots.subsystems.elevator.Elevator;
-import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.tail.Tail;
 
 /** Cursed superstructure ahh frfr */
@@ -109,7 +107,7 @@ public class Superstructure {
     stateMap
         .get(State.INTAKING_CHUTE)
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
                 .until(() -> isTailSafe(elevator, tail))
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING))
@@ -123,7 +121,7 @@ public class Superstructure {
     stateMap
         .get(State.L1_SETUP)
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
                 .until(() -> isTailSafe(elevator, tail))
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L1))
@@ -133,7 +131,7 @@ public class Superstructure {
     stateMap
         .get(State.L2_SETUP)
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
                 .until(() -> isTailSafe(elevator, tail))
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L2))
@@ -143,7 +141,7 @@ public class Superstructure {
     stateMap
         .get(State.L3_SETUP)
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
+            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
                 .until(() -> isTailSafe(elevator, tail))
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L3))
@@ -152,7 +150,7 @@ public class Superstructure {
 
     stateMap
         .get(State.L4_SETUP)
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS))
+        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L4))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
@@ -173,7 +171,8 @@ public class Superstructure {
 
     if (SetpointDisplacement > 0 && elevator.getPose() < Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
       return false;
-    } else if (SetpointDisplacement < 0 && elevator.getPose() > Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
+    } else if (SetpointDisplacement < 0
+        && elevator.getPose() > Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
       return false;
     }
     return true;

@@ -39,15 +39,12 @@ public abstract class Module extends IronComponent {
 
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     config.Feedback.SensorToMechanismRatio = PIVOT_REDUCTION;
-    config.Feedback.SensorToMechanismRatio = 1.0;
     config.Slot0.kP = 20.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.68275;
     config.Slot0.kV = 0.42962962963;
     config.Slot0.kA = 0.031543;
 
-    config.MotionMagic.MotionMagicCruiseVelocity = (5500 / 60) / PIVOT_REDUCTION;
-    config.MotionMagic.MotionMagicAcceleration = (5500 / 60) / (PIVOT_REDUCTION * 0.005);
     config.ClosedLoopGeneral.ContinuousWrap = true;
 
     return config;

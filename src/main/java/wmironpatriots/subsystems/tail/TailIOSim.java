@@ -25,13 +25,13 @@ public class TailIOSim extends Tail {
     tailSim =
         new SingleJointedArmSim(
             DCMotor.getNEO(1),
-            REDUCTION,
+            GEAR_REDUCTION,
             1.0,
             Units.inchesToMeters(LENGTH_INCHES),
-            POSE_OUT_RADS,
-            POSE_OUT_RADS,
+            POSE_MAX_REVS,
+            POSE_MAX_REVS,
             true,
-            POSE_OUT_RADS);
+            POSE_MAX_REVS);
 
     pivotFeedforward = new ArmFeedforward(0.0, 0.0, 0.0);
     pivotFeedback =
@@ -45,10 +45,9 @@ public class TailIOSim extends Tail {
     pivotMotorOk = true;
     rollerMotorOk = true;
 
-    beamITriggered = true;
-    beamIITriggered = true;
+    beamTriggered = true;
 
-    pivotPoseRads = tailSim.getAngleRads();
+    pivotPoseRevs = tailSim.getAngleRads();
     pivotVelRPM = Units.radiansPerSecondToRotationsPerMinute(tailSim.getAngleRads());
     pivotAppliedVolts = pivotInputVoltage;
     pivotSupplyCurrentAmps = tailSim.getCurrentDrawAmps();
@@ -63,7 +62,7 @@ public class TailIOSim extends Tail {
   @Override
   protected void runPivotSetpoint(double setpointRadians) {
     runPivotVolts(
-        pivotFeedback.calculate(pivotPoseRads, setpointRadians)
+        pivotFeedback.calculate(pivotPoseRevs, setpointRadians)
             + pivotFeedforward.calculate(
                 pivotFeedback.getSetpoint().position, pivotFeedback.getSetpoint().velocity));
   }

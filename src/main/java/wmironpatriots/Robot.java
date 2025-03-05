@@ -37,9 +37,11 @@ import wmironpatriots.subsystems.chute.ChuteIOComp;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
+import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.tail.Tail;
 import wmironpatriots.subsystems.tail.TailIOComp;
 import wmironpatriots.subsystems.tail.TailIOSim;
+import wmironpatriots.util.deviceUtil.InputStream;
 import wmironpatriots.util.deviceUtil.OperatorController;
 
 public class Robot extends TimedRobot implements Logged {
@@ -48,13 +50,13 @@ public class Robot extends TimedRobot implements Logged {
   private final CommandXboxController driveController;
   private final OperatorController operatorController;
 
-  // private final Swerve swerve;
+  private final Swerve swerve;
   private final Tail tail;
   private final Elevator elevator;
   private final Chute chute;
 
   private final RobotVisualizer visualizer;
-  // private final SendableChooser<Command> autonChooser;
+  private final SendableChooser<Command> autonChooser;
 
   public Robot() {
     // * MONOLOGUE SETUP
@@ -102,14 +104,14 @@ public class Robot extends TimedRobot implements Logged {
     driveController = new CommandXboxController(0);
     operatorController = new OperatorController(1);
 
-    // Optional<SwerveDriveSimulation> swerveSim =
-    //     Robot.isSimulation()
-    //         ? Optional.of(
-    //             new SwerveDriveSimulation(
-    //                 SWERVE_SIM_CONFIG.get(), new Pose2d(3, 3, new Rotation2d())))
-    //         : Optional.empty();
+    Optional<SwerveDriveSimulation> swerveSim =
+        Robot.isSimulation()
+            ? Optional.of(
+                new SwerveDriveSimulation(
+                    SWERVE_SIM_CONFIG.get(), new Pose2d(3, 3, new Rotation2d())))
+            : Optional.empty();
 
-    // swerve = new Swerve(swerveSim);
+    swerve = new Swerve(swerveSim);
     if (Robot.isReal()) {
       tail = new TailIOComp();
       elevator = new ElevatorIOComp();
@@ -121,35 +123,35 @@ public class Robot extends TimedRobot implements Logged {
     }
 
     // Setup simulated arena if simulated
-    // if (Robot.isSimulation()) {
-    //   SimulatedArena.getInstance().addDriveTrainSimulation(swerveSim.orElse(null));
-    //   swerve.resetOdo(swerveSim.get().getSimulatedDriveTrainPose());
-    // }
+    if (Robot.isSimulation()) {
+      SimulatedArena.getInstance().addDriveTrainSimulation(swerveSim.orElse(null));
+      swerve.resetOdo(swerveSim.get().getSimulatedDriveTrainPose());
+    }
 
     // * DEFAULT COMMANDS
     // Set up driver input streams
-    // double maxSpeed = swerve.MAX_LINEAR_SPEED_MPS;
-    // double maxAngularSpeed = swerve.MAX_ANGULAR_SPEED_RADS_PER_SEC;
+    double maxSpeed = swerve.MAX_LINEAR_SPEED_MPS;
+    double maxAngularSpeed = swerve.MAX_ANGULAR_SPEED_RADS_PER_SEC;
 
-    // InputStream x = InputStream.of(driveController::getLeftY);
-    // InputStream y = InputStream.of(driveController::getLeftX);
-    // InputStream speed = InputStream.of(driveController::getRightTriggerAxis).deadband(0.1, 1.0);
+    InputStream x = InputStream.of(driveController::getLeftY);
+    InputStream y = InputStream.of(driveController::getLeftX);
+    InputStream speed = InputStream.of(driveController::getRightTriggerAxis).deadband(0.1, 1.0);
 
-    // InputStream hypot =
-    //     InputStream.hypot(y, x).clamp(1).deadband(0.05, 1.0).signedPow(2).scale(maxSpeed);
+    InputStream hypot =
+        InputStream.hypot(y, x).clamp(1).deadband(0.05, 1.0).signedPow(2).scale(maxSpeed);
 
-    // InputStream theta = InputStream.arcTan(y, x);
-    // x = hypot.scale(hypot.scale(theta.map(Math::cos)));
-    // y = hypot.scale(hypot.scale(theta.map(Math::sin)));
+    InputStream theta = InputStream.arcTan(y, x);
+    x = hypot.scale(hypot.scale(theta.map(Math::cos)));
+    y = hypot.scale(hypot.scale(theta.map(Math::sin)));
 
-    // InputStream omega =
-    //     InputStream.of(driveController::getRightX)
-    //         .clamp(1.0)
-    //         .deadband(0.05, 1.0)
-    //         .signedPow(2.0)
-    //         .scale(maxAngularSpeed);
+    InputStream omega =
+        InputStream.of(driveController::getRightX)
+            .clamp(1.0)
+            .deadband(0.05, 1.0)
+            .signedPow(2.0)
+            .scale(maxAngularSpeed);
 
-    // swerve.setDefaultCommand(swerve.teleopSwerveCmmd(x, y, omega));
+    swerve.setDefaultCommand(swerve.teleopSwerveCmmd(x, y, omega));
 
     elevator.setDefaultCommand(
         Commands.sequence(
@@ -157,14 +159,14 @@ public class Robot extends TimedRobot implements Logged {
             elevator.setTargetPoseCmmd(Elevator.IDLE).until(() -> elevator.inSetpointRange()),
             elevator.stopMotorInputCmmd()));
 
-    // tail.setDefaultCommand(
-    //     Commands.sequence(
-    //         tail.runPoseZeroingCmmd()
-    //             .onlyIf(() -> !tail.isZeroed() && Superstructure.isTailSafe(elevator, tail)),
-    //         tail.setTargetPoseCmmd(Tail.POSE_OUT_RADS)
-    //             .until(() -> Superstructure.isTailSafe(elevator, tail)),
-    //         tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS).until(() -> tail.inSetpointRange()),
-    //         tail.stopMotorInputCmmd()));
+    tail.setDefaultCommand(
+        Commands.sequence(
+            tail.runPoseZeroingCmmd()
+                .onlyIf(() -> !tail.isZeroed() && Superstructure.isTailSafe(elevator, tail)),
+            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
+                .until(() -> Superstructure.isTailSafe(elevator, tail)),
+            tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS).until(() -> tail.inSetpointRange()),
+            tail.stopMotorInputCmmd()));
 
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
@@ -173,8 +175,8 @@ public class Robot extends TimedRobot implements Logged {
     visualizer = new RobotVisualizer(elevator, tail);
 
     // * AUTON INIT
-    // autonChooser = Autonomous.configureAutons(swerve);
-    // SmartDashboard.putData("Select Auton", autonChooser);
+    autonChooser = Autonomous.configureAutons(swerve);
+    SmartDashboard.putData("Select Auton", autonChooser);
 
     new Superstructure(
         elevator,
@@ -188,6 +190,9 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    if (Robot.isSimulation()) {
+      SimulatedArena.getInstance().simulationPeriodic();
+    }
 
     Monologue.updateAll();
     visualizer.periodic();
@@ -195,14 +200,14 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void autonomousInit() {
-    // Command auton =
-    //     autonChooser
-    //         .getSelected()
-    //         .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
+    Command auton =
+        autonChooser
+            .getSelected()
+            .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
 
-    // if (auton != null) {
-    //   auton.schedule();
-    // }
+    if (auton != null) {
+      auton.schedule();
+    }
   }
 
   @Override

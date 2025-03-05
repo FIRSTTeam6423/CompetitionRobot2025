@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.DigitalOutput;
 public class TailIOComp extends Tail {
   private final SparkMax pivot, roller;
   private final SparkMaxConfig pivotConf, rollerConf;
-  private final DigitalOutput beamUno, beamDos;
+  private final DigitalOutput beam;
 
   private final SparkClosedLoopController pivotFeedback;
 
@@ -28,18 +28,17 @@ public class TailIOComp extends Tail {
     pivot = new SparkMax(1, MotorType.kBrushless);
     roller = new SparkMax(2, MotorType.kBrushless);
 
-    beamUno = new DigitalOutput(0);
-    beamDos = new DigitalOutput(0); // TODO SET CHANNELS
+    beam = new DigitalOutput(0);
 
     // Configure pivot
     pivotConf = new SparkMaxConfig();
 
-    pivotConf.idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+    pivotConf.idleMode(IdleMode.kBrake).smartCurrentLimit((int) CURRENT_LIMIT);
 
     pivotConf
         .softLimit
         .forwardSoftLimit(POSE_MIN_REVS)
-        .reverseSoftLimit(POSE_OUT_RADS)
+        .reverseSoftLimit(POSE_MAX_REVS)
         .forwardSoftLimitEnabled(true)
         .reverseSoftLimitEnabled(true);
 
@@ -48,10 +47,7 @@ public class TailIOComp extends Tail {
         .pid(PIVOT_P, PIVOT_I, PIVOT_D)
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
 
-    pivotConf
-        .encoder
-        .uvwAverageDepth(16)
-        .uvwMeasurementPeriod(32);
+    pivotConf.encoder.uvwAverageDepth(16).uvwMeasurementPeriod(32);
 
     pivot.configure(pivotConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -72,10 +68,9 @@ public class TailIOComp extends Tail {
     pivotMotorOk = pivot.hasStickyFault();
     rollerMotorOk = roller.hasStickyFault();
 
-    beamITriggered = beamUno.get();
-    beamIITriggered = beamDos.get();
+    beamTriggered = beam.get();
 
-    pivotPoseRads = pivot.getEncoder().getPosition();
+    pivotPoseRevs = pivot.getEncoder().getPosition();
     pivotVelRPM = pivot.getEncoder().getVelocity();
     pivotAppliedVolts = pivot.getAppliedOutput() * pivot.getBusVoltage();
     pivotSupplyCurrentAmps = pivot.getOutputCurrent();
@@ -91,8 +86,8 @@ public class TailIOComp extends Tail {
   }
 
   @Override
-  protected void runPivotSetpoint(double setpointRadians) {
-    pivotFeedback.setReference(setpointRadians, ControlType.kMAXMotionPositionControl);
+  protected void runPivotSetpoint(double setpointRevs) {
+    pivotFeedback.setReference(setpointRevs, ControlType.kPosition);
   }
 
   @Override
