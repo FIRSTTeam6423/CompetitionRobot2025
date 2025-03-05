@@ -135,7 +135,6 @@ public class Robot extends TimedRobot implements Logged {
 
     InputStream x = InputStream.of(driveController::getLeftY);
     InputStream y = InputStream.of(driveController::getLeftX);
-    InputStream speed = InputStream.of(driveController::getRightTriggerAxis).deadband(0.1, 1.0);
 
     InputStream hypot =
         InputStream.hypot(y, x).clamp(1).deadband(0.05, 1.0).signedPow(2).scale(maxSpeed);

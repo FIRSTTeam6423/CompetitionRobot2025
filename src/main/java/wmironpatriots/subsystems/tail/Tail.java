@@ -130,7 +130,7 @@ public abstract class Tail extends SubsystemBase {
   protected abstract void runRollerSpeed(double speed);
 
   /** Reset encoder to specific pose in rads */
-  protected abstract void setEncoderPose(double poseRads);
+  protected abstract void setEncoderPose(double poseRevs);
 
   /** Zeros pivot at current pose */
   private void resetEncoderPose() {
