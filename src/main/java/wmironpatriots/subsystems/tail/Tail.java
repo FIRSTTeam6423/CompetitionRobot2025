@@ -24,6 +24,7 @@ public abstract class Tail implements IronSubsystem {
   // Poses
   public static final double POSE_MIN_REVS = -10.4;
   public static final double POSE_MAX_REVS = 0.1;
+  public static final double POSE_MOVE_REVS = -5;
 
   public static final double POSE_L1 = -4;
   public static final double POSE_L2 = -4;

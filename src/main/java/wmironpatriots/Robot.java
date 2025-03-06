@@ -49,7 +49,7 @@ public class Robot extends TimedRobot implements Logged {
 
   private final CommandXboxController driveController;
   private final CommandXboxController operatorController;
-  
+
   private final OperatorController operatorController2;
 
   private final Swerve swerve;
@@ -169,9 +169,13 @@ public class Robot extends TimedRobot implements Logged {
 
     tail.setDefaultCommand(
         Commands.sequence(
+            tail.setRollerSpeedCmmd(0.0),
             tail.runPoseZeroingCmmd()
                 .onlyIf(() -> !tail.isZeroed() && Superstructure.isTailSafe(elevator, tail)),
-            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)));
+            tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)));
+
+    chute.setDefaultCommand(chute.runChuteSpeedCmmd(0.0));
+    
     // .until(() -> Superstructure.isTailSafe(elevator, tail)),
     // tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS).until(() -> tail.inSetpointRange()),
     // tail.stopMotorInputCmmd()));
@@ -184,7 +188,7 @@ public class Robot extends TimedRobot implements Logged {
     // driveController.a().whileTrue(tail.setTargetPoseCmmd(0.0));
 
     // driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS));
-    /* 
+    /*
     driveController
         .x()
         .whileTrue(tail.setRollerSpeedCmmd(1.4))
@@ -204,74 +208,64 @@ public class Robot extends TimedRobot implements Logged {
     */
     // driveController.x().whileTrue(tail.setRollerSpeedCmmd(1)).onFalse(tail.setRollerSpeedCmmd(0.0));
 
-
     // * ELEVATOR LEVEL 1 COMMAND
     operatorController
-      .a()
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)
-        .until(() -> tail.inSetpointRange())
-        .andThen(elevator.setTargetPoseCmmd(Elevator.POSE_L1))
-        .alongWith(tail.setTargetPoseCmmd(Tail.POSE_L1)))
-      .whileFalse(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING)
-        .until(() -> elevator.inSetpointRange())
-        .andThen(tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)));
+        .a()
+        .whileTrue(
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_REVS)
+                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
+        .whileTrue(this.setElevatorToStowed().onlyIf(() -> tail.inSetpointRange()));
 
     // * ELEVATOR LEVEL 2 COMMAND
     operatorController
-      .x()
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)
-        .until(() -> tail.inSetpointRange())
-        .andThen(elevator.setTargetPoseCmmd(Elevator.POSE_L2))
-        .alongWith(tail.setTargetPoseCmmd(Tail.POSE_L2)))
-      .whileFalse(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING)
-        .until(() -> elevator.inSetpointRange())
-        .andThen(tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)));
+        .x()
+        .whileTrue(
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_REVS)
+                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_L2)))
+        .whileTrue(
+            elevator.setTargetPoseCmmd(Elevator.POSE_L2).onlyIf(() -> tail.inSetpointRange()));
 
     // * ELEVATOR LEVEL 3 COMMAND
     operatorController
-      .a()
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)
-        .until(() -> tail.inSetpointRange())
-        .andThen(elevator.setTargetPoseCmmd(Elevator.POSE_L3))
-        .alongWith(tail.setTargetPoseCmmd(Tail.POSE_L3)))
-      .whileFalse(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING)
-        .until(() -> elevator.inSetpointRange())
-        .andThen(tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)));
+        .b()
+        .whileTrue(
+          tail.setTargetPoseCmmd(Tail.POSE_MOVE_REVS)
+              .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+              .andThen(tail.setTargetPoseCmmd(Tail.POSE_L3)))
+        .whileTrue(
+          elevator.setTargetPoseCmmd(Elevator.POSE_L3).onlyIf(() -> tail.inSetpointRange()));
 
     // * ELEVATOR LEVEL 4 COMMAND
     operatorController
-      .x()
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)
-        .until(() -> tail.inSetpointRange())
-        .andThen(elevator.setTargetPoseCmmd(Elevator.POSE_L4))
-        .alongWith(tail.setTargetPoseCmmd(Tail.POSE_L4)))
-      .whileFalse(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING)
-        .until(() -> elevator.inSetpointRange())
-        .andThen(tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)));
-    
+        .y()
+        .whileTrue(
+          tail.setTargetPoseCmmd(Tail.POSE_MOVE_REVS)
+              .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+              .andThen(tail.setTargetPoseCmmd(Tail.POSE_L4)))
+        .whileTrue(
+          elevator.setTargetPoseCmmd(Elevator.POSE_L4).onlyIf(() -> tail.inSetpointRange()));
 
     // * INTAKING CORAL COMMAND
-    operatorController.leftBumper()
-      .whileTrue(chute.runChuteSpeedCmmd(Chute.INTAKE_SPEED)
-        .alongWith(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS)))
-      .whileFalse(chute.runChuteSpeedCmmd(0)
-        .alongWith(tail.setRollerSpeedCmmd(0)));
-      
-    // * OUTTAKING CORAL COMMAND
-    operatorController.rightBumper()
-      .whileTrue(chute.runChuteSpeedCmmd(Chute.OUTAKE_SPEED)
-        .alongWith(tail.setRollerSpeedCmmd(Tail.OUTTAKING_SPEEDS)))
-      .whileFalse(chute.runChuteSpeedCmmd(0)
-        .alongWith(tail.setRollerSpeedCmmd(0)));
+    operatorController
+        .leftBumper()
+        .whileTrue(chute.runChuteSpeedCmmd(Chute.INTAKE_SPEED)
+          .alongWith(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS)));
 
-    
+    // * OUTTAKING CORAL COMMAND
+    operatorController
+        .rightBumper()
+        .whileTrue(
+            chute
+                .runChuteSpeedCmmd(Chute.OUTAKE_SPEED)
+                .alongWith(tail.setRollerSpeedCmmd(Tail.OUTTAKING_SPEEDS)));
+
+
     // * SCORING CORAL COMMAND
     driveController
-    .rightBumper()
-      .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTPUTTING_SPEEDS))
-      .whileFalse(tail.setRollerSpeedCmmd(0));
-
-    
+        .rightBumper()
+        .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTPUTTING_SPEEDS));
 
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
@@ -282,17 +276,16 @@ public class Robot extends TimedRobot implements Logged {
     // * AUTON INIT
     autonChooser = Autonomous.configureAutons(swerve);
     SmartDashboard.putData("Select Auton", autonChooser);
-    /* 
-    new Superstructure(
-        elevator,
-        tail,
-        chute,
-        triggerMap
-        operatorController2.getBranchTarget(),
-        operatorController2.getLevelTarget());
-  */  
+    /*
+      new Superstructure(
+          elevator,
+          tail,
+          chute,
+          triggerMap
+          operatorController2.getBranchTarget(),
+          operatorController2.getLevelTarget());
+    */
   }
-  
 
   @Override
   public void robotPeriodic() {
@@ -326,5 +319,12 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+  }
+
+  private Command setElevatorToStowed() {
+    return elevator
+        .setTargetPoseCmmd(1.0)
+        .until(() -> elevator.inSetpointRange() || elevator.getSetpoint() > elevator.getPose())
+        .andThen(elevator.stopMotorInputCmmd());
   }
 }
