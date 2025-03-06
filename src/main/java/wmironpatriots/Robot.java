@@ -56,6 +56,7 @@ public class Robot extends TimedRobot implements Logged {
   private final Chute chute;
 
   private final RobotVisualizer visualizer;
+
   private final SendableChooser<Command> autonChooser;
 
   public Robot() {
@@ -150,23 +151,52 @@ public class Robot extends TimedRobot implements Logged {
             .signedPow(2.0)
             .scale(maxAngularSpeed);
 
-    swerve.setDefaultCommand(swerve.teleopSwerveCmmd(x, y, omega));
+    // swerve.setDefaultCommand(swerve.teleopSwerveCmmd(x, y, omega));
 
     elevator.setDefaultCommand(
         Commands.sequence(
             elevator.runPoseZeroingCmmd().onlyIf(() -> !elevator.isZeroed()),
-            elevator.setTargetPoseCmmd(Elevator.IDLE).until(() -> elevator.inSetpointRange()),
+            elevator
+                .setTargetPoseCmmd(1.0)
+                .until(
+                    () ->
+                        elevator.inSetpointRange() || elevator.getSetpoint() > elevator.getPose()),
             elevator.stopMotorInputCmmd()));
 
     tail.setDefaultCommand(
         Commands.sequence(
             tail.runPoseZeroingCmmd()
                 .onlyIf(() -> !tail.isZeroed() && Superstructure.isTailSafe(elevator, tail)),
-            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
-                .until(() -> Superstructure.isTailSafe(elevator, tail)),
-            tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS).until(() -> tail.inSetpointRange()),
-            tail.stopMotorInputCmmd()));
+            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)));
+    // .until(() -> Superstructure.isTailSafe(elevator, tail)),
+    // tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS).until(() -> tail.inSetpointRange()),
+    // tail.stopMotorInputCmmd()));
 
+    // driveController
+    //     .a()
+    //     .whileTrue(chute.runChuteSpeedCmmd(Chute.INTAKE_SPEED))
+    //     .onFalse(chute.runChuteSpeedCmmd(0.0));
+
+    // driveController.a().whileTrue(tail.setTargetPoseCmmd(0.0));
+
+    // driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS));
+    driveController
+        .x()
+        .whileTrue(tail.setRollerSpeedCmmd(1.4))
+        .whileFalse(tail.setRollerSpeedCmmd(0));
+
+    driveController
+        .a()
+        .whileTrue(tail.setRollerSpeedCmmd(-1.4))
+        .whileFalse(tail.setRollerSpeedCmmd(0));
+
+    driveController
+        .y()
+        .whileTrue(chute.runChuteSpeedCmmd(-1).alongWith(tail.setRollerSpeedCmmd(1.3)))
+        .whileFalse(chute.runChuteSpeedCmmd(0).alongWith(tail.setRollerSpeedCmmd(0)));
+
+    driveController.b().whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L3));
+    // driveController.x().whileTrue(tail.setRollerSpeedCmmd(1)).onFalse(tail.setRollerSpeedCmmd(0.0));
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
@@ -189,9 +219,9 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    if (Robot.isSimulation()) {
-      SimulatedArena.getInstance().simulationPeriodic();
-    }
+    // if (Robot.isSimulation()) {
+    //   SimulatedArena.getInstance().simulationPeriodic();
+    // }
 
     Monologue.updateAll();
     visualizer.periodic();
@@ -199,14 +229,14 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void autonomousInit() {
-    Command auton =
-        autonChooser
-            .getSelected()
-            .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
+    // Command auton =
+    //     autonChooser
+    //         .getSelected()
+    //         .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
 
-    if (auton != null) {
-      auton.schedule();
-    }
+    // if (auton != null) {
+    //   auton.schedule();
+    // }
   }
 
   @Override

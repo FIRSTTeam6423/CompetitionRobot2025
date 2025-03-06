@@ -122,8 +122,8 @@ public class ModuleIOComp extends Module {
 
     double rotsToRads = (2 * Math.PI);
 
-    pivotABSPoseRads = cancoderPose.getValueAsDouble() * rotsToRads;
-    pivotPoseRads = pivotPose.getValueAsDouble() * rotsToRads;
+    pivotABSPoseRads = cancoderPose.getValueAsDouble();
+    pivotPoseRads = pivotPose.getValueAsDouble();
     pivotVelRadsPerSec = pivotVel.getValueAsDouble() * rotsToRads;
     pivotAppliedVolts = pivotVolts.getValueAsDouble();
     pivotSupplyCurrent = pivotSCurrent.getValueAsDouble();

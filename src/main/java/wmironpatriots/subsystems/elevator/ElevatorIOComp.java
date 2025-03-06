@@ -14,16 +14,18 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.util.Units;
 
 public class ElevatorIOComp extends Elevator {
   private final TalonFX parent, child;
   private final TalonFXConfiguration motorConf;
 
-  private final PositionVoltage reqMotorPose =
-      new PositionVoltage(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+  private final PositionVoltage reqPoseVolts = new PositionVoltage(0.0).withEnableFOC(true);
 
   private final VoltageOut reqMotorVolt =
       new VoltageOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
@@ -52,10 +54,13 @@ public class ElevatorIOComp extends Elevator {
 
     motorConf = new TalonFXConfiguration();
     motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    motorConf.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    motorConf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    motorConf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
     motorConf.Slot0.withKP(1).withKI(0.0).withKD(0); // PID config
     motorConf.Slot0.withKG(0.59).withKS(0.0).withKV(4.12).withKA(0.0); // feedforward config
+    motorConf.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
+    motorConf.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 
     motorConf.CurrentLimits.StatorCurrentLimit = 80.0;
     motorConf.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -65,10 +70,6 @@ public class ElevatorIOComp extends Elevator {
 
     motorConf.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
     motorConf.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-
-    motorConf.MotionMagic.MotionMagicCruiseVelocity = 0.03; // ! TODO
-    motorConf.MotionMagic.MotionMagicAcceleration = 0.03;
-    motorConf.MotionMagic.MotionMagicJerk = 0.0;
 
     parent.getConfigurator().apply(motorConf);
     child.getConfigurator().apply(motorConf);
@@ -153,7 +154,7 @@ public class ElevatorIOComp extends Elevator {
 
   @Override
   protected void runMotorPose(double poseRevs) {
-    parent.setControl(reqMotorPose.withEnableFOC(true).withPosition(poseRevs));
+    parent.setControl(reqPoseVolts.withEnableFOC(true).withPosition(poseRevs));
   }
 
   @Override

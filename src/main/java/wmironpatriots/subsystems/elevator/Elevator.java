@@ -30,7 +30,7 @@ public abstract class Elevator extends SubsystemBase implements Logged {
   public static final double POSE_L1 = 0.0;
   public static final double POSE_L2 = 3.16;
   public static final double POSE_L3 = 10.81;
-  public static final double POSE_L4 = 24;
+  public static final double POSE_L4 = 11;
 
   // Visualizer constants
   public static final double MAX_ELEVATOR_HEIGHT_INCHES = 57;
@@ -89,6 +89,7 @@ public abstract class Elevator extends SubsystemBase implements Logged {
               stopMotors();
               resetPose();
               isZeroed = true;
+              System.out.println("Elevator Zeroed");
             });
   }
 
@@ -109,7 +110,7 @@ public abstract class Elevator extends SubsystemBase implements Logged {
 
   /** Returns pose in revs */
   public double getPose() {
-    return poseRevs;
+    return parentPoseRevs;
   }
 
   /** Gets velocity in rotations per minute */
@@ -117,9 +118,13 @@ public abstract class Elevator extends SubsystemBase implements Logged {
     return velRPM;
   }
 
+  public double getSetpoint() {
+    return setpointPoseRots;
+  }
+
   /** Gets displacement from setpoint pose */
   public double getSetpointDisplacement() {
-    return setpointPoseRots - poseRevs;
+    return setpointPoseRots - parentPoseRevs;
   }
 
   /** Checks if elevator has been zeroed */
@@ -129,7 +134,7 @@ public abstract class Elevator extends SubsystemBase implements Logged {
 
   /** Checks if elevator is around a specific range of the setpoint */
   public boolean inSetpointRange() {
-    return Math.abs(setpointPoseRots - parentPoseRevs) < 0.05; // TODO tweak range if needed
+    return Math.abs(setpointPoseRots - parentPoseRevs) < 0.5; // TODO tweak range if needed
   }
 
   /** HARDWARE METHODS */

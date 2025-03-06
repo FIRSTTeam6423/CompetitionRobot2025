@@ -136,10 +136,7 @@ public class Swerve implements IronSubsystem {
       updateOdo();
       f2d.setRobotPose(getPose());
       publisher.set(getModuleStates());
-
-      if (DriverStation.isDisabled()) {
-        stop();
-      }
+      stop();
     }
   }
 

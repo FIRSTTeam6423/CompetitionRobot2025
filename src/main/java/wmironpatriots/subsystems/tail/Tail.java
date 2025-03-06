@@ -7,10 +7,10 @@
 package wmironpatriots.subsystems.tail;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Annotations.Log;
+import wmironpatriots.util.mechanismUtil.IronSubsystem;
 
-public abstract class Tail extends SubsystemBase {
+public abstract class Tail implements IronSubsystem {
   /** CONSTANTS */
   // mech constants
   // TODO check values in CAD
@@ -22,14 +22,14 @@ public abstract class Tail extends SubsystemBase {
   public static final double CURRENT_LIMIT = 40.0;
 
   // Poses
-  public static final double POSE_MIN_REVS = -7.357;
-  public static final double POSE_MAX_REVS = 0;
+  public static final double POSE_MIN_REVS = -10.4;
+  public static final double POSE_MAX_REVS = 0.1;
 
   // Roller speeds
   public static final double INTAKING_SPEEDS = 5;
   public static final double OUTTAKING_SPEEDS = 5;
 
-  public static final double PIVOT_P = 0.3;
+  public static final double PIVOT_P = 1.5;
   public static final double PIVOT_I = 0.0;
   public static final double PIVOT_D = 0.0;
 
@@ -73,18 +73,19 @@ public abstract class Tail extends SubsystemBase {
     return this.run(
         () -> {
           isZeroed = true;
-          setEncoderPose(POSE_MAX_REVS);
+          // setEncoderPose(POSE_MAX_REVS);
         });
   }
 
   /** Runs pivot backwards until current spikes above threshold */
   public Command runPoseZeroingCmmd() {
-    return this.run(() -> runPivotVolts(0.5))
+    return this.run(() -> runPivotVolts(-1))
         .until(() -> pivotSupplyCurrentAmps > 20.0)
         .finallyDo(
             (interrupted) -> {
               runPivotVolts(0.0);
               setEncoderPose(POSE_MAX_REVS);
+              System.out.println("Tail zeroed");
               isZeroed = true;
             });
   }

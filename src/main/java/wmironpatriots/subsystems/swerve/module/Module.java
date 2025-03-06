@@ -32,13 +32,13 @@ public abstract class Module extends IronComponent {
   // static methods
   protected static TalonFXConfiguration getPivotConfig() {
     TalonFXConfiguration config = new TalonFXConfiguration();
-    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     config.CurrentLimits.SupplyCurrentLimit = 20.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    config.Feedback.SensorToMechanismRatio = PIVOT_REDUCTION;
+    // config.Feedback.SensorToMechanismRatio = PIVOT_REDUCTION;
     config.Slot0.kP = 20.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.68275;
@@ -60,11 +60,11 @@ public abstract class Module extends IronComponent {
     config.CurrentLimits.StatorCurrentLimit = 120.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
 
-    config.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION;
+    // config.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION;
     // TODO TUNE VALUES
-    config.Slot0.kA = 5.0;
-    config.Slot0.kS = 10.0;
-    config.Slot0.kP = 300.0;
+    config.Slot0.kA = 0.33291;
+    config.Slot0.kS = 0.088468;
+    config.Slot0.kP = 3.2;
     config.Slot0.kD = 0.0;
 
     return config;
@@ -136,7 +136,7 @@ public abstract class Module extends IronComponent {
   }
 
   public Rotation2d getCurrentAngle() {
-    return Rotation2d.fromRadians(pivotPoseRads);
+    return Rotation2d.fromRotations(pivotPoseRads);
   }
 
   public SwerveModulePosition getModulePose() {

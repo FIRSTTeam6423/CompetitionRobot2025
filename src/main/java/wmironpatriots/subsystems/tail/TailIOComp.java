@@ -6,98 +6,99 @@
 
 package wmironpatriots.subsystems.tail;
 
-import com.revrobotics.spark.SparkBase.ControlType;
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.DigitalOutput;
 
 public class TailIOComp extends Tail {
-  private final SparkMax pivot, roller;
-  private final SparkMaxConfig pivotConf, rollerConf;
-  private final DigitalOutput beam;
+  private final TalonFX pivot;
+  private final SparkMax roller;
 
-  private final SparkClosedLoopController pivotFeedback;
+  private final TalonFXConfiguration pivotConf;
+  private final SparkMaxConfig rollerConf;
+
+  private final BaseStatusSignal sigPose, sigVel, sigVolts, sigCurrent;
+
+  private final PositionVoltage reqPose = new PositionVoltage(0.0).withEnableFOC(true);
+  private final VoltageOut reqVolts = new VoltageOut(0.0).withEnableFOC(true);
 
   public TailIOComp() {
-    pivot = new SparkMax(1, MotorType.kBrushless);
-    roller = new SparkMax(2, MotorType.kBrushless);
+    pivot = new TalonFX(13, "rio");
+    roller = new SparkMax(1, MotorType.kBrushless);
 
-    beam = new DigitalOutput(0);
+    pivotConf = new TalonFXConfiguration();
+    pivotConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    pivotConf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    // Configure pivot
-    pivotConf = new SparkMaxConfig();
+    pivotConf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    pivotConf.Slot0.kG = 0.0;
+    pivotConf.Slot0.kV = 0.0;
+    pivotConf.Slot0.kP = 0.0;
+    pivotConf.Slot0.kI = 0.0;
+    pivotConf.Slot0.kD = 0.0;
 
-    pivotConf.idleMode(IdleMode.kBrake).smartCurrentLimit((int) CURRENT_LIMIT);
+    pivotConf.CurrentLimits.StatorCurrentLimit = 20.0;
+    pivotConf.CurrentLimits.StatorCurrentLimitEnable = true;
+    pivotConf.CurrentLimits.SupplyCurrentLimit = 20.0;
+    pivotConf.CurrentLimits.SupplyCurrentLimitEnable = true;
+    pivotConf.CurrentLimits.SupplyCurrentLowerLimit = -20.0;
 
-    pivotConf
-        .softLimit
-        .forwardSoftLimit(POSE_MIN_REVS)
-        .reverseSoftLimit(POSE_MAX_REVS)
-        .forwardSoftLimitEnabled(true)
-        .reverseSoftLimitEnabled(true);
+    pivot.getConfigurator().apply(pivotConf);
 
-    pivotConf
-        .closedLoop
-        .pid(PIVOT_P, PIVOT_I, PIVOT_D)
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
-
-    pivotConf.encoder.uvwAverageDepth(16).uvwMeasurementPeriod(32);
-
-    pivot.configure(pivotConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    // Config roller
     rollerConf = new SparkMaxConfig();
-
-    rollerConf.idleMode(IdleMode.kBrake).smartCurrentLimit(20);
-
+    rollerConf.idleMode(IdleMode.kBrake);
     roller.configure(rollerConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    // Configure closed loop controller
-    pivotFeedback = pivot.getClosedLoopController();
+    sigPose = pivot.getPosition();
+    sigVel = pivot.getVelocity();
+    sigVolts = pivot.getMotorVoltage();
+    sigCurrent = pivot.getStatorCurrent();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(100.0, sigPose, sigVel, sigVolts, sigCurrent);
   }
 
   @Override
   public void periodic() {
-    super.periodic();
-    pivotMotorOk = pivot.hasStickyFault();
-    rollerMotorOk = roller.hasStickyFault();
+    pivotMotorOk = BaseStatusSignal.refreshAll(sigPose, sigVel, sigVolts, sigCurrent).isOK();
 
-    beamTriggered = beam.get();
+    pivotPoseRevs = sigPose.getValueAsDouble();
+    pivotVelRPM = sigPose.getValueAsDouble();
+    pivotAppliedVolts = sigVolts.getValueAsDouble();
+    pivotSupplyCurrentAmps = sigCurrent.getValueAsDouble();
 
-    pivotPoseRevs = pivot.getEncoder().getPosition();
-    pivotVelRPM = pivot.getEncoder().getVelocity();
-    pivotAppliedVolts = pivot.getAppliedOutput() * pivot.getBusVoltage();
-    pivotSupplyCurrentAmps = pivot.getOutputCurrent();
-
-    rollerVelRPM = roller.getEncoder().getVelocity();
     rollerAppliedVolts = roller.getAppliedOutput() * roller.getBusVoltage();
     rollerSupplyCurrentAmps = roller.getOutputCurrent();
   }
 
   @Override
   protected void runPivotVolts(double volts) {
-    pivot.setVoltage(volts);
+    pivot.setControl(reqVolts.withEnableFOC(true).withOutput(volts));
   }
 
   @Override
   protected void runPivotSetpoint(double setpointRevs) {
-    pivotFeedback.setReference(setpointRevs, ControlType.kPosition);
+    pivot.setControl(reqPose.withEnableFOC(true).withPosition(setpointRevs));
   }
 
   @Override
   protected void runRollerSpeed(double speed) {
-    roller.set(speed);
+    roller.setVoltage(speed);
   }
 
   @Override
-  protected void setEncoderPose(double poseRads) {
-    pivot.getEncoder().setPosition(poseRads);
+  protected void setEncoderPose(double poseRevs) {
+    pivot.setPosition(poseRevs);
   }
 
   @Override
@@ -112,8 +113,7 @@ public class TailIOComp extends Tail {
 
   @Override
   protected void pivotCoastingEnabled(boolean enabled) {
-    IdleMode idleMode = enabled ? IdleMode.kCoast : IdleMode.kBrake;
-    pivotConf.idleMode(idleMode);
-    pivot.configure(pivotConf, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    NeutralModeValue idleMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
+    pivotConf.MotorOutput.NeutralMode = idleMode;
   }
 }
