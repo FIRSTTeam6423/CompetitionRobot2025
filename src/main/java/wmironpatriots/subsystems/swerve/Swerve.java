@@ -36,9 +36,9 @@ import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.Module.ModuleConfig;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
 import wmironpatriots.subsystems.swerve.module.ModuleIOSim;
-import wmironpatriots.util.mechanismUtil.IronSubsystem;
+import wmironpatriots.util.mechanismUtil.LoggedSubsystem;
 
-public class Swerve implements IronSubsystem {
+public class Swerve implements LoggedSubsystem {
   /** CONSTANTS */
   // mech constants
   public static final double MASS_KG = 54.8847;

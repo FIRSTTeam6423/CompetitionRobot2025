@@ -7,11 +7,22 @@
 package wmironpatriots.subsystems.chute;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import monologue.Annotations.Log;
+import wmironpatriots.util.mechanismUtil.LoggedSubsystem;
 
-public abstract class Chute extends SubsystemBase {
+public abstract class Chute implements LoggedSubsystem {
+  @Log protected double chuteAppliedVolts;
+  @Log protected double chuteSpeedRPM;
+  @Log protected double chuteSupplyCurrent;
+
   public static final double INTAKE_SPEED = -0.13;
 
+  /** Checks to see if current is spiking for chute motors */
+  public boolean hasCoral() {
+    return chuteSupplyCurrent > 10.0;
+  }
+
+  /** Runs chute at specific speed */
   public Command runChuteSpeedCmmd(double speed) {
     return this.run(() -> {});
   }

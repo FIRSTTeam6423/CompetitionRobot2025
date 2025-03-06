@@ -19,9 +19,9 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Distance;
 import org.photonvision.EstimatedRobotPose;
-import wmironpatriots.util.mechanismUtil.IronSubsystem;
+import wmironpatriots.util.mechanismUtil.LoggedSubsystem;
 
-public class Vision implements IronSubsystem {
+public class Vision implements LoggedSubsystem {
   /** CONSTANTS */
   public static final CameraConfig[] CAM_CONFS =
       new CameraConfig[] {

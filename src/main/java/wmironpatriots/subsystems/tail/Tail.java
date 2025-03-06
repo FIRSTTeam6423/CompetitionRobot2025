@@ -8,9 +8,9 @@ package wmironpatriots.subsystems.tail;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import monologue.Annotations.Log;
-import wmironpatriots.util.mechanismUtil.IronSubsystem;
+import wmironpatriots.util.mechanismUtil.LoggedSubsystem;
 
-public abstract class Tail implements IronSubsystem {
+public abstract class Tail implements LoggedSubsystem {
   /** CONSTANTS */
   // mech constants
   // TODO check values in CAD

@@ -9,4 +9,4 @@ package wmironpatriots.util.mechanismUtil;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Logged;
 
-public interface IronSubsystem extends Subsystem, Logged {}
+public interface LoggedSubsystem extends Subsystem, Logged {}
