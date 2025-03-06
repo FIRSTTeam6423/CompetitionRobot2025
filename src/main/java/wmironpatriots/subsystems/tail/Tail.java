@@ -25,9 +25,15 @@ public abstract class Tail implements IronSubsystem {
   public static final double POSE_MIN_REVS = -10.4;
   public static final double POSE_MAX_REVS = 0.1;
 
+  public static final double POSE_L1 = -4;
+  public static final double POSE_L2 = -4;
+  public static final double POSE_L3 = -4;
+  public static final double POSE_L4 = -4;
+
   // Roller speeds
-  public static final double INTAKING_SPEEDS = 5;
-  public static final double OUTTAKING_SPEEDS = 5;
+  public static final double INTAKING_SPEEDS = 1;
+  public static final double OUTTAKING_SPEEDS = -1;
+  public static final double OUTPUTTING_SPEEDS = 2;
 
   public static final double PIVOT_P = 1.5;
   public static final double PIVOT_I = 0.0;
@@ -59,6 +65,8 @@ public abstract class Tail implements IronSubsystem {
           runPivotSetpoint(poseRes);
         });
   }
+
+  
 
   /** Runs rollers at specific speed */
   public Command setRollerSpeedCmmd(double speed) {

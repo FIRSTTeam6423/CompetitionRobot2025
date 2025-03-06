@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public abstract class Chute extends SubsystemBase {
   public static final double INTAKE_SPEED = -0.13;
+  public static final double OUTAKE_SPEED = 0.13;
 
   public Command runChuteSpeedCmmd(double speed) {
     return this.run(() -> {});
