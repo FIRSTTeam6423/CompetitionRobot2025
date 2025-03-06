@@ -151,7 +151,7 @@ public class Robot extends TimedRobot implements Logged {
             .signedPow(2.0)
             .scale(maxAngularSpeed);
 
-    // swerve.setDefaultCommand(swerve.teleopSwerveCmmd(x, y, omega));
+    swerve.setDefaultCommand(swerve.teleopSwerveCmmd(x, y, omega));
 
     elevator.setDefaultCommand(
         Commands.sequence(
@@ -167,36 +167,11 @@ public class Robot extends TimedRobot implements Logged {
         Commands.sequence(
             tail.runPoseZeroingCmmd()
                 .onlyIf(() -> !tail.isZeroed() && Superstructure.isTailSafe(elevator, tail)),
-            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)));
-    // .until(() -> Superstructure.isTailSafe(elevator, tail)),
-    // tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS).until(() -> tail.inSetpointRange()),
-    // tail.stopMotorInputCmmd()));
+            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
+                .until(() -> Superstructure.isTailSafe(elevator, tail)),
+            tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS).until(() -> tail.inSetpointRange()),
+            tail.stopMotorInputCmmd()));
 
-    // driveController
-    //     .a()
-    //     .whileTrue(chute.runChuteSpeedCmmd(Chute.INTAKE_SPEED))
-    //     .onFalse(chute.runChuteSpeedCmmd(0.0));
-
-    // driveController.a().whileTrue(tail.setTargetPoseCmmd(0.0));
-
-    // driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS));
-    driveController
-        .x()
-        .whileTrue(tail.setRollerSpeedCmmd(1.4))
-        .whileFalse(tail.setRollerSpeedCmmd(0));
-
-    driveController
-        .a()
-        .whileTrue(tail.setRollerSpeedCmmd(-1.4))
-        .whileFalse(tail.setRollerSpeedCmmd(0));
-
-    driveController
-        .y()
-        .whileTrue(chute.runChuteSpeedCmmd(-1).alongWith(tail.setRollerSpeedCmmd(1.3)))
-        .whileFalse(chute.runChuteSpeedCmmd(0).alongWith(tail.setRollerSpeedCmmd(0)));
-
-    driveController.b().whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L3));
-    // driveController.x().whileTrue(tail.setRollerSpeedCmmd(1)).onFalse(tail.setRollerSpeedCmmd(0.0));
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
