@@ -38,7 +38,7 @@ public abstract class Module extends IronComponent {
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    // config.Feedback.SensorToMechanismRatio = PIVOT_REDUCTION;
+    config.Feedback.RotorToSensorRatio = PIVOT_REDUCTION;
     config.Slot0.kP = 20.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.68275;
@@ -60,7 +60,7 @@ public abstract class Module extends IronComponent {
     config.CurrentLimits.StatorCurrentLimit = 120.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
 
-    // config.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION;
+    config.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION;
     // TODO TUNE VALUES
     config.Slot0.kA = 0.33291;
     config.Slot0.kS = 0.088468;
@@ -71,7 +71,8 @@ public abstract class Module extends IronComponent {
   }
 
   protected static CANcoderConfiguration getCANcoderConfig() {
-    return new CANcoderConfiguration();
+    CANcoderConfiguration config = new CANcoderConfiguration();
+    return config;
   }
 
   public static record ModuleConfig(
@@ -79,7 +80,7 @@ public abstract class Module extends IronComponent {
       int pivotID,
       int driveID,
       int cancoderID,
-      double cancoderOffsetRads,
+      double cancoderOffsetRevs,
       boolean pivotInverted) {}
   ;
 
@@ -88,9 +89,9 @@ public abstract class Module extends IronComponent {
 
   @Log public boolean driveOk = false;
 
-  @Log public double pivotABSPoseRads = 0.0;
-  @Log public double pivotPoseRads = 0.0;
-  @Log public double pivotVelRadsPerSec = 0.0;
+  @Log public double pivotABSPoseRevs = 0.0;
+  @Log public double pivotPoseRevs = 0.0;
+  @Log public double pivotVelRevsPerSec = 0.0;
   @Log public double pivotAppliedVolts = 0.0;
   @Log public double pivotSupplyCurrent = 0.0;
   @Log public double pivotTorqueCurrent = 0.0;
@@ -136,7 +137,7 @@ public abstract class Module extends IronComponent {
   }
 
   public Rotation2d getCurrentAngle() {
-    return Rotation2d.fromRotations(pivotPoseRads);
+    return Rotation2d.fromRotations(pivotPoseRevs);
   }
 
   public SwerveModulePosition getModulePose() {
@@ -150,7 +151,7 @@ public abstract class Module extends IronComponent {
   /** HARDWARE METHODS */
   protected abstract void runPivotVolts(double volts);
 
-  protected abstract void runPivotPose(double poseRads);
+  protected abstract void runPivotPose(double poseRevs);
 
   protected void runDriveVolts(double volts) {
     runDriveVolts(volts, true);

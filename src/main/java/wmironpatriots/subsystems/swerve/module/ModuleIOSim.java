@@ -61,7 +61,7 @@ public class ModuleIOSim extends Module {
         config.pivotInverted()
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
-    pivotConf.Feedback.FeedbackRotorOffset = config.cancoderOffsetRads() / (2 * Math.PI);
+    pivotConf.Feedback.FeedbackRotorOffset = config.cancoderOffsetRevs();
 
     pivot.getConfigurator().apply(pivotConf);
     drive.getConfigurator().apply(driveConf);
@@ -132,15 +132,14 @@ public class ModuleIOSim extends Module {
     pivotOk = true;
     driveOk = true; // TODO add a debouncer
 
-    double rotsToRads = (2 * Math.PI);
-
-    pivotABSPoseRads = cancoderPose.getValueAsDouble() * rotsToRads;
-    pivotPoseRads = pivotPose.getValueAsDouble() * rotsToRads;
-    pivotVelRadsPerSec = pivotVel.getValueAsDouble() * rotsToRads;
+    pivotABSPoseRevs = cancoderPose.getValueAsDouble();
+    pivotPoseRevs = pivotPose.getValueAsDouble();
+    pivotVelRevsPerSec = pivotVel.getValueAsDouble();
     pivotAppliedVolts = pivotVolts.getValueAsDouble();
     pivotSupplyCurrent = pivotSCurrent.getValueAsDouble();
     pivotTorqueCurrent = pivotTCurrent.getValueAsDouble();
 
+    double rotsToRads = (2 * Math.PI);
     drivePoseMeters = drivePose.getValueAsDouble() * rotsToRads * WHEEL_RADIUS_METERS;
     driveVelMPS = driveVel.getValueAsDouble() * rotsToRads * WHEEL_RADIUS_METERS;
     driveAppliedVolts = driveVolts.getValueAsDouble();
@@ -154,9 +153,9 @@ public class ModuleIOSim extends Module {
   }
 
   @Override
-  protected void runPivotPose(double poseRads) {
-    System.out.println(poseRads);
-    pivot.setControl(reqPivotFeedback.withPosition(poseRads / (2 * Math.PI)));
+  protected void runPivotPose(double poseRevs) {
+    System.out.println(poseRevs);
+    pivot.setControl(reqPivotFeedback.withPosition(poseRevs));
   }
 
   @Override

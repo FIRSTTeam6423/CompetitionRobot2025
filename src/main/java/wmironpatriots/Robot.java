@@ -194,9 +194,9 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    // if (Robot.isSimulation()) {
-    //   SimulatedArena.getInstance().simulationPeriodic();
-    // }
+    if (Robot.isSimulation()) {
+      SimulatedArena.getInstance().simulationPeriodic();
+    }
 
     Monologue.updateAll();
     visualizer.periodic();
@@ -204,14 +204,14 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void autonomousInit() {
-    // Command auton =
-    //     autonChooser
-    //         .getSelected()
-    //         .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
+    Command auton =
+        autonChooser
+            .getSelected()
+            .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
 
-    // if (auton != null) {
-    //   auton.schedule();
-    // }
+    if (auton != null) {
+      auton.schedule();
+    }
   }
 
   @Override

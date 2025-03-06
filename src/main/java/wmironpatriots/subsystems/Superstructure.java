@@ -6,6 +6,7 @@
 
 package wmironpatriots.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -168,6 +169,7 @@ public class Superstructure {
   /** Checks to see if tail will hit top of carriage when stowed */
   public static boolean isTailSafe(Elevator elevator, Tail tail) {
     double SetpointDisplacement = elevator.getSetpointDisplacement();
+    SetpointDisplacement = MathUtil.applyDeadband(SetpointDisplacement, 0.2);
 
     if (SetpointDisplacement > 0 && elevator.getPose() < Elevator.POSE_MAX_CARRIAGE_STAGE_ONE) {
       return false;
