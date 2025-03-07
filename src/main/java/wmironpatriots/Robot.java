@@ -255,7 +255,7 @@ public class Robot extends TimedRobot implements Logged {
             tail.setRollerSpeedCmmd(.5)
                 .alongWith(chute.runChuteSpeedCmmd(-.1))
                 .until(() -> tail.beamTripped = true)
-                .andThen(tail.setRollerTimecmmd(.5, 1)));
+                .andThen(tail.setRollerTimecmmd(.5, 1)).alongWith(chute.runChuteSpeedCmmd(0)));
 
     // // * OUTTAKING CORAL COMMAND
     operatorController
