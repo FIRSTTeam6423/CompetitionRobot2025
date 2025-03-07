@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static wmironpatriots.Constants.SWERVE_SIM_CONFIG;
 
+import choreo.auto.AutoChooser;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -18,10 +19,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,6 +83,8 @@ public class Robot extends TimedRobot implements Logged {
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+  private final AutoChooser chooser;
 
   public Robot() {
     // * MONOLOGUE SETUP
@@ -283,6 +287,9 @@ public class Robot extends TimedRobot implements Logged {
     */
 
     factory = new ChoreoFactory(drivetrain);
+    chooser = factory.getChooser();
+    SmartDashboard.putData("sdf", chooser);
+    RobotModeTriggers.autonomous().whileTrue(chooser.selectedCommandScheduler());
   }
 
   private void configureBindings() {
@@ -337,11 +344,10 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void autonomousInit() {
     Command auton =
-        factory.getMove().withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
-
-    if (auton != null) {
-      auton.schedule();
-    }
+        factory
+            .getMove(); // .withDeadline(Commands.waitUntil(() -> DriverStation.isTeleopEnabled()));
+    // if (auton != null) {
+    auton.schedule();
   }
 
   @Override
