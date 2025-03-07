@@ -248,6 +248,14 @@ public class Robot extends TimedRobot implements Logged {
         .whileFalse(tail.setRollerSpeedCmmd(0))
         .whileFalse(chute.runChuteSpeedCmmd(0.0));
 
+    // * AUTO CENTERING COMMAND
+
+    operatorController.povRight()
+    .onTrue(tail.setRollerSpeedCmmd(.5)
+    .alongWith(chute.runChuteSpeedCmmd(-.1))
+    .until(() -> tail.beamTripped = true)
+    .andThen(tail.setRollerPositionCommand(1)));
+
     // // * OUTTAKING CORAL COMMAND
     operatorController
         .rightBumper()
