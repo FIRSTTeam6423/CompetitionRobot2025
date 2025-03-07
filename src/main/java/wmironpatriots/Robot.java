@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
@@ -220,7 +219,7 @@ public class Robot extends TimedRobot implements Logged {
 
     // // * ELEVATOR LEVEL 3 COMMAND
     operatorController
-        .b()
+        .y()
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
@@ -230,7 +229,7 @@ public class Robot extends TimedRobot implements Logged {
 
     // // * ELEVATOR LEVEL 4 COMMAND
     operatorController
-        .y()
+        .b()
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
@@ -250,11 +249,13 @@ public class Robot extends TimedRobot implements Logged {
 
     // * AUTO CENTERING COMMAND
 
-    operatorController.povRight()
-    .onTrue(tail.setRollerSpeedCmmd(.5)
-    .alongWith(chute.runChuteSpeedCmmd(-.1))
-    .until(() -> tail.beamTripped = true)
-    .andThen(tail.setRollerPositionCommand(1)));
+    operatorController
+        .povRight()
+        .onTrue(
+            tail.setRollerSpeedCmmd(.5)
+                .alongWith(chute.runChuteSpeedCmmd(-.1))
+                .until(() -> tail.beamTripped = true)
+                .andThen(tail.setRollerTimecmmd(.5, 1)));
 
     // // * OUTTAKING CORAL COMMAND
     operatorController
@@ -271,35 +272,42 @@ public class Robot extends TimedRobot implements Logged {
         .rightBumper()
         .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTPUTTING_SPEEDS))
         .onFalse(tail.setRollerSpeedCmmd(0.0));
-    
-    // * ALGAE DESCORING
 
+    // * ALGAE DESCORING
 
     operatorController
         .povUp()
         .whileTrue(
-            tail.setRollerSpeedCmmd(1).alongWith(
-            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
-                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_HIGH))))
+            tail.setRollerSpeedCmmd(1)
+                .alongWith(
+                    tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                        .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                        .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_HIGH))))
         .whileTrue(
-            elevator.setTargetPoseCmmd(Elevator.POSE_ALGAE_HIGH).onlyIf(() -> tail.inSetpointRange()))
+            elevator
+                .setTargetPoseCmmd(Elevator.POSE_ALGAE_HIGH)
+                .onlyIf(() -> tail.inSetpointRange()))
         .whileFalse(tail.setRollerSpeedCmmd(0));
-    
+
     operatorController
         .povDown()
-        .whileTrue( 
-            tail.setRollerSpeedCmmd(1).alongWith(
-            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
-                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW))))
         .whileTrue(
-            elevator.setTargetPoseCmmd(Elevator.POSE_ALGAE_LOW).onlyIf(() -> tail.inSetpointRange()))
+            tail.setRollerSpeedCmmd(1)
+                .alongWith(
+                    tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                        .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                        .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW))))
+        .whileTrue(
+            elevator
+                .setTargetPoseCmmd(Elevator.POSE_ALGAE_LOW)
+                .onlyIf(() -> tail.inSetpointRange()))
         .whileFalse(tail.setRollerSpeedCmmd(0));
 
-    
-    operatorController.povDown().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW).alongWith(tail.setRollerSpeedCmmd(1))).whileFalse(tail.setRollerSpeedCmmd(0));
-
+    operatorController
+        .povDown()
+        .whileTrue(
+            tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW).alongWith(tail.setRollerSpeedCmmd(1)))
+        .whileFalse(tail.setRollerSpeedCmmd(0));
 
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
@@ -369,8 +377,7 @@ public class Robot extends TimedRobot implements Logged {
   }
 
   @Override
-  public void autonomousInit() {
-  }
+  public void autonomousInit() {}
 
   @Override
   public void autonomousPeriodic() {}

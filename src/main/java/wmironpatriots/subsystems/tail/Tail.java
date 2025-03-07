@@ -6,6 +6,7 @@
 
 package wmironpatriots.subsystems.tail;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import monologue.Annotations.Log;
 import wmironpatriots.util.mechanismUtil.LoggedSubsystem;
@@ -27,12 +28,12 @@ public abstract class Tail implements LoggedSubsystem {
   public static final double POSE_MOVE_ANGLE = 8.2;
 
   public static final double POSE_L1 = 5.56;
-  public static final double POSE_L2 = (20 * 5 / 36);//5;
-  public static final double POSE_L3 = (20 * 5 / 36);//5.56;
-  public static final double POSE_L4 = (30 * 5 / 36);//4;
+  public static final double POSE_L2 = (20 * 5 / 36); // 5;
+  public static final double POSE_L3 = (20 * 5 / 36); // 5.56;
+  public static final double POSE_L4 = (30 * 5 / 36); // 4;
 
-  public static final double POSE_ALGAE_HIGH =(70 * 5 / 36); //uses formula
-  public static final double POSE_ALGAE_LOW =(70 * 5 / 36); //uses formula
+  public static final double POSE_ALGAE_HIGH = (70 * 5 / 36); // uses formula
+  public static final double POSE_ALGAE_LOW = (70 * 5 / 36); // uses formula
 
   // Roller speeds
   public static final double INTAKING_SPEEDS = 2;
@@ -51,8 +52,7 @@ public abstract class Tail implements LoggedSubsystem {
   @Log protected boolean pivotMotorOk = false;
   @Log protected boolean rollerMotorOk = false;
 
-  @Log
-  public boolean beamTripped = true;
+  @Log public boolean beamTripped = true;
 
   @Log protected double pivotSetpointRevs;
   @Log protected double pivotPoseRevs;
@@ -63,6 +63,8 @@ public abstract class Tail implements LoggedSubsystem {
   @Log protected double rollerVelRPM;
   @Log protected double rollerAppliedVolts;
   @Log protected double rollerSupplyCurrentAmps;
+
+  Timer timer = new Timer();
 
   /** Runs target position in radians from current zeroed pose */
   public Command setTargetPoseCmmd(double poseRes) {
@@ -81,6 +83,16 @@ public abstract class Tail implements LoggedSubsystem {
         });
   }
 
+  public Command setRollerTimecmmd(double speed, double time){
+    return this.run(()->{
+      runRollerSpeed(speed);
+      timer.reset();
+      timer.start();
+      if (timer.hasElapsed(1)){
+        runRollerSpeed(0);
+      }
+    });
+  }
 
   /** Zeroes tail pivot at current pose */
   public Command zeroPoseCmmd() {
@@ -104,10 +116,11 @@ public abstract class Tail implements LoggedSubsystem {
             });
   }
 
-  public Command setRollerPositionCommand(double revs){
-    return this.run(()-> {
-      setRollerPosition(revs);
-    });
+  public Command setRollerPositionCommand(double revs) {
+    return this.run(
+        () -> {
+          setRollerPosition(revs);
+        });
   }
 
   /** Stop all elevator motor input */

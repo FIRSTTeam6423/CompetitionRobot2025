@@ -14,16 +14,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
-import edu.wpi.first.wpilibj.DigitalInput;
-
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 public class TailIOComp extends Tail {
   private final TalonFX pivot;
@@ -110,7 +108,7 @@ public class TailIOComp extends Tail {
     roller.setVoltage(speed);
   }
 
-  protected void setRollerPosition(double poseRevs){
+  protected void setRollerPosition(double poseRevs) {
     encoder.setPosition(poseRevs);
   }
 
@@ -128,8 +126,6 @@ public class TailIOComp extends Tail {
   protected void stopRollers() {
     roller.stopMotor();
   }
-
-
 
   @Override
   protected void pivotCoastingEnabled(boolean enabled) {
