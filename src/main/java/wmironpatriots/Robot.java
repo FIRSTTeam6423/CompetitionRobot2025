@@ -263,6 +263,35 @@ public class Robot extends TimedRobot implements Logged {
         .rightBumper()
         .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTPUTTING_SPEEDS))
         .onFalse(tail.setRollerSpeedCmmd(0.0));
+    
+    // * ALGAE DESCORING
+
+
+    operatorController
+        .povUp()
+        .whileTrue(
+            tail.setRollerSpeedCmmd(1).alongWith(
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_HIGH))))
+        .whileTrue(
+            elevator.setTargetPoseCmmd(Elevator.POSE_ALGAE_HIGH).onlyIf(() -> tail.inSetpointRange()))
+        .whileFalse(tail.setRollerSpeedCmmd(0));
+    
+    operatorController
+        .povDown()
+        .whileTrue( 
+            tail.setRollerSpeedCmmd(1).alongWith(
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW))))
+        .whileTrue(
+            elevator.setTargetPoseCmmd(Elevator.POSE_ALGAE_LOW).onlyIf(() -> tail.inSetpointRange()))
+        .whileFalse(tail.setRollerSpeedCmmd(0));
+
+    
+    operatorController.povDown().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW).alongWith(tail.setRollerSpeedCmmd(1))).whileFalse(tail.setRollerSpeedCmmd(0));
+
 
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();

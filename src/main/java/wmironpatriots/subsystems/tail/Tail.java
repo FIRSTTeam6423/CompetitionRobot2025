@@ -27,9 +27,12 @@ public abstract class Tail implements LoggedSubsystem {
   public static final double POSE_MOVE_ANGLE = 8.2;
 
   public static final double POSE_L1 = 5.56;
-  public static final double POSE_L2 = 5;
-  public static final double POSE_L3 = 5.56;
-  public static final double POSE_L4 = 4;
+  public static final double POSE_L2 = (20 * 5 / 36);//5;
+  public static final double POSE_L3 = (20 * 5 / 36);//5.56;
+  public static final double POSE_L4 = (30 * 5 / 36);//4;
+
+  public static final double POSE_ALGAE_HIGH =(70 * 5 / 36); //uses formula
+  public static final double POSE_ALGAE_LOW =(70 * 5 / 36); //uses formula
 
   // Roller speeds
   public static final double INTAKING_SPEEDS = 2;
