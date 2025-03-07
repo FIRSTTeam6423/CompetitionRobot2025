@@ -45,8 +45,9 @@ public class TailIOSim extends Tail {
     pivotMotorOk = true;
     rollerMotorOk = true;
 
-    beamTriggered = true;
+    beamTripped = true;
 
+    
     pivotPoseRevs = tailSim.getAngleRads();
     pivotVelRPM = Units.radiansPerSecondToRotationsPerMinute(tailSim.getAngleRads());
     pivotAppliedVolts = pivotInputVoltage;
@@ -83,4 +84,10 @@ public class TailIOSim extends Tail {
 
   @Override
   protected void pivotCoastingEnabled(boolean enabled) {} // Sim motors can't coast
+
+  @Override
+  protected void setRollerPosition(double revs) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setRollerPosition'");
+  }
 }

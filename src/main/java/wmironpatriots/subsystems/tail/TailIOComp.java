@@ -14,16 +14,22 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 public class TailIOComp extends Tail {
   private final TalonFX pivot;
   private final SparkMax roller;
+
+  private final RelativeEncoder encoder;
+
+  private final DigitalInput beam;
 
   private final TalonFXConfiguration pivotConf;
   private final SparkMaxConfig rollerConf;
@@ -36,6 +42,10 @@ public class TailIOComp extends Tail {
   public TailIOComp() {
     pivot = new TalonFX(13, "rio");
     roller = new SparkMax(1, MotorType.kBrushless);
+
+    beam = new DigitalInput(8);
+
+    encoder = roller.getEncoder();
 
     pivotConf = new TalonFXConfiguration();
     pivotConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -72,6 +82,8 @@ public class TailIOComp extends Tail {
   public void periodic() {
     pivotMotorOk = BaseStatusSignal.refreshAll(sigPose, sigVel, sigVolts, sigCurrent).isOK();
 
+    beamTripped = !beam.get();
+
     pivotPoseRevs = sigPose.getValueAsDouble();
     pivotVelRPM = sigPose.getValueAsDouble();
     pivotAppliedVolts = sigVolts.getValueAsDouble();
@@ -94,6 +106,10 @@ public class TailIOComp extends Tail {
   @Override
   protected void runRollerSpeed(double speed) {
     roller.setVoltage(speed);
+  }
+
+  protected void setRollerPosition(double poseRevs) {
+    encoder.setPosition(poseRevs);
   }
 
   @Override

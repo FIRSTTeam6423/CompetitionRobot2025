@@ -225,7 +225,7 @@ public class Robot extends TimedRobot implements Logged {
 
     // // * ELEVATOR LEVEL 3 COMMAND
     operatorController
-        .b()
+        .y()
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
@@ -235,11 +235,11 @@ public class Robot extends TimedRobot implements Logged {
 
     // // * ELEVATOR LEVEL 4 COMMAND
     operatorController
-        .y()
+        .b()
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_L4)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_L4).until(joystick.leftBumper()).andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))))
         .whileTrue(
             elevator.setTargetPoseCmmd(Elevator.POSE_L4).onlyIf(() -> tail.inSetpointRange()));
 
@@ -252,6 +252,16 @@ public class Robot extends TimedRobot implements Logged {
                 .alongWith(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS)))
         .whileFalse(tail.setRollerSpeedCmmd(0))
         .whileFalse(chute.runChuteSpeedCmmd(0.0));
+
+    // * AUTO CENTERING COMMAND
+
+    operatorController
+        .povRight()
+        .onTrue(
+            tail.setRollerSpeedCmmd(.5)
+                .alongWith(chute.runChuteSpeedCmmd(-.1))
+                .until(() -> tail.beamTripped = true)
+                .andThen(tail.setRollerTimecmmd(.5, 1)).alongWith(chute.runChuteSpeedCmmd(0)));
 
     // // * OUTTAKING CORAL COMMAND
     operatorController
@@ -268,6 +278,42 @@ public class Robot extends TimedRobot implements Logged {
         .rightBumper()
         .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTPUTTING_SPEEDS))
         .onFalse(tail.setRollerSpeedCmmd(0.0));
+
+    // * ALGAE DESCORING
+
+    operatorController
+        .povUp()
+        .whileTrue(
+            tail.setRollerSpeedCmmd(1)
+                .alongWith(
+                    tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                        .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                        .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_HIGH))))
+        .whileTrue(
+            elevator
+                .setTargetPoseCmmd(Elevator.POSE_ALGAE_HIGH)
+                .onlyIf(() -> tail.inSetpointRange()))
+        .whileFalse(tail.setRollerSpeedCmmd(0));
+
+    operatorController
+        .povDown()
+        .whileTrue(
+            tail.setRollerSpeedCmmd(1)
+                .alongWith(
+                    tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                        .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                        .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW))))
+        .whileTrue(
+            elevator
+                .setTargetPoseCmmd(Elevator.POSE_ALGAE_LOW)
+                .onlyIf(() -> tail.inSetpointRange()))
+        .whileFalse(tail.setRollerSpeedCmmd(0));
+
+    operatorController
+        .povDown()
+        .whileTrue(
+            tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW).alongWith(tail.setRollerSpeedCmmd(1)))
+        .whileFalse(tail.setRollerSpeedCmmd(0));
 
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
@@ -308,7 +354,7 @@ public class Robot extends TimedRobot implements Logged {
                             * MaxAngularRate) // Drive counterclockwise with negative X (left)
             ));
 
-    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+    //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
     joystick
         .b()
         .whileTrue(
@@ -325,7 +371,7 @@ public class Robot extends TimedRobot implements Logged {
     // joystick.povUp().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
     // reset the field-centric heading on left bumper press
-    joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+    joystick.a().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
     drivetrain.registerTelemetry(logger::telemeterize);
   }
