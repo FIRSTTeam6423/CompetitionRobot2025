@@ -51,7 +51,8 @@ public abstract class Tail implements LoggedSubsystem {
   @Log protected boolean pivotMotorOk = false;
   @Log protected boolean rollerMotorOk = false;
 
-  @Log protected boolean beamTriggered = false;
+  @Log
+  public boolean beamTripped = true;
 
   @Log protected double pivotSetpointRevs;
   @Log protected double pivotPoseRevs;
@@ -80,6 +81,7 @@ public abstract class Tail implements LoggedSubsystem {
         });
   }
 
+
   /** Zeroes tail pivot at current pose */
   public Command zeroPoseCmmd() {
     return this.run(
@@ -100,6 +102,12 @@ public abstract class Tail implements LoggedSubsystem {
               System.out.println("Tail zeroed");
               isZeroed = true;
             });
+  }
+
+  public Command setRollerPositionCommand(double revs){
+    return this.run(()-> {
+      setRollerPosition(revs);
+    });
   }
 
   /** Stop all elevator motor input */
@@ -129,7 +137,7 @@ public abstract class Tail implements LoggedSubsystem {
 
   /** Checks if both tail beambreaks are triggered */
   public boolean hasCoral() {
-    return beamTriggered;
+    return beamTripped;
   }
 
   /** HARDWARE METHODS */
@@ -141,6 +149,8 @@ public abstract class Tail implements LoggedSubsystem {
 
   /** Run roller motor with speed request */
   protected abstract void runRollerSpeed(double speed);
+
+  protected abstract void setRollerPosition(double revs);
 
   /** Reset encoder to specific pose in rads */
   protected abstract void setEncoderPose(double poseRevs);
