@@ -233,7 +233,7 @@ public class Robot extends TimedRobot implements Logged {
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_L4)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_L4).until(joystick.leftBumper()).andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))))
         .whileTrue(
             elevator.setTargetPoseCmmd(Elevator.POSE_L4).onlyIf(() -> tail.inSetpointRange()));
 
@@ -343,7 +343,7 @@ public class Robot extends TimedRobot implements Logged {
                             * MaxAngularRate) // Drive counterclockwise with negative X (left)
             ));
 
-    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+    //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
     joystick
         .b()
         .whileTrue(
@@ -360,7 +360,7 @@ public class Robot extends TimedRobot implements Logged {
     // joystick.povUp().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
     // reset the field-centric heading on left bumper press
-    joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+    joystick.a().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
     drivetrain.registerTelemetry(logger::telemeterize);
   }
