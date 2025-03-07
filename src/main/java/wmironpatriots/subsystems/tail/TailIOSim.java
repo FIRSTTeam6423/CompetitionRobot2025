@@ -47,7 +47,6 @@ public class TailIOSim extends Tail {
 
     beamTripped = true;
 
-    
     pivotPoseRevs = tailSim.getAngleRads();
     pivotVelRPM = Units.radiansPerSecondToRotationsPerMinute(tailSim.getAngleRads());
     pivotAppliedVolts = pivotInputVoltage;

@@ -83,15 +83,16 @@ public abstract class Tail implements LoggedSubsystem {
         });
   }
 
-  public Command setRollerTimecmmd(double speed, double time){
-    return this.run(()->{
-      runRollerSpeed(speed);
-      timer.reset();
-      timer.start();
-      if (timer.hasElapsed(1)){
-        runRollerSpeed(0);
-      }
-    });
+  public Command setRollerTimecmmd(double speed, double time) {
+    return this.run(
+        () -> {
+          runRollerSpeed(speed);
+          timer.reset();
+          timer.start();
+          if (timer.hasElapsed(1)) {
+            runRollerSpeed(0);
+          }
+        });
   }
 
   /** Zeroes tail pivot at current pose */

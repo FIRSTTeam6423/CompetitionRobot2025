@@ -10,7 +10,6 @@ import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,8 +30,7 @@ public class ChoreoFactory {
   public ChoreoFactory(CommandSwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;
     controller =
-        new SwerveRequest.RobotCentric()
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+        new SwerveRequest.RobotCentric().withDriveRequestType(DriveRequestType.OpenLoopVoltage);
     factory =
         new AutoFactory(
             drivetrain::getPose, drivetrain::resetPose, this::followTraj, true, drivetrain);

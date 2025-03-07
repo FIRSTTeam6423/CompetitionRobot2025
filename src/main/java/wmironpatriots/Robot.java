@@ -24,9 +24,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import monologue.Logged;
@@ -37,8 +34,6 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import wmironpatriots.commands.ChoreoFactory;
 import wmironpatriots.generated.TunerConstants;
 import wmironpatriots.subsystems.CommandSwerveDrivetrain;
-import wmironpatriots.subsystems.Superstructure;
-import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.chute.Chute;
 import wmironpatriots.subsystems.chute.ChuteIOComp;
 import wmironpatriots.subsystems.elevator.Elevator;
@@ -239,7 +234,10 @@ public class Robot extends TimedRobot implements Logged {
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_L4).until(joystick.leftBumper()).andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))))
+                .andThen(
+                    tail.setTargetPoseCmmd(Tail.POSE_L4)
+                        .until(joystick.leftBumper())
+                        .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))))
         .whileTrue(
             elevator.setTargetPoseCmmd(Elevator.POSE_L4).onlyIf(() -> tail.inSetpointRange()));
 
@@ -261,7 +259,8 @@ public class Robot extends TimedRobot implements Logged {
             tail.setRollerSpeedCmmd(.5)
                 .alongWith(chute.runChuteSpeedCmmd(-.1))
                 .until(() -> tail.beamTripped = true)
-                .andThen(tail.setRollerTimecmmd(.5, 1)).alongWith(chute.runChuteSpeedCmmd(0)));
+                .andThen(tail.setRollerTimecmmd(.5, 1))
+                .alongWith(chute.runChuteSpeedCmmd(0)));
 
     // // * OUTTAKING CORAL COMMAND
     operatorController
@@ -280,7 +279,6 @@ public class Robot extends TimedRobot implements Logged {
         .onFalse(tail.setRollerSpeedCmmd(0.0));
 
     // * ALGAE DESCORING
-
     operatorController
         .povUp()
         .whileTrue(
@@ -316,7 +314,7 @@ public class Robot extends TimedRobot implements Logged {
         .whileFalse(tail.setRollerSpeedCmmd(0));
 
     // * SUPERSTRUCTURE INIT
-    Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
+    // Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
     // Create new superstructure visualizer
     visualizer = new RobotVisualizer(elevator, tail);
@@ -354,7 +352,7 @@ public class Robot extends TimedRobot implements Logged {
                             * MaxAngularRate) // Drive counterclockwise with negative X (left)
             ));
 
-    //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+    // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
     joystick
         .b()
         .whileTrue(
