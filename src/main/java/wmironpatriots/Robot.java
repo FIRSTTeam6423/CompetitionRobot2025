@@ -32,6 +32,7 @@ import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import wmironpatriots.commands.ChoreoFactory;
 import wmironpatriots.generated.TunerConstants;
 import wmironpatriots.subsystems.CommandSwerveDrivetrain;
 import wmironpatriots.subsystems.Superstructure;
@@ -57,7 +58,7 @@ public class Robot extends TimedRobot implements Logged {
   private final Tail tail;
   private final Elevator elevator;
   private final Chute chute;
-
+  private final ChoreoFactory factory;
   private final RobotVisualizer visualizer;
 
   private double MaxSpeed =
@@ -280,6 +281,8 @@ public class Robot extends TimedRobot implements Logged {
           operatorController2.getBranchTarget(),
           operatorController2.getLevelTarget());
     */
+
+    factory = new ChoreoFactory(drivetrain);
   }
 
   private void configureBindings() {
@@ -333,6 +336,12 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void autonomousInit() {
+    Command auton =
+        factory.getMove().withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
+
+    if (auton != null) {
+      auton.schedule();
+    }
   }
 
   @Override

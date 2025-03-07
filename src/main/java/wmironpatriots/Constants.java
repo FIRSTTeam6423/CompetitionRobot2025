@@ -47,7 +47,7 @@ public class Constants {
                           1.5))
                   .withTrackLengthTrackWidth(
                       Meters.of(Swerve.TRACK_WIDTH_METERS),
-                      Meters.of(Swerve.TRACK_WIDTH_METERS)) // TODO add back bumper width
+                      Meters.of(Swerve.TRACK_WIDTH_METERS)) // TODO add back bumper widt
                   .withBumperSize(
                       Meters.of(Swerve.BUMPER_WIDTH_METER), Meters.of(Swerve.BUMPER_WIDTH_METER))
                   .withRobotMass(Kilograms.of(Swerve.MASS_KG))
