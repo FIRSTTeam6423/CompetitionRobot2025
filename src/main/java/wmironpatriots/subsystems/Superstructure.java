@@ -108,9 +108,9 @@ public class Superstructure {
     stateMap
         .get(State.INTAKING_CHUTE)
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_ANGLE)
                 .until(() -> isTailSafe(elevator, tail))
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_INTAKING))
         .and(() -> elevator.inSetpointRange())
         .whileTrue(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS))
@@ -122,9 +122,9 @@ public class Superstructure {
     stateMap
         .get(State.L1_SETUP)
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_ANGLE)
                 .until(() -> isTailSafe(elevator, tail))
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L1))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
@@ -132,9 +132,9 @@ public class Superstructure {
     stateMap
         .get(State.L2_SETUP)
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_ANGLE)
                 .until(() -> isTailSafe(elevator, tail))
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L2))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
@@ -142,16 +142,16 @@ public class Superstructure {
     stateMap
         .get(State.L3_SETUP)
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS)
+            tail.setTargetPoseCmmd(Tail.POSE_OUT_ANGLE)
                 .until(() -> isTailSafe(elevator, tail))
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE)))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L3))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));
 
     stateMap
         .get(State.L4_SETUP)
-        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MAX_REVS))
+        .whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_ANGLE))
         .whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L4))
         .and(() -> elevator.inSetpointRange())
         .onTrue(setCurrentStateCommand(State.REEF_SCORE));

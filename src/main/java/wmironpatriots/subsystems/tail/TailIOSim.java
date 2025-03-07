@@ -28,10 +28,10 @@ public class TailIOSim extends Tail {
             GEAR_REDUCTION,
             1.0,
             Units.inchesToMeters(LENGTH_INCHES),
-            POSE_MAX_REVS,
-            POSE_MAX_REVS,
+            POSE_OUT_ANGLE,
+            POSE_OUT_ANGLE,
             true,
-            POSE_MAX_REVS);
+            POSE_OUT_ANGLE);
 
     pivotFeedforward = new ArmFeedforward(0.0, 0.0, 0.0);
     pivotFeedback =

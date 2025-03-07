@@ -6,15 +6,18 @@
 
 package wmironpatriots;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static wmironpatriots.Constants.SWERVE_SIM_CONFIG;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -29,7 +32,8 @@ import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import wmironpatriots.commands.Autonomous;
+import wmironpatriots.generated.TunerConstants;
+import wmironpatriots.subsystems.CommandSwerveDrivetrain;
 import wmironpatriots.subsystems.Superstructure;
 import wmironpatriots.subsystems.Superstructure.Requests;
 import wmironpatriots.subsystems.chute.Chute;
@@ -37,29 +41,45 @@ import wmironpatriots.subsystems.chute.ChuteIOComp;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.elevator.ElevatorIOSim;
-import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.tail.Tail;
 import wmironpatriots.subsystems.tail.TailIOComp;
 import wmironpatriots.subsystems.tail.TailIOSim;
-import wmironpatriots.util.deviceUtil.InputStream;
 import wmironpatriots.util.deviceUtil.OperatorController;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
-  private final CommandXboxController driveController;
+  private final CommandXboxController joystick;
   private final CommandXboxController operatorController;
 
   private final OperatorController operatorController2;
 
-  private final Swerve swerve;
   private final Tail tail;
   private final Elevator elevator;
   private final Chute chute;
 
   private final RobotVisualizer visualizer;
 
-  private final SendableChooser<Command> autonChooser;
+  private double MaxSpeed =
+      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)
+          * 0.75; // kSpeedAt12Volts desired top speed
+  private double MaxAngularRate =
+      RotationsPerSecond.of(0.75)
+          .in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+
+  /* Setting up bindings for necessary control of the swerve drive platform */
+  private final SwerveRequest.FieldCentric drive =
+      new SwerveRequest.FieldCentric()
+          .withDeadband(MaxSpeed * 0.1)
+          .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+          .withDriveRequestType(
+              DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+
+  private final Telemetry logger = new Telemetry(MaxSpeed);
+
+  public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
   public Robot() {
     // * MONOLOGUE SETUP
@@ -104,7 +124,7 @@ public class Robot extends TimedRobot implements Logged {
         });
 
     // * SUBSYSTEM INIT
-    driveController = new CommandXboxController(0);
+    joystick = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
 
     operatorController2 = new OperatorController(3);
@@ -116,7 +136,6 @@ public class Robot extends TimedRobot implements Logged {
                     SWERVE_SIM_CONFIG.get(), new Pose2d(3, 3, new Rotation2d())))
             : Optional.empty();
 
-    swerve = new Swerve(swerveSim);
     if (Robot.isReal()) {
       tail = new TailIOComp();
       elevator = new ElevatorIOComp();
@@ -130,64 +149,36 @@ public class Robot extends TimedRobot implements Logged {
     // Setup simulated arena if simulated
     if (Robot.isSimulation()) {
       SimulatedArena.getInstance().addDriveTrainSimulation(swerveSim.orElse(null));
-      swerve.resetOdo(swerveSim.get().getSimulatedDriveTrainPose());
     }
 
     // * DEFAULT COMMANDS
     // Set up driver input streams
-    double maxSpeed = swerve.MAX_LINEAR_SPEED_MPS;
-    double maxAngularSpeed = swerve.MAX_ANGULAR_SPEED_RADS_PER_SEC;
+    configureBindings();
 
-    InputStream x = InputStream.of(driveController::getLeftY);
-    InputStream y = InputStream.of(driveController::getLeftX);
+    // elevator.setDefaultCommand(
+    //     Commands.sequence(
+    //         elevator.runPoseZeroingCmmd().onlyIf(() -> !elevator.isZeroed()),
+    //         elevator
+    //             .setTargetPoseCmmd(3.4)
+    //             .until(
+    //                 () ->
+    //                     elevator.inSetpointRange() || elevator.getSetpoint() >
+    // elevator.getPose()),
+    //         elevator.stopMotorInputCmmd()));
 
-    InputStream hypot =
-        InputStream.hypot(y, x).clamp(1).deadband(0.05, 1.0).signedPow(2).scale(maxSpeed);
+    // tail.setDefaultCommand(
+    //     Commands.sequence(
+    //         // tail.setRollerSpeedCmmd(0.0),
+    //         tail.runPoseZeroingCmmd().onlyIf(() -> !tail.isZeroed()),
+    //         tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+    //             .until(
+    //                 () -> elevator.inSetpointRange() || elevator.getSetpoint() >
+    // elevator.getPose())
+    //             .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))));
 
-    InputStream theta = InputStream.arcTan(y, x);
-    x = hypot.scale(hypot.scale(theta.map(Math::cos)));
-    y = hypot.scale(hypot.scale(theta.map(Math::sin)));
-
-    InputStream omega =
-        InputStream.of(driveController::getRightX)
-            .clamp(1.0)
-            .deadband(0.05, 1.0)
-            .signedPow(2.0)
-            .scale(maxAngularSpeed);
-
-    swerve.setDefaultCommand(swerve.teleopSwerveCmmd(x, y, omega));
-
-    elevator.setDefaultCommand(
-        Commands.sequence(
-            elevator.runPoseZeroingCmmd().onlyIf(() -> !elevator.isZeroed()),
-            elevator
-                .setTargetPoseCmmd(1.0)
-                .until(
-                    () ->
-                        elevator.inSetpointRange() || elevator.getSetpoint() > elevator.getPose()),
-            elevator.stopMotorInputCmmd()));
-
-    tail.setDefaultCommand(
-        Commands.sequence(
-            tail.setRollerSpeedCmmd(0.0),
-            tail.runPoseZeroingCmmd()
-                .onlyIf(() -> !tail.isZeroed() && Superstructure.isTailSafe(elevator, tail)),
-            tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)));
-
-    chute.setDefaultCommand(chute.runChuteSpeedCmmd(0.0));
-    
     // .until(() -> Superstructure.isTailSafe(elevator, tail)),
     // tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS).until(() -> tail.inSetpointRange()),
     // tail.stopMotorInputCmmd()));
-
-    // driveController
-    //     .a()
-    //     .whileTrue(chute.runChuteSpeedCmmd(Chute.INTAKE_SPEED))
-    //     .onFalse(chute.runChuteSpeedCmmd(0.0));
-
-    // driveController.a().whileTrue(tail.setTargetPoseCmmd(0.0));
-
-    // driveController.x().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS));
     /*
     driveController
         .x()
@@ -206,66 +197,72 @@ public class Robot extends TimedRobot implements Logged {
 
     driveController.b().whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L3));
     */
-    // driveController.x().whileTrue(tail.setRollerSpeedCmmd(1)).onFalse(tail.setRollerSpeedCmmd(0.0));
+    // joystick.x().whileTrue(tail.setRollerSpeedCmmd(1)).onFalse(tail.setRollerSpeedCmmd(0.0));
 
     // * ELEVATOR LEVEL 1 COMMAND
     operatorController
         .a()
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_MOVE_REVS)
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-                .andThen(tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS)))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE)))
         .whileTrue(this.setElevatorToStowed().onlyIf(() -> tail.inSetpointRange()));
 
-    // * ELEVATOR LEVEL 2 COMMAND
+    // // * ELEVATOR LEVEL 2 COMMAND
     operatorController
         .x()
         .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_MOVE_REVS)
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_L2)))
         .whileTrue(
             elevator.setTargetPoseCmmd(Elevator.POSE_L2).onlyIf(() -> tail.inSetpointRange()));
 
-    // * ELEVATOR LEVEL 3 COMMAND
+    // // * ELEVATOR LEVEL 3 COMMAND
     operatorController
         .b()
         .whileTrue(
-          tail.setTargetPoseCmmd(Tail.POSE_MOVE_REVS)
-              .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-              .andThen(tail.setTargetPoseCmmd(Tail.POSE_L3)))
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_L3)))
         .whileTrue(
-          elevator.setTargetPoseCmmd(Elevator.POSE_L3).onlyIf(() -> tail.inSetpointRange()));
+            elevator.setTargetPoseCmmd(Elevator.POSE_L3).onlyIf(() -> tail.inSetpointRange()));
 
-    // * ELEVATOR LEVEL 4 COMMAND
+    // // * ELEVATOR LEVEL 4 COMMAND
     operatorController
         .y()
         .whileTrue(
-          tail.setTargetPoseCmmd(Tail.POSE_MOVE_REVS)
-              .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-              .andThen(tail.setTargetPoseCmmd(Tail.POSE_L4)))
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_L4)))
         .whileTrue(
-          elevator.setTargetPoseCmmd(Elevator.POSE_L4).onlyIf(() -> tail.inSetpointRange()));
+            elevator.setTargetPoseCmmd(Elevator.POSE_L4).onlyIf(() -> tail.inSetpointRange()));
 
-    // * INTAKING CORAL COMMAND
+    // // * INTAKING CORAL COMMAND
     operatorController
         .leftBumper()
-        .whileTrue(chute.runChuteSpeedCmmd(Chute.INTAKE_SPEED)
-          .alongWith(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS)));
+        .whileTrue(
+            chute
+                .runChuteSpeedCmmd(Chute.INTAKE_SPEED)
+                .alongWith(tail.setRollerSpeedCmmd(Tail.INTAKING_SPEEDS)))
+        .whileFalse(tail.setRollerSpeedCmmd(0))
+        .whileFalse(chute.runChuteSpeedCmmd(0.0));
 
-    // * OUTTAKING CORAL COMMAND
+    // // * OUTTAKING CORAL COMMAND
     operatorController
         .rightBumper()
         .whileTrue(
             chute
                 .runChuteSpeedCmmd(Chute.OUTAKE_SPEED)
-                .alongWith(tail.setRollerSpeedCmmd(Tail.OUTTAKING_SPEEDS)));
+                .alongWith(tail.setRollerSpeedCmmd(Tail.OUTTAKING_SPEEDS)))
+        .whileFalse(tail.setRollerSpeedCmmd(0))
+        .whileFalse(chute.runChuteSpeedCmmd(0.0));
 
-
-    // * SCORING CORAL COMMAND
-    driveController
+    // // * SCORING CORAL COMMAND
+    joystick
         .rightBumper()
-        .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTPUTTING_SPEEDS));
+        .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTPUTTING_SPEEDS))
+        .onFalse(tail.setRollerSpeedCmmd(0.0));
 
     // * SUPERSTRUCTURE INIT
     Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
@@ -274,8 +271,6 @@ public class Robot extends TimedRobot implements Logged {
     visualizer = new RobotVisualizer(elevator, tail);
 
     // * AUTON INIT
-    autonChooser = Autonomous.configureAutons(swerve);
-    SmartDashboard.putData("Select Auton", autonChooser);
     /*
       new Superstructure(
           elevator,
@@ -285,6 +280,44 @@ public class Robot extends TimedRobot implements Logged {
           operatorController2.getBranchTarget(),
           operatorController2.getLevelTarget());
     */
+  }
+
+  private void configureBindings() {
+    // Note that X is defined as forward according to WPILib convention,
+    // and Y is defined as to the left according to WPILib convention.
+    drivetrain.setDefaultCommand(
+        // Drivetrain will execute this command periodically
+        drivetrain.applyRequest(
+            () ->
+                drive
+                    .withVelocityX(-joystick.getLeftY() * MaxSpeed)
+                    .withVelocityY(
+                        -joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(
+                        joystick.getRightX()
+                            * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            ));
+
+    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+    joystick
+        .b()
+        .whileTrue(
+            drivetrain.applyRequest(
+                () ->
+                    point.withModuleDirection(
+                        new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
+
+    // Run SysId routines when holding back/start and X/Y.
+    // Note that each routine should be run exactly once in a single log.
+    // joystick.povDown().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    // joystick.povDown().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    // joystick.povUp().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    // joystick.povUp().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+    // reset the field-centric heading on left bumper press
+    joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+    drivetrain.registerTelemetry(logger::telemeterize);
   }
 
   @Override
@@ -300,14 +333,6 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void autonomousInit() {
-    Command auton =
-        autonChooser
-            .getSelected()
-            .withDeadline(Commands.waitUntil(() -> DriverStation.isEnabled()));
-
-    if (auton != null) {
-      auton.schedule();
-    }
   }
 
   @Override

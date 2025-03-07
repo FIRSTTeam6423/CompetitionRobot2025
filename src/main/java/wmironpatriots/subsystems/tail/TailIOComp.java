@@ -43,9 +43,9 @@ public class TailIOComp extends Tail {
 
     pivotConf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     pivotConf.Slot0.kG = 0.0;
-    pivotConf.Slot0.kV = 0.0;
-    pivotConf.Slot0.kP = 0.3;
-    pivotConf.Slot0.kI = 0.0;
+    pivotConf.Slot0.kV = 2.5;
+    pivotConf.Slot0.kP = 0.4;
+    pivotConf.Slot0.kI = 0.1;
     pivotConf.Slot0.kD = 0.0;
 
     pivotConf.CurrentLimits.StatorCurrentLimit = 20.0;

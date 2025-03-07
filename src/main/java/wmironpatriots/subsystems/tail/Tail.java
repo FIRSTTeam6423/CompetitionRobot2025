@@ -22,23 +22,25 @@ public abstract class Tail implements LoggedSubsystem {
   public static final double CURRENT_LIMIT = 40.0;
 
   // Poses
-  public static final double POSE_MIN_REVS = -10.4;
-  public static final double POSE_MAX_REVS = 0.1;
-  public static final double POSE_MOVE_REVS = -5;
+  public static final double POSE_IN_ANGLE = 0;
+  public static final double POSE_OUT_ANGLE = 10;
+  public static final double POSE_MOVE_ANGLE = 8.2;
 
-  public static final double POSE_L1 = -4;
-  public static final double POSE_L2 = -4;
-  public static final double POSE_L3 = -4;
-  public static final double POSE_L4 = -4;
+  public static final double POSE_L1 = 5.56;
+  public static final double POSE_L2 = 5;
+  public static final double POSE_L3 = 5.56;
+  public static final double POSE_L4 = 4;
 
   // Roller speeds
-  public static final double INTAKING_SPEEDS = 1;
+  public static final double INTAKING_SPEEDS = 2;
   public static final double OUTTAKING_SPEEDS = -1;
-  public static final double OUTPUTTING_SPEEDS = 2;
+  public static final double OUTPUTTING_SPEEDS = 2.5;
 
-  public static final double PIVOT_P = 1.5;
-  public static final double PIVOT_I = 0.0;
+  public static final double PIVOT_P = 0.4;
+  public static final double PIVOT_I = 0.1;
   public static final double PIVOT_D = 0.0;
+
+  public static final double POSE_MIN_REVS = 0;
 
   /** LOGGED VALUES */
   @Log protected boolean isZeroed = false;
@@ -67,8 +69,6 @@ public abstract class Tail implements LoggedSubsystem {
         });
   }
 
-  
-
   /** Runs rollers at specific speed */
   public Command setRollerSpeedCmmd(double speed) {
     return this.run(
@@ -88,12 +88,12 @@ public abstract class Tail implements LoggedSubsystem {
 
   /** Runs pivot backwards until current spikes above threshold */
   public Command runPoseZeroingCmmd() {
-    return this.run(() -> runPivotVolts(-1))
+    return this.run(() -> runPivotVolts(-2))
         .until(() -> pivotSupplyCurrentAmps > 20.0)
         .finallyDo(
             (interrupted) -> {
               runPivotVolts(0.0);
-              setEncoderPose(POSE_MAX_REVS);
+              setEncoderPose(0);
               System.out.println("Tail zeroed");
               isZeroed = true;
             });
@@ -121,7 +121,7 @@ public abstract class Tail implements LoggedSubsystem {
 
   /** Checks if pivot pose is +- PI/8 rads from specified pose */
   public boolean inSetpointRange() {
-    return Math.abs(pivotSetpointRevs - pivotPoseRevs) < 0.2;
+    return Math.abs(pivotSetpointRevs - pivotPoseRevs) < 1;
   }
 
   /** Checks if both tail beambreaks are triggered */

@@ -29,8 +29,8 @@ public abstract class Elevator extends SubsystemBase implements Logged {
 
   public static final double POSE_L1 = 0.0;
   public static final double POSE_L2 = 3.16;
-  public static final double POSE_L3 = 10.81;
-  public static final double POSE_L4 = 11;
+  public static final double POSE_L3 = 7;
+  public static final double POSE_L4 = 12.75;
 
   // Visualizer constants
   public static final double MAX_ELEVATOR_HEIGHT_INCHES = 57;

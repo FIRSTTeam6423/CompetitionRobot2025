@@ -55,10 +55,10 @@ public class Constants {
           : Optional.empty();
 
   public static enum LevelTarget {
-    L1(Elevator.POSE_L1, Tail.POSE_MIN_REVS),
-    L2(Elevator.POSE_L2, Tail.POSE_MIN_REVS),
-    L3(Elevator.POSE_L3, Tail.POSE_MIN_REVS),
-    L4(Elevator.POSE_L4, Tail.POSE_MAX_REVS);
+    L1(Elevator.POSE_L1, Tail.POSE_IN_ANGLE),
+    L2(Elevator.POSE_L2, Tail.POSE_IN_ANGLE),
+    L3(Elevator.POSE_L3, Tail.POSE_IN_ANGLE),
+    L4(Elevator.POSE_L4, Tail.POSE_OUT_ANGLE);
     public final double elevatorPoseRevs, tailPoseRads;
 
     private LevelTarget(double elevatorPoseRevs, double tailPoseRads) {

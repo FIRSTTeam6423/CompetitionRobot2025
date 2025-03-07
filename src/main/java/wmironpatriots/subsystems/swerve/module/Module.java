@@ -80,7 +80,7 @@ public abstract class Module extends IronComponent {
       int pivotID,
       int driveID,
       int cancoderID,
-      double cancoderOffsetRevs,
+      double cancoderOffsetRads,
       boolean pivotInverted) {}
   ;
 

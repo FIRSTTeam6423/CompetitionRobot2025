@@ -6,6 +6,8 @@
 
 package wmironpatriots.subsystems.swerve.gyro;
 
+import static wmironpatriots.Constants.CANIVORE;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
@@ -16,7 +18,7 @@ public class GyroIOComp extends Gyro {
   public GyroIOComp() {
     super();
 
-    pigeon = new Pigeon2(GYRO_ID);
+    pigeon = new Pigeon2(GYRO_ID, CANIVORE);
 
     sigYaw = pigeon.getYaw();
     sigPitch = pigeon.getPitch();

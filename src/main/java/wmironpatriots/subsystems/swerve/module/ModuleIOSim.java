@@ -61,7 +61,7 @@ public class ModuleIOSim extends Module {
         config.pivotInverted()
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
-    pivotConf.Feedback.FeedbackRotorOffset = config.cancoderOffsetRevs();
+    pivotConf.Feedback.FeedbackRotorOffset = config.cancoderOffsetRads();
 
     pivot.getConfigurator().apply(pivotConf);
     drive.getConfigurator().apply(driveConf);

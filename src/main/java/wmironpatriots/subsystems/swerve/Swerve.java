@@ -70,15 +70,15 @@ public class Swerve implements LoggedSubsystem {
 
   public static final ModuleConfig[] MODULE_CONFIGS =
       new ModuleConfig[] {
-        new ModuleConfig(1, 1, 2, 9, 0.0, true),
-        new ModuleConfig(2, 3, 4, 10, 0.0, true),
-        new ModuleConfig(3, 5, 6, 11, 0.0, true),
-        new ModuleConfig(4, 7, 8, 12, 0.0, true),
+        new ModuleConfig(1, 1, 2, 9, -0.896, true),
+        new ModuleConfig(2, 3, 4, 10, 4.283, true),
+        new ModuleConfig(3, 5, 6, 11, 0.095, false),
+        new ModuleConfig(4, 7, 8, 12, 0.356, false),
       };
 
   // TODO check with
   // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
-  public static double MAX_LINEAR_SPEED_MPS = Units.feetToMeters(3);
+  public static double MAX_LINEAR_SPEED_MPS = Units.feetToMeters(9);
   public static double MAX_LINEAR_ACCEL_MPS_SQRD = 2;
   public static double MAX_ANGULAR_SPEED_RADS_PER_SEC =
       MAX_LINEAR_SPEED_MPS / (Math.hypot(TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0));
