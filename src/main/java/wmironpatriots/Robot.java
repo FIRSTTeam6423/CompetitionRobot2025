@@ -411,14 +411,16 @@ public class Robot extends TimedRobot implements Logged {
     drivetrain.setDefaultCommand(
         // Drivetrain will execute this command periodically
         drivetrain.applyRequest(
-            () ->
-                drive
-                    .withVelocityX(-joystick.getLeftY() * MaxSpeed)
-                    .withVelocityY(
-                        -joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(
-                        joystick.getRightX()
-                            * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            () -> {
+              double multiplier = joystick.getRightTriggerAxis() > 0.1 ? 0.3 : 1.0;
+              return drive
+                  .withVelocityX(-joystick.getLeftY() * MaxSpeed * multiplier)
+                  .withVelocityY(
+                      -joystick.getLeftX()
+                          * MaxSpeed
+                          * multiplier) // Drive left with negative X (left)
+                  .withRotationalRate(joystick.getRightX() * MaxAngularRate * multiplier);
+            } // Drive counterclockwise with negative X (left)
             ));
 
     // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
