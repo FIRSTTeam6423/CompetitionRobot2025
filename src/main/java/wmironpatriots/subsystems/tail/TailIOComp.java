@@ -43,7 +43,7 @@ public class TailIOComp extends Tail {
     pivot = new TalonFX(13, "rio");
     roller = new SparkMax(1, MotorType.kBrushless);
 
-    beam = new DigitalInput(8);
+    beam = new DigitalInput(5);
 
     encoder = roller.getEncoder();
 

@@ -6,9 +6,9 @@
 
 package wmironpatriots.subsystems;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 
-import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
@@ -17,19 +17,26 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.Optional;
 import java.util.function.Supplier;
 import wmironpatriots.generated.TunerConstants.TunerSwerveDrivetrain;
+import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
@@ -39,6 +46,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private static final double kSimLoopPeriod = 0.005; // 5 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
+  private final Timer timer = new Timer();
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -148,6 +156,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
   }
 
+  public ChassisSpeeds getSpeeds() {
+    SwerveModuleState[] states = new SwerveModuleState[4];
+    for (int i = 0; i < 4; i++) {
+      states[i] = super.getModule(i).getCurrentState();
+    }
+
+    return super.getKinematics().toChassisSpeeds(states);
+  }
+
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    *
@@ -181,24 +198,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   }
 
   public Pose2d getPose() {
+    super.samplePoseAt(timer.get());
     Optional<Pose2d> poseOpp = super.samplePoseAt(Utils.getCurrentTimeSeconds());
     Pose2d pose = poseOpp.isPresent() ? poseOpp.get() : new Pose2d();
     return pose;
-  }
-
-  public Command followTraj(SwerveSample sample, SwerveRequest.FieldCentric req) {
-    return run(
-        () -> {
-          Pose2d pose = getPose();
-          this.applyRequest(
-              () ->
-                  req.withVelocityX(sample.vx + linearFeedback.calculate(pose.getX(), sample.x))
-                      .withVelocityY(sample.vy + linearFeedback.calculate(pose.getY(), sample.y))
-                      .withRotationalRate(
-                          sample.omega
-                              + headingFeedback.calculate(
-                                  pose.getRotation().getRadians(), sample.heading)));
-        });
   }
 
   /**
@@ -242,6 +245,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * Otherwise, only check and apply the operator perspective if the DS is disabled.
      * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
      */
+    new Trigger(() -> DriverStation.isDisabled())
+        .onTrue(
+            Commands.run(
+                () -> {
+                  timer.stop();
+                  timer.reset();
+                }));
+    new Trigger(() -> DriverStation.isEnabled()).onTrue(Commands.run(() -> timer.start()));
     if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
       DriverStation.getAlliance()
           .ifPresent(
@@ -270,6 +281,34 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               updateSimState(deltaTime, RobotController.getBatteryVoltage());
             });
     m_simNotifier.startPeriodic(kSimLoopPeriod);
+  }
+
+  // public Command drivePose(Pose2d pose) {
+  //   return this.run(() -> {
+  //     Pose2d currentPose = getPose();
+  //     Vector<N3> difference =
+  //       VecBuilder.fill(
+  //         currentPose.getX() - pose.getX(),
+  //         currentPose.getY() - pose.getY(),
+  //         MathUtil.angleModulus(currentPose.getRotation().getRadians() -
+  // pose.getRotation().getRadians())
+
+  //       );
+  //   });
+  // }
+
+  public void updateEstimates(PoseEstimate... poses) {
+    Pose3d[] loggedEstimates = new Pose3d[poses.length];
+    for (int i = 0; i < poses.length; i++) {
+      loggedEstimates[i] = poses[i].estimatedPose().estimatedPose;
+      addVisionMeasurement(
+          poses[i].estimatedPose().estimatedPose.toPose2d(),
+          poses[i].estimatedPose().timestampSeconds,
+          poses[i].standardDev());
+      // field2d
+      //     .getObject("Cam " + i + " Est Pose")
+      //     .setPose(poses[i].estimatedPose().estimatedPose.toPose2d());
+    }
   }
 
   /**

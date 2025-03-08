@@ -18,6 +18,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -31,6 +33,7 @@ import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import wmironpatriots.commands.Autonomous;
 import wmironpatriots.generated.TunerConstants;
 import wmironpatriots.subsystems.CommandSwerveDrivetrain;
 import wmironpatriots.subsystems.chute.Chute;
@@ -41,6 +44,9 @@ import wmironpatriots.subsystems.elevator.ElevatorIOSim;
 import wmironpatriots.subsystems.tail.Tail;
 import wmironpatriots.subsystems.tail.TailIOComp;
 import wmironpatriots.subsystems.tail.TailIOSim;
+
+// import wmironpatriots.subsystems.vision.Vision;
+// import wmironpatriots.subsystems.vision.VisionIOComp;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
@@ -53,6 +59,7 @@ public class Robot extends TimedRobot implements Logged {
   private final Elevator elevator;
   private final Chute chute;
   private final RobotVisualizer visualizer;
+  //   private final VisionIOComp vision;
 
   private double MaxSpeed =
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)
@@ -74,6 +81,8 @@ public class Robot extends TimedRobot implements Logged {
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+  public final SendableChooser<Command> chooser;
 
   public Robot() {
     // * MONOLOGUE SETUP
@@ -138,6 +147,11 @@ public class Robot extends TimedRobot implements Logged {
       elevator = new ElevatorIOSim();
       chute = new Chute() {};
     }
+    // vision = new VisionIOComp(Vision.CAM_CONFS);
+    chooser = Autonomous.configureAutons(drivetrain, tail, elevator);
+    SmartDashboard.putData("choser", chooser);
+
+    // addPeriodic(() -> drivetrain.updateEstimates(vision.estimatedGlobalPoses()), 0.02);
 
     // Setup simulated arena if simulated
     if (Robot.isSimulation()) {
@@ -198,7 +212,7 @@ public class Robot extends TimedRobot implements Logged {
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> elevator.inSetpointRange())
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE)))
-        .whileTrue(this.setElevatorToStowed().onlyIf(() -> tail.inSetpointRange()));
+        .whileTrue(this.setElevatorToStowed().onlyIf(() -> tail.pastCollisionPose()).repeatedly());
 
     // // * ELEVATOR LEVEL 2 COMMAND
     operatorController
@@ -208,7 +222,10 @@ public class Robot extends TimedRobot implements Logged {
                 .until(() -> elevator.inSetpointRange())
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_L2)))
         .whileTrue(
-            elevator.setTargetPoseCmmd(Elevator.POSE_L2).onlyIf(() -> tail.inSetpointRange()));
+            elevator
+                .setTargetPoseCmmd(Elevator.POSE_L2)
+                .onlyIf(() -> tail.pastCollisionPose())
+                .repeatedly());
 
     // // * ELEVATOR LEVEL 3 COMMAND
     operatorController
@@ -218,7 +235,10 @@ public class Robot extends TimedRobot implements Logged {
                 .until(() -> elevator.inSetpointRange())
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_L3)))
         .whileTrue(
-            elevator.setTargetPoseCmmd(Elevator.POSE_L3).onlyIf(() -> tail.inSetpointRange()));
+            elevator
+                .setTargetPoseCmmd(Elevator.POSE_L3)
+                .onlyIf(() -> tail.pastCollisionPose())
+                .repeatedly());
 
     // // * ELEVATOR LEVEL 4 COMMAND
     operatorController
@@ -233,7 +253,7 @@ public class Robot extends TimedRobot implements Logged {
         .whileTrue(
             elevator
                 .setTargetPoseCmmd(Elevator.POSE_L4)
-                .onlyIf(() -> tail.inSetpointRange())
+                .onlyIf(() -> tail.pastCollisionPose())
                 .repeatedly());
 
     // // * INTAKING CORAL COMMAND
@@ -305,7 +325,8 @@ public class Robot extends TimedRobot implements Logged {
         .whileTrue(
             elevator
                 .setTargetPoseCmmd(Elevator.POSE_ALGAE_HIGH)
-                .onlyIf(() -> tail.inSetpointRange()));
+                .onlyIf(() -> tail.pastCollisionPose())
+                .repeatedly());
 
     operatorController
         .povDown()
@@ -316,7 +337,8 @@ public class Robot extends TimedRobot implements Logged {
         .whileTrue(
             elevator
                 .setTargetPoseCmmd(Elevator.POSE_ALGAE_LOW)
-                .onlyIf(() -> tail.inSetpointRange()));
+                .onlyIf(() -> tail.pastCollisionPose())
+                .repeatedly());
 
     // operatorController
     //     .povUp()

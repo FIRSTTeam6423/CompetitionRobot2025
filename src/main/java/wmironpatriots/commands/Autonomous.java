@@ -8,6 +8,8 @@ package wmironpatriots.commands;
 
 import static wmironpatriots.Constants.DT_TIME;
 
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.ModuleConfig;
@@ -21,14 +23,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import wmironpatriots.subsystems.CommandSwerveDrivetrain;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.tail.Tail;
 
 public class Autonomous {
+  public static SwerveRequest.RobotCentric reqSpeed =
+      new SwerveRequest.RobotCentric().withDriveRequestType(DriveRequestType.Velocity);
+
   public static SendableChooser<Command> configureAutons(
-      Swerve swerve, Tail tail, Elevator elevator) {
+      CommandSwerveDrivetrain drivetrain, Tail tail, Elevator elevator) {
     RobotConfig robotConfig =
         new RobotConfig(
             Swerve.MASS_KG,
@@ -43,10 +49,16 @@ public class Autonomous {
             Swerve.MODULE_LOCS);
 
     AutoBuilder.configure(
-        swerve::getPose,
-        swerve::resetOdo,
-        swerve::getRobotRelativeVelocities,
-        (velocities, ff) -> swerve.runVelocities(velocities, false),
+        drivetrain::getPose,
+        drivetrain::resetPose,
+        drivetrain::getSpeeds,
+        (velocities, ff) ->
+            drivetrain.applyRequest(
+                () ->
+                    new SwerveRequest.RobotCentric()
+                        .withVelocityX(velocities.vxMetersPerSecond)
+                        .withVelocityY(velocities.vyMetersPerSecond)
+                        .withRotationalRate(velocities.omegaRadiansPerSecond)),
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0, 0), new PIDConstants(5.0, 0, 0), DT_TIME),
         robotConfig,
@@ -57,7 +69,7 @@ public class Autonomous {
           }
           return false;
         },
-        swerve);
+        drivetrain);
 
     Command algaeHigh =
         Commands.parallel(

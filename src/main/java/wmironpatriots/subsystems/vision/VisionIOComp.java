@@ -59,7 +59,7 @@ public class VisionIOComp extends Vision {
       visionSim = new VisionSystemSim("v1Ultrakill");
       visionSim.addAprilTags(LAYOUT);
 
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < configs.length; i++) {
         CameraConfig config = configs[i];
         var prop = new SimCameraProperties();
         prop.setCalibration(

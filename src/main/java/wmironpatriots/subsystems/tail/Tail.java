@@ -149,6 +149,10 @@ public abstract class Tail implements LoggedSubsystem {
     return Math.abs(pivotSetpointRevs - pivotPoseRevs) < .6;
   }
 
+  public boolean pastCollisionPose() {
+    return pivotPoseRevs > 3.19;
+  }
+
   /** Checks if both tail beambreaks are triggered */
   public boolean hasCoral() {
     return beamTripped;
