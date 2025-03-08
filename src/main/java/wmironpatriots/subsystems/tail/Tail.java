@@ -29,7 +29,7 @@ public abstract class Tail implements LoggedSubsystem {
 
   public static final double POSE_L1 = 5.56;
   public static final double POSE_L2 = (20 * 5 / 36); // 5;
-  public static final double POSE_L3 = (20 * 5 / 36); // 5.56;
+  public static final double POSE_L3 = 3.95; // (20 * 5 / 36); // 5.56
   public static final double POSE_L4 = (30 * 5 / 36); // 4;
 
   public static final double POSE_ALGAE_HIGH = (70 * 5 / 36); // uses formula
@@ -146,7 +146,7 @@ public abstract class Tail implements LoggedSubsystem {
 
   /** Checks if pivot pose is +- PI/8 rads from specified pose */
   public boolean inSetpointRange() {
-    return Math.abs(pivotSetpointRevs - pivotPoseRevs) < 1;
+    return Math.abs(pivotSetpointRevs - pivotPoseRevs) < .6;
   }
 
   /** Checks if both tail beambreaks are triggered */

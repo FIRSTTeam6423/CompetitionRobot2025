@@ -11,7 +11,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static wmironpatriots.Constants.SWERVE_SIM_CONFIG;
 
-import choreo.auto.AutoChooser;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -19,9 +18,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import java.util.Optional;
@@ -31,7 +31,6 @@ import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import wmironpatriots.commands.ChoreoFactory;
 import wmironpatriots.generated.TunerConstants;
 import wmironpatriots.subsystems.CommandSwerveDrivetrain;
 import wmironpatriots.subsystems.chute.Chute;
@@ -42,20 +41,17 @@ import wmironpatriots.subsystems.elevator.ElevatorIOSim;
 import wmironpatriots.subsystems.tail.Tail;
 import wmironpatriots.subsystems.tail.TailIOComp;
 import wmironpatriots.subsystems.tail.TailIOSim;
-import wmironpatriots.util.deviceUtil.OperatorController;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
   private final CommandXboxController joystick;
   private final CommandXboxController operatorController;
-
-  private final OperatorController operatorController2;
+  private final CommandXboxController debugController;
 
   private final Tail tail;
   private final Elevator elevator;
   private final Chute chute;
-  private final ChoreoFactory factory;
   private final RobotVisualizer visualizer;
 
   private double MaxSpeed =
@@ -78,8 +74,6 @@ public class Robot extends TimedRobot implements Logged {
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
-  private final AutoChooser chooser;
 
   public Robot() {
     // * MONOLOGUE SETUP
@@ -126,8 +120,7 @@ public class Robot extends TimedRobot implements Logged {
     // * SUBSYSTEM INIT
     joystick = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
-
-    operatorController2 = new OperatorController(3);
+    debugController = new CommandXboxController(4);
 
     Optional<SwerveDriveSimulation> swerveSim =
         Robot.isSimulation()
@@ -155,30 +148,29 @@ public class Robot extends TimedRobot implements Logged {
     // Set up driver input streams
     configureBindings();
 
-    // elevator.setDefaultCommand(
-    //     Commands.sequence(
-    //         elevator.runPoseZeroingCmmd().onlyIf(() -> !elevator.isZeroed()),
-    //         elevator
-    //             .setTargetPoseCmmd(3.4)
-    //             .until(
-    //                 () ->
-    //                     elevator.inSetpointRange() || elevator.getSetpoint() >
-    // elevator.getPose()),
-    //         elevator.stopMotorInputCmmd()));
+    debugController.a().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE));
+    debugController.rightBumper().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_ANGLE));
+    debugController.leftBumper().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE));
 
-    // tail.setDefaultCommand(
-    //     Commands.sequence(
-    //         // tail.setRollerSpeedCmmd(0.0),
-    //         tail.runPoseZeroingCmmd().onlyIf(() -> !tail.isZeroed()),
-    //         tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
-    //             .until(
-    //                 () -> elevator.inSetpointRange() || elevator.getSetpoint() >
-    // elevator.getPose())
-    //             .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))));
+    elevator.setDefaultCommand(
+        Commands.sequence(
+            elevator.runPoseZeroingCmmd().onlyIf(() -> !elevator.isZeroed()),
+            elevator
+                .setTargetPoseCmmd(3.4)
+                .until(
+                    () ->
+                        elevator.inSetpointRange() || elevator.getSetpoint() > elevator.getPose()),
+            elevator.stopMotorInputCmmd()));
 
-    // .until(() -> Superstructure.isTailSafe(elevator, tail)),
-    // tail.setTargetPoseCmmd(Tail.POSE_MIN_REVS).until(() -> tail.inSetpointRange()),
-    // tail.stopMotorInputCmmd()));
+    tail.setDefaultCommand(
+        Commands.sequence(
+            // tail.setRollerSpeedCmmd(0.0),
+            tail.runPoseZeroingCmmd().onlyIf(() -> !tail.isZeroed()),
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                .until(
+                    () -> elevator.inSetpointRange() || elevator.getSetpoint() > elevator.getPose())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))));
+
     /*
     driveController
         .x()
@@ -204,7 +196,7 @@ public class Robot extends TimedRobot implements Logged {
         .a()
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
-                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .until(() -> elevator.inSetpointRange())
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE)))
         .whileTrue(this.setElevatorToStowed().onlyIf(() -> tail.inSetpointRange()));
 
@@ -213,7 +205,7 @@ public class Robot extends TimedRobot implements Logged {
         .x()
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
-                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .until(() -> elevator.inSetpointRange())
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_L2)))
         .whileTrue(
             elevator.setTargetPoseCmmd(Elevator.POSE_L2).onlyIf(() -> tail.inSetpointRange()));
@@ -223,7 +215,7 @@ public class Robot extends TimedRobot implements Logged {
         .y()
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
-                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .until(() -> elevator.inSetpointRange())
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_L3)))
         .whileTrue(
             elevator.setTargetPoseCmmd(Elevator.POSE_L3).onlyIf(() -> tail.inSetpointRange()));
@@ -233,13 +225,16 @@ public class Robot extends TimedRobot implements Logged {
         .b()
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
-                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .until(() -> elevator.inSetpointRange())
                 .andThen(
                     tail.setTargetPoseCmmd(Tail.POSE_L4)
                         .until(joystick.leftBumper())
                         .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))))
         .whileTrue(
-            elevator.setTargetPoseCmmd(Elevator.POSE_L4).onlyIf(() -> tail.inSetpointRange()));
+            elevator
+                .setTargetPoseCmmd(Elevator.POSE_L4)
+                .onlyIf(() -> tail.inSetpointRange())
+                .repeatedly());
 
     // // * INTAKING CORAL COMMAND
     operatorController
@@ -252,15 +247,22 @@ public class Robot extends TimedRobot implements Logged {
         .whileFalse(chute.runChuteSpeedCmmd(0.0));
 
     // * AUTO CENTERING COMMAND
-
     operatorController
         .povRight()
         .onTrue(
-            tail.setRollerSpeedCmmd(.5)
-                .alongWith(chute.runChuteSpeedCmmd(-.1))
-                .until(() -> tail.beamTripped = true)
-                .andThen(tail.setRollerTimecmmd(.5, 1))
-                .alongWith(chute.runChuteSpeedCmmd(0)));
+            tail.setRollerSpeedCmmd(1)
+                .alongWith(chute.runChuteSpeedCmmd(-.2))
+                .until(() -> tail.beamTripped == true)
+                .andThen(tail.setRollerTimecmmd(1, 1).alongWith(chute.runChuteSpeedCmmd(0))));
+
+    joystick.x().whileTrue(tail.setRollerSpeedCmmd(-3)).whileFalse(tail.setRollerSpeedCmmd(0));
+    // operatorController
+    //     .povRight()
+    //     .onTrue(
+    //         tail.setRollerSpeedCmmd(1)
+    //             .alongWith(chute.runChuteSpeedCmmd(-.2))
+    //             .until(() -> tail.beamTripped = true)
+    //             .andThen(tail.setRollerTimecmmd(.5, 1).alongWith(chute.runChuteSpeedCmmd(0))));
 
     // // * OUTTAKING CORAL COMMAND
     operatorController
@@ -279,39 +281,76 @@ public class Robot extends TimedRobot implements Logged {
         .onFalse(tail.setRollerSpeedCmmd(0.0));
 
     // * ALGAE DESCORING
+
+    /*
     operatorController
         .povUp()
         .whileTrue(
-            tail.setRollerSpeedCmmd(1)
-                .alongWith(
-                    tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
-                        .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-                        .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_HIGH))))
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_HIGH)))
+        .whileTrue(tail.setRollerSpeedCmmd(1))
         .whileTrue(
             elevator
                 .setTargetPoseCmmd(Elevator.POSE_ALGAE_HIGH)
                 .onlyIf(() -> tail.inSetpointRange()))
         .whileFalse(tail.setRollerSpeedCmmd(0));
+    */
+    operatorController
+        .povUp()
+        .whileTrue(
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_HIGH)))
+        .whileTrue(
+            elevator
+                .setTargetPoseCmmd(Elevator.POSE_ALGAE_HIGH)
+                .onlyIf(() -> tail.inSetpointRange()));
 
     operatorController
         .povDown()
         .whileTrue(
-            tail.setRollerSpeedCmmd(1)
-                .alongWith(
-                    tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
-                        .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
-                        .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW))))
+            tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+                .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW)))
         .whileTrue(
             elevator
                 .setTargetPoseCmmd(Elevator.POSE_ALGAE_LOW)
-                .onlyIf(() -> tail.inSetpointRange()))
-        .whileFalse(tail.setRollerSpeedCmmd(0));
+                .onlyIf(() -> tail.inSetpointRange()));
 
-    operatorController
-        .povDown()
-        .whileTrue(
-            tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW).alongWith(tail.setRollerSpeedCmmd(1)))
-        .whileFalse(tail.setRollerSpeedCmmd(0));
+    // operatorController
+    //     .povUp()
+    //     .whileTrue(
+    //         tail.setRollerSpeedCmmd(1)
+    //             .alongWith(
+    //                 tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+    //                     .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+    //                     .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_HIGH))))
+    //     .whileTrue(
+    //         elevator
+    //             .setTargetPoseCmmd(Elevator.POSE_ALGAE_HIGH)
+    //             .onlyIf(() -> tail.inSetpointRange()))
+    //     .whileFalse(tail.setRollerSpeedCmmd(0));
+
+    // operatorController
+    //     .povDown()
+    //     .whileTrue(
+    //         tail.setRollerSpeedCmmd(1)
+    //             .alongWith(
+    //                 tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
+    //                     .until(() -> tail.inSetpointRange() && elevator.inSetpointRange())
+    //                     .andThen(tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW))))
+    //     .whileTrue(
+    //         elevator
+    //             .setTargetPoseCmmd(Elevator.POSE_ALGAE_LOW)
+    //             .onlyIf(() -> tail.inSetpointRange()))
+    //     .whileFalse(tail.setRollerSpeedCmmd(0));
+
+    // operatorController
+    //     .povDown()
+    //     .whileTrue(
+    //         tail.setTargetPoseCmmd(Tail.POSE_ALGAE_LOW).alongWith(tail.setRollerSpeedCmmd(1)))
+    //     .whileFalse(tail.setRollerSpeedCmmd(0));
 
     // * SUPERSTRUCTURE INIT
     // Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
@@ -330,10 +369,18 @@ public class Robot extends TimedRobot implements Logged {
           operatorController2.getLevelTarget());
     */
 
-    factory = new ChoreoFactory(drivetrain);
-    chooser = factory.getChooser();
-    SmartDashboard.putData("sdf", chooser);
-    RobotModeTriggers.autonomous().whileTrue(chooser.selectedCommandScheduler());
+    // factory = new ChoreoFactory(drivetrain);
+    // chooser = factory.getChooser();
+    Command auton =
+        drivetrain
+            .runOnce(() -> drivetrain.seedFieldCentric())
+            .andThen(
+                drivetrain
+                    .applyRequest(() -> drive.withVelocityX(MaxSpeed * 0.3))
+                    .withDeadline(new WaitCommand(1)));
+    RobotModeTriggers.autonomous().whileTrue(auton);
+    // SmartDashboard.putData("sdf", chooser);
+    // RobotModeTriggers.autonomous().whileTrue(chooser.selectedCommandScheduler());
   }
 
   private void configureBindings() {
@@ -386,13 +433,7 @@ public class Robot extends TimedRobot implements Logged {
   }
 
   @Override
-  public void autonomousInit() {
-    Command auton =
-        factory
-            .getMove(); // .withDeadline(Commands.waitUntil(() -> DriverStation.isTeleopEnabled()));
-    // if (auton != null) {
-    auton.schedule();
-  }
+  public void autonomousInit() {}
 
   @Override
   public void autonomousPeriodic() {}
