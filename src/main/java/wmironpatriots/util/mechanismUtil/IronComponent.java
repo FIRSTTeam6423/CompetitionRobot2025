@@ -6,8 +6,6 @@
 
 package wmironpatriots.util.mechanismUtil;
 
-import monologue.Logged;
-
-public abstract class IronComponent implements Logged {
+public abstract class IronComponent {
   public void periodic() {}
 }

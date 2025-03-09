@@ -9,31 +9,22 @@ package wmironpatriots;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static wmironpatriots.Constants.SWERVE_SIM_CONFIG;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import java.util.Optional;
-import java.util.function.BiConsumer;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import wmironpatriots.commands.Autonomous;
 import wmironpatriots.generated.TunerConstants;
 import wmironpatriots.subsystems.CommandSwerveDrivetrain;
 import wmironpatriots.subsystems.chute.Chute;
@@ -53,12 +44,11 @@ public class Robot extends TimedRobot implements Logged {
 
   private final CommandXboxController joystick;
   private final CommandXboxController operatorController;
-  private final CommandXboxController debugController;
+  //   private final CommandXboxController debugController;
 
   private final Tail tail;
   private final Elevator elevator;
   private final Chute chute;
-  private final RobotVisualizer visualizer;
   //   private final VisionIOComp vision;
 
   private double MaxSpeed =
@@ -71,31 +61,30 @@ public class Robot extends TimedRobot implements Logged {
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive =
       new SwerveRequest.FieldCentric()
-          .withDeadband(MaxSpeed * 0.1)
+          .withDeadband(MaxSpeed * 0.05)
           .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
           .withDriveRequestType(
               DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-  private final Telemetry logger = new Telemetry(MaxSpeed);
+  //   private final Telemetry logger = new Telemetry(MaxSpeed);
+
+  //   private Trigger[] triggerCache = new Trigger[20];
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
-  public final SendableChooser<Command> chooser;
 
   public Robot() {
     // * MONOLOGUE SETUP
     DriverStation.silenceJoystickConnectionWarning(true);
 
-    if (isReal()) {
-      SignalLogger.enableAutoLogging(false);
-    }
-
     Monologue.setupMonologue(
         this,
         "/Robot",
-        new MonologueConfig(DriverStation::isFMSAttached, "", false, false).withLazyLogging(true));
+        new MonologueConfig(DriverStation::isFMSAttached, "", false, true)
+            .withLazyLogging(true)
+            .withDatalogPrefix("")
+            .withOptimizeBandwidth(DriverStation::isFMSAttached));
 
     // logs build data to the datalog
     final String meta = "/BuildData/";
@@ -108,35 +97,31 @@ public class Robot extends TimedRobot implements Logged {
     Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
     Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
 
+    SignalLogger.enableAutoLogging(false);
+    SignalLogger.stop();
+
     // Command logging
-    BiConsumer<Command, Boolean> logCommandFunction =
-        (Command command, Boolean active) -> {
-          Monologue.log("Commands/" + command.getName(), active);
-        };
-    scheduler.onCommandInitialize(
-        (Command command) -> {
-          logCommandFunction.accept(command, true);
-        });
-    scheduler.onCommandFinish(
-        (Command command) -> {
-          logCommandFunction.accept(command, false);
-        });
-    scheduler.onCommandInterrupt(
-        (Command command) -> {
-          logCommandFunction.accept(command, false);
-        });
+    // BiConsumer<Command, Boolean> logCommandFunction =
+    //     (Command command, Boolean active) -> {
+    //       Monologue.log("Commands/" + command.getName(), active);
+    //     };
+    // scheduler.onCommandInitialize(
+    //     (Command command) -> {
+    //       logCommandFunction.accept(command, true);
+    //     });
+    // scheduler.onCommandFinish(
+    //     (Command command) -> {
+    //       logCommandFunction.accept(command, false);
+    //     });
+    // scheduler.onCommandInterrupt(
+    //     (Command command) -> {
+    //       logCommandFunction.accept(command, false);
+    //     });
 
     // * SUBSYSTEM INIT
     joystick = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
-    debugController = new CommandXboxController(4);
-
-    Optional<SwerveDriveSimulation> swerveSim =
-        Robot.isSimulation()
-            ? Optional.of(
-                new SwerveDriveSimulation(
-                    SWERVE_SIM_CONFIG.get(), new Pose2d(3, 3, new Rotation2d())))
-            : Optional.empty();
+    // debugController = new CommandXboxController(4);
 
     if (Robot.isReal()) {
       tail = new TailIOComp();
@@ -148,23 +133,16 @@ public class Robot extends TimedRobot implements Logged {
       chute = new Chute() {};
     }
     // vision = new VisionIOComp(Vision.CAM_CONFS);
-    chooser = Autonomous.configureAutons(drivetrain, tail, elevator);
-    SmartDashboard.putData("choser", chooser);
 
     // addPeriodic(() -> drivetrain.updateEstimates(vision.estimatedGlobalPoses()), 0.02);
-
-    // Setup simulated arena if simulated
-    if (Robot.isSimulation()) {
-      SimulatedArena.getInstance().addDriveTrainSimulation(swerveSim.orElse(null));
-    }
 
     // * DEFAULT COMMANDS
     // Set up driver input streams
     configureBindings();
 
-    debugController.a().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE));
-    debugController.rightBumper().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_ANGLE));
-    debugController.leftBumper().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE));
+    // debugController.a().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE));
+    // debugController.rightBumper().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_OUT_ANGLE));
+    // debugController.leftBumper().whileTrue(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE));
 
     elevator.setDefaultCommand(
         Commands.sequence(
@@ -185,27 +163,8 @@ public class Robot extends TimedRobot implements Logged {
                     () -> elevator.inSetpointRange() || elevator.getSetpoint() > elevator.getPose())
                 .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))));
 
-    /*
-    driveController
-        .x()
-        .whileTrue(tail.setRollerSpeedCmmd(1.4))
-        .whileFalse(tail.setRollerSpeedCmmd(0));
-
-    driveController
-        .a()
-        .whileTrue(tail.setRollerSpeedCmmd(-1.4))
-        .whileFalse(tail.setRollerSpeedCmmd(0));
-
-    driveController
-        .y()
-        .whileTrue(chute.runChuteSpeedCmmd(-1).alongWith(tail.setRollerSpeedCmmd(1.3)))
-        .whileFalse(chute.runChuteSpeedCmmd(0).alongWith(tail.setRollerSpeedCmmd(0)));
-
-    driveController.b().whileTrue(elevator.setTargetPoseCmmd(Elevator.POSE_L3));
-    */
-    // joystick.x().whileTrue(tail.setRollerSpeedCmmd(1)).onFalse(tail.setRollerSpeedCmmd(0.0));
-
     // * ELEVATOR LEVEL 1 COMMAND
+    // triggerCache[0] =
     operatorController
         .a()
         .whileTrue(
@@ -215,6 +174,7 @@ public class Robot extends TimedRobot implements Logged {
         .whileTrue(this.setElevatorToStowed().onlyIf(() -> tail.pastCollisionPose()).repeatedly());
 
     // // * ELEVATOR LEVEL 2 COMMAND
+    // triggerCache[1] =
     operatorController
         .x()
         .whileTrue(
@@ -228,6 +188,7 @@ public class Robot extends TimedRobot implements Logged {
                 .repeatedly());
 
     // // * ELEVATOR LEVEL 3 COMMAND
+    // triggerCache[2] =
     operatorController
         .y()
         .whileTrue(
@@ -241,15 +202,13 @@ public class Robot extends TimedRobot implements Logged {
                 .repeatedly());
 
     // // * ELEVATOR LEVEL 4 COMMAND
+    // triggerCache[3] =
     operatorController
         .b()
         .whileTrue(
             tail.setTargetPoseCmmd(Tail.POSE_MOVE_ANGLE)
                 .until(() -> elevator.inSetpointRange())
-                .andThen(
-                    tail.setTargetPoseCmmd(Tail.POSE_L4)
-                        .until(joystick.leftBumper())
-                        .andThen(tail.setTargetPoseCmmd(Tail.POSE_IN_ANGLE))))
+                .andThen(tail.setTargetPoseCmmd(Tail.POSE_L4)))
         .whileTrue(
             elevator
                 .setTargetPoseCmmd(Elevator.POSE_L4)
@@ -257,6 +216,7 @@ public class Robot extends TimedRobot implements Logged {
                 .repeatedly());
 
     // // * INTAKING CORAL COMMAND
+    // triggerCache[4] =
     operatorController
         .leftBumper()
         .whileTrue(
@@ -267,6 +227,7 @@ public class Robot extends TimedRobot implements Logged {
         .whileFalse(chute.runChuteSpeedCmmd(0.0));
 
     // * AUTO CENTERING COMMAND
+    // triggerCache[5] =
     operatorController
         .povRight()
         .onTrue(
@@ -275,6 +236,7 @@ public class Robot extends TimedRobot implements Logged {
                 .until(() -> tail.beamTripped == true)
                 .andThen(tail.setRollerTimecmmd(1, 1).alongWith(chute.runChuteSpeedCmmd(0))));
 
+    // triggerCache[6] =
     joystick.x().whileTrue(tail.setRollerSpeedCmmd(-3)).whileFalse(tail.setRollerSpeedCmmd(0));
     // operatorController
     //     .povRight()
@@ -285,6 +247,7 @@ public class Robot extends TimedRobot implements Logged {
     //             .andThen(tail.setRollerTimecmmd(.5, 1).alongWith(chute.runChuteSpeedCmmd(0))));
 
     // // * OUTTAKING CORAL COMMAND
+    // triggerCache[7] =
     operatorController
         .rightBumper()
         .whileTrue(
@@ -295,6 +258,7 @@ public class Robot extends TimedRobot implements Logged {
         .whileFalse(chute.runChuteSpeedCmmd(0.0));
 
     // // * SCORING CORAL COMMAND
+    // triggerCache[8] =
     joystick
         .rightBumper()
         .whileTrue(tail.setRollerSpeedCmmd(Tail.OUTPUTTING_SPEEDS))
@@ -316,6 +280,7 @@ public class Robot extends TimedRobot implements Logged {
                 .onlyIf(() -> tail.inSetpointRange()))
         .whileFalse(tail.setRollerSpeedCmmd(0));
     */
+    // triggerCache[9] =
     operatorController
         .povUp()
         .whileTrue(
@@ -328,6 +293,7 @@ public class Robot extends TimedRobot implements Logged {
                 .onlyIf(() -> tail.pastCollisionPose())
                 .repeatedly());
 
+    // triggerCache[10] =
     operatorController
         .povDown()
         .whileTrue(
@@ -378,8 +344,6 @@ public class Robot extends TimedRobot implements Logged {
     // Map<Requests, Trigger> triggerMap = new HashMap<Superstructure.Requests, Trigger>();
 
     // Create new superstructure visualizer
-    visualizer = new RobotVisualizer(elevator, tail);
-
     // * AUTON INIT
     /*
       new Superstructure(
@@ -411,16 +375,14 @@ public class Robot extends TimedRobot implements Logged {
     drivetrain.setDefaultCommand(
         // Drivetrain will execute this command periodically
         drivetrain.applyRequest(
-            () -> {
-              double multiplier = joystick.getRightTriggerAxis() > 0.1 ? 0.3 : 1.0;
-              return drive
-                  .withVelocityX(-joystick.getLeftY() * MaxSpeed * multiplier)
-                  .withVelocityY(
-                      -joystick.getLeftX()
-                          * MaxSpeed
-                          * multiplier) // Drive left with negative X (left)
-                  .withRotationalRate(joystick.getRightX() * MaxAngularRate * multiplier);
-            } // Drive counterclockwise with negative X (left)
+            () ->
+                //   double multiplier = joystick.getRightTriggerAxis() > 0.1 ? 0.3 : 1.0;
+                drive
+                    .withVelocityX(-joystick.getLeftY() * MaxSpeed) // * multiplier)
+                    .withVelocityY(-joystick.getLeftX() * MaxSpeed)
+                    // * multiplier) // Drive left with negative X (left)
+                    .withRotationalRate(joystick.getRightX() * MaxAngularRate) // * multiplier);
+            // Drive counterclockwise with negative X (left)
             ));
 
     // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
@@ -442,18 +404,14 @@ public class Robot extends TimedRobot implements Logged {
     // reset the field-centric heading on left bumper press
     joystick.a().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-    drivetrain.registerTelemetry(logger::telemeterize);
+    // drivetrain.registerTelemetry(logger::telemeterize);
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    if (Robot.isSimulation()) {
-      SimulatedArena.getInstance().simulationPeriodic();
-    }
 
     Monologue.updateAll();
-    visualizer.periodic();
   }
 
   @Override

@@ -95,7 +95,7 @@ public class VisionIOComp extends Vision {
       for (int j = 0; j < unreadLength; j++) {
         var change = unreadChanges.get(j);
         estimate = estimators[i].update(change);
-        log("estimates present " + i, estimate.isPresent());
+        // ("estimates present " + i, estimate.isPresent());
         estimate
             .filter(
                 f ->
