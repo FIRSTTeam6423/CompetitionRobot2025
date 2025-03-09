@@ -1,6 +1,8 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.1.1"
+    id "edu.wpi.first.GradleRIO" version "2025.3.1"
+    id 'com.diffplug.spotless' version '7.0.2'
+    id "com.peterabeles.gversion" version "1.10.3"
 }
 
 java {
@@ -8,7 +10,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-def ROBOT_MAIN_CLASS = "frc.robot.Main"
+def ROBOT_MAIN_CLASS = "wmironpatriots"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -33,8 +35,7 @@ deploy {
                 frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
                     files = project.fileTree('src/main/deploy')
                     directory = '/home/lvuser/deploy'
-                    deleteOldFiles = false // Change to true to delete files on roboRIO that no
-                                           // longer exist in deploy directory of this project
+                    deleteOldFiles = true
                 }
             }
         }
@@ -72,6 +73,8 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation "javax.annotation:javax.annotation-api:1.3.2"
 }
 
 test {
@@ -81,7 +84,7 @@ test {
 
 // Simulation configuration (e.g. environment variables).
 wpi.sim.addGui().defaultEnabled = true
-wpi.sim.addDriverstation()
+wpi.sim.addDriverstation().defaultEnabled = true
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
@@ -101,4 +104,32 @@ wpi.java.configureTestTasks(test)
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
+    options.encoding = 'UTF-8'
+}
+
+project.compileJava.dependsOn(createVersionFile)
+gversion {
+    srcDir = "src/main/java"
+    classPackage = "wmironpatriots"
+    className = "BuildConstants"
+    dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+    timeZone = "GMT-4"
+    indent = "  "
+}
+
+// Spotless auto format
+project.compileJava.dependsOn(spotlessApply)
+spotless {
+    java {
+        target fileTree('.') {
+            include '**/*.java'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        toggleOffOn()
+        googleJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+        licenseHeader("// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots\n// https://github.com/FIRSTTeam6423\n// \n// Open Source Software; you can modify and/or share it under the terms of\n// MIT license file in the root directory of this project\n\n")
+    }
 }
