@@ -42,7 +42,7 @@ public abstract class Elevator implements LoggedSubsystem {
   public Command runCurrentZeroingCmmd() {
     return this.run(
             () -> {
-              runMotorVolts(-0.8);
+              setMotorVolts(-0.8);
               targetPoseRevs = 0.0;
             })
         .until(() -> currentAmps > 20.0)
@@ -64,7 +64,7 @@ public abstract class Elevator implements LoggedSubsystem {
     return this.run(
         () -> {
           targetPoseRevs = desiredPoseRevs;
-          runMotorPose(desiredPoseRevs);
+          setMotorPose(desiredPoseRevs);
         });
   }
 
@@ -77,12 +77,22 @@ public abstract class Elevator implements LoggedSubsystem {
     return this.run(() -> stopMotors());
   }
 
+  /**
+   * Sets elevator coasting to enabled or disabled
+   * 
+   * @param enabled true for coasting false for brake
+   * @return Set elevator idle mode command
+   */
+  public Command setCoasting(boolean enabled) {
+    return this.run(() -> motorCoasting(enabled));
+  }
+
   // * HARDWARE METHODS
   /** Runs elevator motors with specified volts */
-  protected abstract void runMotorVolts(double volts);
+  protected abstract void setMotorVolts(double volts);
 
   /** Runs elevator motors to specified pose in revs */
-  protected abstract void runMotorPose(double poseRevs);
+  protected abstract void setMotorPose(double poseRevs);
 
   /** Sets motor rotary encoder pose in revs */
   protected abstract void setEncoderPose(double poseRevs);

@@ -3,6 +3,7 @@
 // 
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
+package wmironpatriots.subsystems.tail;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import monologue.Annotations.Log;
@@ -48,7 +49,7 @@ public abstract class Tail implements LoggedSubsystem {
   public Command runCurrentZeroingCmmd() {
     return this.run(
             () -> {
-              runPivotVolts(1);
+              setPivotVolts(-1);
               targetPoseRevs = 0.0;
             })
         .until(() -> currentAmps > 20.0)
@@ -70,7 +71,7 @@ public abstract class Tail implements LoggedSubsystem {
     return this.run(
         () -> {
           targetPoseRevs = desiredPoseRevs;
-          runPivotPose(desiredPoseRevs);
+          setPivotPose(desiredPoseRevs);
         });
   }
 
@@ -81,7 +82,7 @@ public abstract class Tail implements LoggedSubsystem {
    * @return Set roller speed command
    */
   public Command runRollerSpeed(double speed) {
-    return this.run(() -> runRollerVolts(speed));
+    return this.run(() -> setRollerVolts(speed));
   }
 
   /**
@@ -93,14 +94,32 @@ public abstract class Tail implements LoggedSubsystem {
     return this.run(() -> stopMotors());
   }
 
+  /**
+   * Sets tail coasting to enabled or disabled
+   * 
+   * @param enabled true for coasting false for brake
+   * @return Set elevator idle mode command
+   */
+  public Command setCoasting(boolean enabled) {
+    return this.run(() -> motorCoasting(enabled));
+  }
+
   // * HARDWARE METHODS
-  protected abstract void runPivotVolts(double volts);
+  /** Runs pivot motors with specified volts */
+  protected abstract void setPivotVolts(double volts);
 
-  protected abstract void runPivotPose(double poseRevs);
+  /** Runs pivot motors to specified pose in revs */
+  protected abstract void setPivotPose(double poseRevs);
 
+  /** Sets motor rotary encoder pose in revs */
   protected abstract void setEncoderPose(double poseRevs);
 
-  protected abstract void runRollerVolts(double volts);
+  /** Runs roller motors with specified volts */
+  protected abstract void setRollerVolts(double volts);
 
+  /** Sets all motor input to 0 */
   protected abstract void stopMotors();
+
+  /** Enable motor coasting for easier movement */
+  protected abstract void motorCoasting(boolean enabled);
 }

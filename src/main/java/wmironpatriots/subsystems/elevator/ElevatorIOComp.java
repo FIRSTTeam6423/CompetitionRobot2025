@@ -82,12 +82,12 @@ public class ElevatorIOComp extends Elevator {
   }
 
   @Override
-  protected void runMotorVolts(double volts) {
+  protected void setMotorVolts(double volts) {
     parent.setControl(reqVolts.withOutput(volts));
   }
 
   @Override
-  protected void runMotorPose(double poseRevs) {
+  protected void setMotorPose(double poseRevs) {
     parent.setControl(reqPose.withPosition(poseRevs));
   }
 
