@@ -20,7 +20,6 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 public class ElevatorIOComp extends Elevator {
   private final TalonFX parent, child;
@@ -44,7 +43,7 @@ public class ElevatorIOComp extends Elevator {
     motorConf.CurrentLimits.StatorCurrentLimitEnable = true;
     motorConf.CurrentLimits.SupplyCurrentLimit = 40.0;
     motorConf.CurrentLimits.SupplyCurrentLimitEnable = true;
-    
+
     motorConf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     motorConf.Slot0.kG = 0.59;
     motorConf.Slot0.kV = 4.12;
