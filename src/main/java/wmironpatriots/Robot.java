@@ -8,9 +8,38 @@ package wmironpatriots;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import wmironpatriots.subsystems.Superstructure;
+import wmironpatriots.subsystems.chute.Chute;
+import wmironpatriots.subsystems.chute.ChuteIOComp;
+import wmironpatriots.subsystems.elevator.Elevator;
+import wmironpatriots.subsystems.elevator.ElevatorIOComp;
+import wmironpatriots.subsystems.tail.Tail;
+import wmironpatriots.subsystems.tail.TailIOComp;
 
 public class Robot extends TimedRobot {
-  public Robot() {}
+  private final Superstructure superstructure;
+  private final Elevator elevator;
+  private final Tail tail;
+  private final Chute chute;
+
+  private final CommandXboxController operator;
+
+  public Robot() {
+    operator = new CommandXboxController(1);
+
+    elevator = new ElevatorIOComp();
+    tail = new TailIOComp();
+    chute = new ChuteIOComp();
+
+    superstructure = new Superstructure(elevator, tail, chute);
+
+    elevator.setDefaultCommand(superstructure.defaultElevatorCmmd());
+    tail.setDefaultCommand(superstructure.defaultTailCmmd());
+
+    operator.x().whileTrue(elevator.runPoseCmmd(Elevator.POSE_L3));
+    operator.a().whileTrue(tail.runPoseCmmd(Tail.POSE_MAX));
+  }
 
   @Override
   public void robotPeriodic() {

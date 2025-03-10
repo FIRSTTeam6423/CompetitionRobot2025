@@ -21,13 +21,12 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import wmironpatriots.Constants.MATRIXID;
 
 public class TailIOComp extends Tail {
   private final TalonFX pivot;
   private final SparkMax rollers;
-  
+
   private final TalonFXConfiguration pivotConf;
   private final SparkMaxConfig rollerConf;
 
@@ -106,8 +105,12 @@ public class TailIOComp extends Tail {
   }
 
   @Override
-  protected void stopMotors() {
+  protected void stopPivot() {
     pivot.stopMotor();
+  }
+
+  @Override
+  protected void stopRollers() {
     rollers.stopMotor();
   }
 

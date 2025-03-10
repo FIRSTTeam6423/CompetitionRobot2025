@@ -3,6 +3,7 @@
 // 
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
+
 package wmironpatriots.subsystems.tail;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -39,7 +40,9 @@ public abstract class Tail implements LoggedSubsystem {
   @Log protected double velRPM;
   @Log protected double appliedVolts;
   @Log protected double currentAmps;
-  @Log protected boolean isZeroed;
+  @Log private boolean beamITriggered;
+  @Log private boolean beamIITriggered;
+  @Log public boolean isZeroed;
 
   /**
    * Runs Tail up until current spikes to find zero
@@ -47,7 +50,7 @@ public abstract class Tail implements LoggedSubsystem {
    * @return Tail zeroing command
    */
   public Command runCurrentZeroingCmmd() {
-    return this.run(
+    return this.runOnce(
             () -> {
               setPivotVolts(-1);
               targetPoseRevs = 0.0;
@@ -55,7 +58,7 @@ public abstract class Tail implements LoggedSubsystem {
         .until(() -> currentAmps > 20.0)
         .finallyDo(
             (i) -> {
-              stopMotors();
+              stopPivot();
               setEncoderPose(0.0);
               isZeroed = true;
             });
@@ -76,6 +79,15 @@ public abstract class Tail implements LoggedSubsystem {
   }
 
   /**
+   * Runs tail rollers until coral is in scoring pose
+   *
+   * @return coral vectoring command
+   */
+  public Command vectorCoral() {
+    return runRollerSpeed(1.0).until(() -> coralVectored()).finallyDo(() -> stopRollers());
+  }
+
+  /**
    * Runs tail rollers with specified speed
    *
    * @param speed setpoint speed
@@ -91,17 +103,44 @@ public abstract class Tail implements LoggedSubsystem {
    * @return Stop elevator command
    */
   public Command stopTailCmmd() {
-    return this.run(() -> stopMotors());
+    return this.run(() -> stopPivot());
   }
 
   /**
    * Sets tail coasting to enabled or disabled
-   * 
+   *
    * @param enabled true for coasting false for brake
    * @return Set elevator idle mode command
    */
   public Command setCoasting(boolean enabled) {
     return this.run(() -> motorCoasting(enabled));
+  }
+
+  /**
+   * Checks if tail pose is in a 0.5 rev range from setpoint
+   *
+   * @return true if in range false if not
+   */
+  public boolean nearSetpoint() {
+    return Math.abs(targetPoseRevs - poseRevs) > 0.6;
+  }
+
+  /**
+   * Checks if tail has coral
+   *
+   * @return true if either beam is tripped
+   */
+  public boolean hasCoral() {
+    return beamITriggered || beamIITriggered;
+  }
+
+  /**
+   * Checks if coral is in position
+   *
+   * @return true if beam II is triggered and beam I isn't
+   */
+  public boolean coralVectored() {
+    return beamIITriggered && !beamITriggered;
   }
 
   // * HARDWARE METHODS
@@ -117,8 +156,11 @@ public abstract class Tail implements LoggedSubsystem {
   /** Runs roller motors with specified volts */
   protected abstract void setRollerVolts(double volts);
 
-  /** Sets all motor input to 0 */
-  protected abstract void stopMotors();
+  /** Sets pivot motor input to 0 */
+  protected abstract void stopPivot();
+
+  /** Sets roller motor input to 0 */
+  protected abstract void stopRollers();
 
   /** Enable motor coasting for easier movement */
   protected abstract void motorCoasting(boolean enabled);

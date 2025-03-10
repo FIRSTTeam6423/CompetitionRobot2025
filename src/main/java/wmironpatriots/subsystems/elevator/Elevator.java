@@ -32,7 +32,7 @@ public abstract class Elevator implements LoggedSubsystem {
   @Log protected double velRPM;
   @Log protected double appliedVolts;
   @Log protected double currentAmps;
-  @Log protected boolean isZeroed;
+  @Log public boolean isZeroed;
 
   /**
    * Runs elevator down until current spikes to find zero
@@ -79,12 +79,21 @@ public abstract class Elevator implements LoggedSubsystem {
 
   /**
    * Sets elevator coasting to enabled or disabled
-   * 
+   *
    * @param enabled true for coasting false for brake
    * @return Set elevator idle mode command
    */
   public Command setCoasting(boolean enabled) {
     return this.run(() -> motorCoasting(enabled));
+  }
+
+  /**
+   * Checks if elevator pose is in a 0.5 rev range from setpoint
+   *
+   * @return true if in range false if not
+   */
+  public boolean nearSetpoint() {
+    return Math.abs(targetPoseRevs - poseRevs) > 0.5;
   }
 
   // * HARDWARE METHODS
