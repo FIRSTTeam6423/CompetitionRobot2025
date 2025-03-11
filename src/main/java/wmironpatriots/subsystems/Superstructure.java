@@ -59,41 +59,46 @@ public class Superstructure {
   public Command defaultElevatorCmmd() {
     return Commands.sequence(
         elevator.runCurrentZeroingCmmd().onlyIf(() -> !elevator.isZeroed),
-        elevator.runPoseCmmd(Elevator.POSE_STOWED).until(() -> elevator.nearSetpoint()),
+        elevator.runPoseCmmd(2).until(() -> elevator.underSetpoint()),
         elevator.stopElevatorCmmd());
   }
 
   public Command defaultTailCmmd() {
     return Commands.sequence(
+        tail.runRollerSpeed(0).until(() -> true), // cooked
         tail.runCurrentZeroingCmmd().onlyIf(() -> !tail.isZeroed),
-        tail.runPoseCmmd(Tail.POSE_STOWED).until(() -> tail.nearSetpoint()),
-        tail.stopTailCmmd());
+        new WaitUntilCommand(() -> elevator.getPose() <= 8.2),
+        tail.runPoseCmmd(Tail.POSE_STOWED).until(() -> tail.nearSetpoint()));
   }
 
   public Command defaultChuteCmmd() {
     return chute.runChuteSpeedCmmd(0.0);
   }
 
+  /** Intakes and indexes coral automatically */
   public Command intakeCoral() {
     return chute
         .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
         .alongWith(tail.runRollerSpeed(Tail.SPEED_INTAKING))
         .until(() -> tail.hasCoral())
-        .andThen(tail.vectorCoral())
-        .finallyDo(() -> hasCoral = true)
-        .onlyIf(() -> !hasCoral);
+        .andThen(tail.indexCoral());
   }
 
+  public Command outtakeCoral() {
+    return chute
+        .runChuteSpeedCmmd(Chute.SPEED_OUTAKING)
+        .alongWith(tail.runRollerSpeed(Tail.SPEED_OUTAKING));
+  }
+
+  /** Scores to input level */
   public Command score(ReefLevel level) {
-    return Commands.parallel(
+    return tail.runPoseCmmd(Tail.POSE_MAX)
+        .until(() -> elevator.getPose() >= 8.2)
+        .andThen(tail.runPoseCmmd(level.tailPose))
+        .alongWith(
             elevator
                 .runPoseCmmd(level.elevatorPose)
-                .alongWith(tail.runPoseCmmd(level.tailPose))
-                .until(() -> !hasCoral),
-            new WaitUntilCommand(() -> elevator.nearSetpoint() && tail.nearSetpoint())
-                .andThen(tail.runRollerSpeed(Tail.SPEED_SCORING))
-                .until(() -> !tail.hasCoral())
-                .finallyDo(() -> hasCoral = false))
-        .onlyIf(() -> hasCoral);
+                .onlyIf(() -> tail.getPose() > 4.5)
+                .repeatedly());
   }
 }

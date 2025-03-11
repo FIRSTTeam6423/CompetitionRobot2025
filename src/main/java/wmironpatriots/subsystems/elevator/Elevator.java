@@ -32,7 +32,7 @@ public abstract class Elevator implements LoggedSubsystem {
   @Log protected double velRPM;
   @Log protected double appliedVolts;
   @Log protected double currentAmps;
-  @Log public boolean isZeroed;
+  @Log public boolean isZeroed = false;
 
   /**
    * Runs elevator down until current spikes to find zero
@@ -40,16 +40,13 @@ public abstract class Elevator implements LoggedSubsystem {
    * @return Elevator zeroing command
    */
   public Command runCurrentZeroingCmmd() {
-    return this.run(
-            () -> {
-              setMotorVolts(-0.8);
-              targetPoseRevs = 0.0;
-            })
+    return this.run(() -> setMotorVolts(-1.0))
         .until(() -> currentAmps > 20.0)
         .finallyDo(
             (i) -> {
               stopMotors();
               setEncoderPose(0.0);
+              System.out.println("Elevator zeroed");
               isZeroed = true;
             });
   }
@@ -87,6 +84,14 @@ public abstract class Elevator implements LoggedSubsystem {
     return this.run(() -> motorCoasting(enabled));
   }
 
+  public double getPose() {
+    return poseRevs;
+  }
+
+  public double getSetpoint() {
+    return targetPoseRevs;
+  }
+
   /**
    * Checks if elevator pose is in a 0.5 rev range from setpoint
    *
@@ -94,6 +99,10 @@ public abstract class Elevator implements LoggedSubsystem {
    */
   public boolean nearSetpoint() {
     return Math.abs(targetPoseRevs - poseRevs) > 0.5;
+  }
+
+  public boolean underSetpoint() {
+    return targetPoseRevs > poseRevs;
   }
 
   // * HARDWARE METHODS

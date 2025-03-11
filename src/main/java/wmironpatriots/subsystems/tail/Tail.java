@@ -7,6 +7,7 @@
 package wmironpatriots.subsystems.tail;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import monologue.Annotations.Log;
 import wmironpatriots.utils.LoggedSubsystem;
 
@@ -40,9 +41,9 @@ public abstract class Tail implements LoggedSubsystem {
   @Log protected double velRPM;
   @Log protected double appliedVolts;
   @Log protected double currentAmps;
-  @Log private boolean beamITriggered;
-  @Log private boolean beamIITriggered;
-  @Log public boolean isZeroed;
+  @Log protected boolean beamITriggered;
+  @Log protected boolean beamIITriggered;
+  @Log public boolean isZeroed = false;
 
   /**
    * Runs Tail up until current spikes to find zero
@@ -50,15 +51,12 @@ public abstract class Tail implements LoggedSubsystem {
    * @return Tail zeroing command
    */
   public Command runCurrentZeroingCmmd() {
-    return this.runOnce(
-            () -> {
-              setPivotVolts(-1);
-              targetPoseRevs = 0.0;
-            })
+    return this.run(() -> setPivotVolts(-3))
         .until(() -> currentAmps > 20.0)
         .finallyDo(
             (i) -> {
               stopPivot();
+              System.out.println("Tail zeroed");
               setEncoderPose(0.0);
               isZeroed = true;
             });
@@ -83,8 +81,8 @@ public abstract class Tail implements LoggedSubsystem {
    *
    * @return coral vectoring command
    */
-  public Command vectorCoral() {
-    return runRollerSpeed(1.0).until(() -> coralVectored()).finallyDo(() -> stopRollers());
+  public Command indexCoral() {
+    return runRollerSpeed(1.0).withDeadline(new WaitCommand(0.2));
   }
 
   /**
@@ -103,7 +101,7 @@ public abstract class Tail implements LoggedSubsystem {
    * @return Stop elevator command
    */
   public Command stopTailCmmd() {
-    return this.run(() -> stopPivot());
+    return this.runOnce(() -> stopPivot());
   }
 
   /**
@@ -125,6 +123,10 @@ public abstract class Tail implements LoggedSubsystem {
     return Math.abs(targetPoseRevs - poseRevs) > 0.6;
   }
 
+  public double getPose() {
+    return poseRevs;
+  }
+
   /**
    * Checks if tail has coral
    *
@@ -132,15 +134,6 @@ public abstract class Tail implements LoggedSubsystem {
    */
   public boolean hasCoral() {
     return beamITriggered || beamIITriggered;
-  }
-
-  /**
-   * Checks if coral is in position
-   *
-   * @return true if beam II is triggered and beam I isn't
-   */
-  public boolean coralVectored() {
-    return beamIITriggered && !beamITriggered;
   }
 
   // * HARDWARE METHODS

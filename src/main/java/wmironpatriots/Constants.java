@@ -12,7 +12,7 @@ public class Constants {
   /** static class containing all device ids */
   public static class MATRIXID {
     // * CANIVORE LOOP
-    public static final CANBus CANCHAN = new CANBus("can-chan"); // :3
+    public static final CANBus CANCHAN = new CANBus("CANchan"); // :3
     public static final int PIGEON = 0;
     public static final int BL_PIVOT = 1;
     public static final int BL_DRIVE = 2;

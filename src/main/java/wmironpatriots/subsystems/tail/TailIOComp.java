@@ -8,7 +8,7 @@ package wmironpatriots.subsystems.tail;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -21,6 +21,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj.DigitalInput;
 import wmironpatriots.Constants.MATRIXID;
 
 public class TailIOComp extends Tail {
@@ -33,7 +34,9 @@ public class TailIOComp extends Tail {
   private final BaseStatusSignal pose, vel, volts, current;
 
   private final VoltageOut reqVolts;
-  private final MotionMagicVoltage reqPose;
+  private final PositionVoltage reqPose;
+
+  private final DigitalInput beamI, beamII;
 
   public TailIOComp() {
     pivot = new TalonFX(MATRIXID.TAIL_PIVOT, MATRIXID.RIO);
@@ -73,15 +76,23 @@ public class TailIOComp extends Tail {
     rollers.configure(rollerConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     reqVolts = new VoltageOut(0.0).withEnableFOC(true);
-    reqPose = new MotionMagicVoltage(0.0).withEnableFOC(true);
+    reqPose = new PositionVoltage(0.0).withEnableFOC(true);
+
+    beamI = new DigitalInput(1);
+    beamII = new DigitalInput(3);
   }
 
   @Override
   public void periodic() {
+    BaseStatusSignal.refreshAll(pose, vel, volts, current);
+
     poseRevs = pose.getValueAsDouble();
     velRPM = vel.getValueAsDouble();
     appliedVolts = volts.getValueAsDouble();
     currentAmps = current.getValueAsDouble();
+
+    beamITriggered = !beamI.get();
+    beamIITriggered = !beamII.get();
   }
 
   @Override
