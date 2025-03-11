@@ -187,5 +187,5 @@ compile_commands.json
 .factorypath
 
 # Build data
-src/java/wmironpatriots/BuildConstants.java
+src/main/java/wmironpatriots/BuildConstants.java
 simgui*
