@@ -39,6 +39,7 @@ public class Robot extends TimedRobot {
 
     operator.x().whileTrue(elevator.runPoseCmmd(Elevator.POSE_L3));
     operator.a().whileTrue(tail.runPoseCmmd(Tail.POSE_MAX));
+    operator.y().whileTrue(superstructure.intakeCoral());
   }
 
   @Override

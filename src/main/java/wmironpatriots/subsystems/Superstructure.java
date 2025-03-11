@@ -8,11 +8,40 @@ package wmironpatriots.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import wmironpatriots.subsystems.chute.Chute;
 import wmironpatriots.subsystems.elevator.Elevator;
 import wmironpatriots.subsystems.tail.Tail;
 
 public class Superstructure {
+  public static enum ReefBranch {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L
+  };
+
+  public static enum ReefLevel {
+    L1(Elevator.POSE_L1, Tail.POSE_L1),
+    L2(Elevator.POSE_L2, Tail.POSE_L2),
+    L3(Elevator.POSE_L3, Tail.POSE_L3),
+    L4(Elevator.POSE_L4, Tail.POSE_L4);
+    private final double elevatorPose, tailPose;
+
+    private ReefLevel(double elevatorPose, double tailPose) {
+      this.elevatorPose = elevatorPose;
+      this.tailPose = tailPose;
+    }
+  };
+
   private final Elevator elevator;
   private final Tail tail;
   private final Chute chute;
@@ -36,9 +65,8 @@ public class Superstructure {
 
   public Command defaultTailCmmd() {
     return Commands.sequence(
-        tail.stopTailCmmd(),
         tail.runCurrentZeroingCmmd().onlyIf(() -> !tail.isZeroed),
-        tail.runPoseCmmd(Tail.POSE_STOWED),
+        tail.runPoseCmmd(Tail.POSE_STOWED).until(() -> tail.nearSetpoint()),
         tail.stopTailCmmd());
   }
 
@@ -51,6 +79,21 @@ public class Superstructure {
         .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
         .alongWith(tail.runRollerSpeed(Tail.SPEED_INTAKING))
         .until(() -> tail.hasCoral())
-        .andThen(tail.vectorCoral());
+        .andThen(tail.vectorCoral())
+        .finallyDo(() -> hasCoral = true)
+        .onlyIf(() -> !hasCoral);
+  }
+
+  public Command score(ReefLevel level) {
+    return Commands.parallel(
+            elevator
+                .runPoseCmmd(level.elevatorPose)
+                .alongWith(tail.runPoseCmmd(level.tailPose))
+                .until(() -> !hasCoral),
+            new WaitUntilCommand(() -> elevator.nearSetpoint() && tail.nearSetpoint())
+                .andThen(tail.runRollerSpeed(Tail.SPEED_SCORING))
+                .until(() -> !tail.hasCoral())
+                .finallyDo(() -> hasCoral = false))
+        .onlyIf(() -> hasCoral);
   }
 }
