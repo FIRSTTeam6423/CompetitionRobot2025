@@ -87,14 +87,18 @@ public class Superstructure {
 
   /** Scores to input level */
   public Command scoreCoralCmmd(ReefLevel level) {
-    return tail.runPoseCmmd(Tail.POSE_MAX)
-        .until(() -> elevator.poseRevs >= Elevator.POSE_COLLISION)
-        .andThen(tail.runPoseCmmd(level.tailPose))
-        .alongWith(
-            elevator
-                .runPoseCmmd(level.elevatorPose)
-                .onlyIf(() -> tail.poseRevs > Tail.POSE_SAFTEY)
-                .repeatedly());
+    return Commands.parallel(
+        tail.runPoseCmmd(Tail.POSE_MAX)
+            .until(() -> elevator.poseRevs >= Elevator.POSE_COLLISION)
+            .andThen(tail.runPoseCmmd(level.tailPose)),
+        elevator
+            .runPoseCmmd(level.elevatorPose)
+            .onlyIf(() -> tail.poseRevs > Tail.POSE_SAFTEY)
+            .repeatedly(),
+        roller
+            .runRollerSpeedCmmd(Roller.SPEED_SCORING)
+            .onlyIf(() -> tail.nearSetpoint() && elevator.nearSetpoint())
+            .repeatedly());
   }
 
   // * STATIC SCORE TARGET ENUMS
