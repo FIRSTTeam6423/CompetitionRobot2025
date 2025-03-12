@@ -6,9 +6,11 @@
 
 package wmironpatriots.subsystems.superstructure;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import wmironpatriots.subsystems.superstructure.chute.Chute;
 import wmironpatriots.subsystems.superstructure.chute.ChuteIOComp;
 import wmironpatriots.subsystems.superstructure.elevator.Elevator;
@@ -35,6 +37,12 @@ public class Superstructure {
     tail.setDefaultCommand(defaultTailCmmd());
     roller.setDefaultCommand(defaultRollerCmmd());
     chute.setDefaultCommand(defaultChuteCmmd());
+
+    // Turn off brake mode when disabled
+    var enabled = new Trigger(() -> DriverStation.isDisabled())
+      .onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
+    var disabled = new Trigger(() -> DriverStation.isEnabled())
+      .onTrue(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
   }
 
   // * DEFAULT COMMANDS
@@ -89,21 +97,41 @@ public class Superstructure {
             tail.runPoseCmmd(Tail.POSE_MAX)
                 .until(() -> tailSafe())
                 .andThen(tail.runPoseCmmd(level.tailPose)),
-            elevator
-                .runPoseCmmd(level.elevatorPose)
-                .onlyWhile(() -> tail.poseRevs > Tail.POSE_SAFTEY),
             roller
                 .runRollerSpeedCmmd(Roller.SPEED_SCORING)
-                .onlyWhile(() -> tail.nearSetpoint() && elevator.nearSetpoint()))
+                .onlyWhile(() -> tail.nearSetpoint() && elevator.nearSetpoint()),
+            elevator.runPoseCmmd(level.elevatorPose).onlyWhile(() -> tailDeployed()))
         .onlyIf(() -> tail.hasCoral());
   }
 
+  // * ALGAE MANIPULATION
+  /** Puts tail out for intaking algae */
+  public Command intakeAlgaeCmmd() {
+    return Commands.parallel(
+            tail.setCoasting(true)
+                .andThen(tail.runPoseCmmd(Tail.POSE_MAX).until(() -> roller.hasAlgae()))
+                .andThen(tail.setCoasting(false)),
+            roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING).until(() -> roller.hasAlgae()))
+        .onlyIf(() -> !tail.hasCoral());
+  }
+
+  /** Runs roller to score algae */
+  public Command scoreAlgaeCmmd() {
+    return roller.runRollerSpeedCmmd(Roller.SPEED_SCORING);
+  }
+
+  // * SAFETY CONSTRAINTS
   /** Checks if tail is safe from collision */
   private boolean tailSafe() {
     var displacement = tail.targetPoseRevs - tail.poseRevs;
     return displacement > 0
         ? elevator.poseRevs >= Elevator.POSE_COLLISION
         : elevator.poseRevs <= Elevator.POSE_COLLISION;
+  }
+
+  /** Checks if tail is deployed */
+  private boolean tailDeployed() {
+    return tail.poseRevs > Tail.POSE_SAFTEY;
   }
 
   // * STATIC SCORE TARGET ENUMS

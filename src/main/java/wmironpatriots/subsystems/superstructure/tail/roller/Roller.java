@@ -19,6 +19,7 @@ public abstract class Roller implements LoggedSubsystem {
   // * LOGGED VALUES
   @Log public double poseRevs;
   @Log public double velRPM;
+  @Log public double currentAmps;
 
   /**
    * Runs tail rollers until coral is in scoring pose
@@ -48,6 +49,11 @@ public abstract class Roller implements LoggedSubsystem {
   public Command runRollerDistanceCmmd(double distanceRevs) {
     double prevPose = distanceRevs;
     return this.run(() -> setRollerVolts(1)).until(() -> this.poseRevs - prevPose == distanceRevs);
+  }
+
+  /** Checks if rollers are strained */
+  public boolean hasAlgae() {
+    return currentAmps > 15.0;
   }
 
   // * HARDWARE METHODS

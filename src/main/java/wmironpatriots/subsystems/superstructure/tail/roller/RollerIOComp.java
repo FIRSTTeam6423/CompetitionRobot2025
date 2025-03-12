@@ -31,6 +31,7 @@ public class RollerIOComp extends Roller {
   public void periodic() {
     poseRevs = rollerEncoder.getPosition();
     velRPM = rollerEncoder.getVelocity();
+    currentAmps = roller.getOutputCurrent();
   }
 
   @Override
