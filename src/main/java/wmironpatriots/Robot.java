@@ -14,20 +14,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
-import wmironpatriots.subsystems.Superstructure;
-import wmironpatriots.subsystems.Superstructure.ReefLevel;
-import wmironpatriots.subsystems.chute.Chute;
-import wmironpatriots.subsystems.chute.ChuteIOComp;
-import wmironpatriots.subsystems.elevator.Elevator;
-import wmironpatriots.subsystems.elevator.ElevatorIOComp;
-import wmironpatriots.subsystems.tail.Tail;
-import wmironpatriots.subsystems.tail.TailIOComp;
+import wmironpatriots.subsystems.superstructure.Superstructure;
+import wmironpatriots.subsystems.superstructure.Superstructure.ReefLevel;
 
 public class Robot extends TimedRobot implements Logged {
   private final Superstructure superstructure;
-  private final Elevator elevator;
-  private final Tail tail;
-  private final Chute chute;
 
   private final CommandXboxController operator;
 
@@ -57,21 +48,18 @@ public class Robot extends TimedRobot implements Logged {
     SignalLogger.enableAutoLogging(false);
     SignalLogger.stop();
 
+    // * INIT HARDWARE
     operator = new CommandXboxController(1);
+    superstructure = new Superstructure();
 
-    elevator = new ElevatorIOComp();
-    tail = new TailIOComp();
-    chute = new ChuteIOComp();
-
-    superstructure = new Superstructure(elevator, tail, chute);
-
-    elevator.setDefaultCommand(superstructure.defaultElevatorCmmd());
-    tail.setDefaultCommand(superstructure.defaultTailCmmd());
-    chute.setDefaultCommand(superstructure.defaultChuteCmmd());
-
-    operator.a().whileTrue(superstructure.score(ReefLevel.L4));
-    operator.b().whileTrue(superstructure.intakeCoral());
-    operator.povRight().whileTrue(superstructure.outtakeCoral());
+    // * SETUP BINDS
+    // Operator binds
+    operator.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L1));
+    operator.x().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L2));
+    operator.b().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L3));
+    operator.y().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L4));
+    operator.povUp().whileTrue(superstructure.outtakeCoralCmmd());
+    operator.povDown().whileTrue(superstructure.intakeCoralCmmd());
   }
 
   @Override
