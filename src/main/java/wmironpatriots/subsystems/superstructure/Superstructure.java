@@ -86,17 +86,24 @@ public class Superstructure {
   /** Scores to input level */
   public Command scoreCoralCmmd(ReefLevel level) {
     return Commands.parallel(
-        tail.runPoseCmmd(Tail.POSE_MAX)
-            .until(() -> elevator.poseRevs >= Elevator.POSE_COLLISION)
-            .andThen(tail.runPoseCmmd(level.tailPose)),
-        elevator
-            .runPoseCmmd(level.elevatorPose)
-            .onlyIf(() -> tail.poseRevs > Tail.POSE_SAFTEY)
-            .repeatedly(),
-        roller
-            .runRollerSpeedCmmd(Roller.SPEED_SCORING)
-            .onlyIf(() -> tail.nearSetpoint() && elevator.nearSetpoint())
-            .repeatedly()).onlyIf(() -> tail.hasCoral());
+            tail.runPoseCmmd(Tail.POSE_MAX)
+                .until(() -> tailSafe())
+                .andThen(tail.runPoseCmmd(level.tailPose)),
+            elevator
+                .runPoseCmmd(level.elevatorPose)
+                .onlyWhile(() -> tail.poseRevs > Tail.POSE_SAFTEY),
+            roller
+                .runRollerSpeedCmmd(Roller.SPEED_SCORING)
+                .onlyWhile(() -> tail.nearSetpoint() && elevator.nearSetpoint()))
+        .onlyIf(() -> tail.hasCoral());
+  }
+
+  /** Checks if tail is safe from collision */
+  private boolean tailSafe() {
+    var displacement = tail.targetPoseRevs - tail.poseRevs;
+    return displacement > 0
+        ? elevator.poseRevs >= Elevator.POSE_COLLISION
+        : elevator.poseRevs <= Elevator.POSE_COLLISION;
   }
 
   // * STATIC SCORE TARGET ENUMS
