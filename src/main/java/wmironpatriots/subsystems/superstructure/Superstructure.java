@@ -39,10 +39,12 @@ public class Superstructure {
     chute.setDefaultCommand(defaultChuteCmmd());
 
     // Turn off brake mode when disabled
-    var enabled = new Trigger(() -> DriverStation.isDisabled())
-      .onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
-    var disabled = new Trigger(() -> DriverStation.isEnabled())
-      .onTrue(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
+    var enabled =
+        new Trigger(() -> DriverStation.isDisabled())
+            .onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
+    var disabled =
+        new Trigger(() -> DriverStation.isEnabled())
+            .onTrue(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
   }
 
   // * DEFAULT COMMANDS
@@ -73,14 +75,22 @@ public class Superstructure {
   }
 
   // * CORAL MANIPULATION
-  /** Intakes and indexes coral */
+  /** Automated intaking sequence; Will try to unjam if jammed */
+  public Command runIntakeRoutineCmmd() {
+    return Commands.sequence(
+      intakeCoralCmmd(),
+      outtakeCoralCmmd().andThen(intakeCoralCmmd())
+        .onlyIf(() -> chute.isStuck())
+    ).onlyIf(() -> !tail.hasCoral());
+  }
+
+  /** Intakes and then indexes coral if it isn't jammed in chute */
   public Command intakeCoralCmmd() {
     return chute
         .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
         .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_INTAKING))
-        .until(() -> tail.hasCoral())
-        .andThen(roller.indexCoralCmmd())
-        .onlyIf(() -> !tail.hasCoral());
+        .until(() -> tail.hasCoral() || chute.isStuck())
+        .andThen(roller.indexCoralCmmd().onlyIf(() -> tail.hasCoral()));
   }
 
   /** Unjams coral in intake */
