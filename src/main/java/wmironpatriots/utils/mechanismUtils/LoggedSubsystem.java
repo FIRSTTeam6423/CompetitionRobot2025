@@ -4,7 +4,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
 
-package wmironpatriots.utils;
+package wmironpatriots.utils.mechanismUtils;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Logged;

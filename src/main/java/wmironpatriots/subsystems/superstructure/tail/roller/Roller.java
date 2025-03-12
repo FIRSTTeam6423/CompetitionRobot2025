@@ -8,7 +8,7 @@ package wmironpatriots.subsystems.superstructure.tail.roller;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import monologue.Annotations.Log;
-import wmironpatriots.utils.LoggedSubsystem;
+import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
 
 public abstract class Roller implements LoggedSubsystem {
   // * CONSTANTS

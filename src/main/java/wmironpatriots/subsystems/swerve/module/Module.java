@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import monologue.Annotations.Log;
-import wmironpatriots.utils.LoggedSubsystemComponent;
+import wmironpatriots.utils.mechanismUtils.LoggedSubsystemComponent;
 
 public abstract class Module extends LoggedSubsystemComponent {
     // * CONSTANTS
