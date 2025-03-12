@@ -24,8 +24,6 @@ public class Superstructure {
   private final Roller roller;
   private final Chute chute;
 
-  private boolean hasCoral;
-
   public Superstructure() {
     // * INIT SUBSYSTEMS
     elevator = new ElevatorIOComp();
@@ -37,8 +35,6 @@ public class Superstructure {
     tail.setDefaultCommand(defaultTailCmmd());
     roller.setDefaultCommand(defaultRollerCmmd());
     chute.setDefaultCommand(defaultChuteCmmd());
-
-    hasCoral = tail.hasCoral();
   }
 
   // * DEFAULT COMMANDS
@@ -75,14 +71,16 @@ public class Superstructure {
         .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
         .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_INTAKING))
         .until(() -> tail.hasCoral())
-        .andThen(roller.indexCoralCmmd());
+        .andThen(roller.indexCoralCmmd())
+        .onlyIf(() -> !tail.hasCoral());
   }
 
   /** Unjams coral in intake */
   public Command outtakeCoralCmmd() {
     return chute
         .runChuteSpeedCmmd(Chute.SPEED_OUTAKING)
-        .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING));
+        .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING))
+        .onlyIf(() -> tail.hasCoral());
   }
 
   /** Scores to input level */
@@ -98,7 +96,7 @@ public class Superstructure {
         roller
             .runRollerSpeedCmmd(Roller.SPEED_SCORING)
             .onlyIf(() -> tail.nearSetpoint() && elevator.nearSetpoint())
-            .repeatedly());
+            .repeatedly()).onlyIf(() -> tail.hasCoral());
   }
 
   // * STATIC SCORE TARGET ENUMS
