@@ -4,7 +4,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
 
-package wmironpatriots.subsystems.elevator;
+package wmironpatriots.subsystems.superstructure.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import monologue.Annotations.Log;
@@ -18,6 +18,7 @@ public abstract class Elevator implements LoggedSubsystem {
 
   // Poses
   public static final double POSE_STOWED = 0.0;
+  public static final double POSE_COLLISION = 8.2; // Position where top of tail will collide with top of first stage when stowed
   public static final double POSE_INTAKE = 0.0;
   public static final double POSE_ALGAE_L = 5.4;
   public static final double POSE_ALGAE_H = 9.7;
@@ -27,11 +28,11 @@ public abstract class Elevator implements LoggedSubsystem {
   public static final double POSE_L4 = 12.75;
 
   // * LOGGED VALUES
-  @Log protected double poseRevs;
-  @Log protected double targetPoseRevs;
-  @Log protected double velRPM;
-  @Log protected double appliedVolts;
-  @Log protected double currentAmps;
+  @Log public double poseRevs;
+  @Log public double targetPoseRevs;
+  @Log public double velRPM;
+  @Log public double appliedVolts;
+  @Log public double currentAmps;
   @Log public boolean isZeroed = false;
 
   /**
@@ -84,14 +85,6 @@ public abstract class Elevator implements LoggedSubsystem {
     return this.run(() -> motorCoasting(enabled));
   }
 
-  public double getPose() {
-    return poseRevs;
-  }
-
-  public double getSetpoint() {
-    return targetPoseRevs;
-  }
-
   /**
    * Checks if elevator pose is in a 0.5 rev range from setpoint
    *
@@ -99,10 +92,6 @@ public abstract class Elevator implements LoggedSubsystem {
    */
   public boolean nearSetpoint() {
     return Math.abs(targetPoseRevs - poseRevs) > 0.5;
-  }
-
-  public boolean underSetpoint() {
-    return targetPoseRevs > poseRevs;
   }
 
   // * HARDWARE METHODS

@@ -4,7 +4,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
 
-package wmironpatriots.subsystems.elevator;
+package wmironpatriots.subsystems.superstructure.elevator;
 
 import static wmironpatriots.Constants.MATRIXID.CANCHAN;
 import static wmironpatriots.Constants.MATRIXID.ELEVATOR_CHILD;
