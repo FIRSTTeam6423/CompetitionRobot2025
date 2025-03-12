@@ -1,5 +1,7 @@
 package wmironpatriots.subsystems.swerve;
 
-public class Swerve {
+import wmironpatriots.utils.LoggedSubsystem;
+
+public class Swerve implements LoggedSubsystem {
     
 }
