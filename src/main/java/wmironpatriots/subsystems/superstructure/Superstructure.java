@@ -26,7 +26,7 @@ import wmironpatriots.subsystems.superstructure.tail.roller.RollerIOComp;
 public class Superstructure {
   // * CONSTANTS
   public static Rectangle2d INTAKING_ZONE = 
-    new Rectangle2d(new Translation2d(), new Translation2d());
+    new Rectangle2d(new Translation2d(0.0, 0.0), new Translation2d(2.0, 1.5));
 
   private final Elevator elevator;
   private final Tail tail;
@@ -46,16 +46,14 @@ public class Superstructure {
     chute.setDefaultCommand(defaultChuteCmmd());
 
     // Turn off brake mode when disabled
-    var enabled =
-        new Trigger(() -> DriverStation.isDisabled())
-            .onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
-    var disabled =
-        new Trigger(() -> DriverStation.isEnabled())
-            .onTrue(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
+    new Trigger(() -> DriverStation.isDisabled())
+        .onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
+    new Trigger(() -> DriverStation.isEnabled())
+        .onTrue(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
 
     // Auto intake; if robot is close to source intaking sequence should start
-    var inSourceZone =
-        new Trigger(() -> INTAKING_ZONE.contains(new Pose2d().getTranslation())); // TODO get pose from swerve subsystem
+    new Trigger(() -> INTAKING_ZONE.contains(new Pose2d().getTranslation())) // TODO GET FIELD AREA
+        .whileTrue(runIntakeRoutineCmmd());
   }
 
   // * DEFAULT COMMANDS
