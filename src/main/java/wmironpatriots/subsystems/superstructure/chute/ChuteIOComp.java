@@ -28,9 +28,9 @@ public class ChuteIOComp extends Chute {
 
   @Override
   public void periodic() {
-    chuteAppliedVolts = roller.getAppliedOutput() * roller.getBusVoltage();
-    chuteSpeedRPM = roller.get();
-    chuteSupplyCurrent = roller.getOutputCurrent();
+    appliedVolts = roller.getAppliedOutput() * roller.getBusVoltage();
+    speedRPM = roller.get();
+    currentAmps = roller.getOutputCurrent();
   }
 
   @Override

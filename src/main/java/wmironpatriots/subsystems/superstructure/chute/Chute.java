@@ -11,9 +11,9 @@ import monologue.Annotations.Log;
 import wmironpatriots.utils.LoggedSubsystem;
 
 public abstract class Chute implements LoggedSubsystem {
-  @Log protected double chuteAppliedVolts;
-  @Log protected double chuteSpeedRPM;
-  @Log protected double chuteSupplyCurrent;
+  @Log protected double appliedVolts;
+  @Log protected double speedRPM;
+  @Log protected double currentAmps;
 
   public static final double SPEED_INTAKING = -0.1;
   public static final double SPEED_OUTAKING = 0.1;
@@ -26,11 +26,11 @@ public abstract class Chute implements LoggedSubsystem {
 
   /** Checks to see if current is spiking for chute motors */
   public boolean hasCoral() {
-    return chuteSupplyCurrent > 10.0;
+    return currentAmps > 10.0;
   }
 
   /** Checks if chute is jammed */
   public boolean isStuck() {
-    return chuteSupplyCurrent > 10.0;
+    return currentAmps > 10.0;
   }
 }

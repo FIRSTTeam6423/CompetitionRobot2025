@@ -15,7 +15,6 @@ import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import wmironpatriots.subsystems.superstructure.Superstructure;
-import wmironpatriots.subsystems.superstructure.Superstructure.ReefLevel;
 
 public class Robot extends TimedRobot implements Logged {
   private final Superstructure superstructure;
@@ -53,13 +52,6 @@ public class Robot extends TimedRobot implements Logged {
     superstructure = new Superstructure();
 
     // * SETUP BINDS
-    // Operator binds
-    operator.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L1));
-    operator.x().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L2));
-    operator.b().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L3));
-    operator.y().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L4));
-    operator.povUp().whileTrue(superstructure.outtakeCoralCmmd());
-    operator.povDown().whileTrue(superstructure.intakeCoralCmmd());
   }
 
   @Override

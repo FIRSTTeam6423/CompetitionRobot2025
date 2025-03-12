@@ -25,8 +25,8 @@ import wmironpatriots.subsystems.superstructure.tail.roller.RollerIOComp;
 
 public class Superstructure {
   // * CONSTANTS
-  public static Rectangle2d INTAKING_ZONE = 
-    new Rectangle2d(new Translation2d(), new Translation2d());
+  public static Rectangle2d INTAKING_ZONE =
+      new Rectangle2d(new Translation2d(), new Translation2d());
 
   private final Elevator elevator;
   private final Tail tail;
@@ -55,7 +55,10 @@ public class Superstructure {
 
     // Auto intake; if robot is close to source intaking sequence should start
     var inSourceZone =
-        new Trigger(() -> INTAKING_ZONE.contains(new Pose2d().getTranslation())); // TODO get pose from swerve subsystem
+        new Trigger(
+            () ->
+                INTAKING_ZONE.contains(
+                    new Pose2d().getTranslation())); // TODO get pose from swerve subsystem
   }
 
   // * DEFAULT COMMANDS
