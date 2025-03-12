@@ -18,7 +18,8 @@ public abstract class Elevator implements LoggedSubsystem {
 
   // Poses
   public static final double POSE_STOWED = 0.0;
-  public static final double POSE_COLLISION = 8.2; // Position where top of tail will collide with top of first stage when stowed
+  public static final double POSE_COLLISION =
+      8.2; // Position where top of tail will collide with top of first stage when stowed
   public static final double POSE_INTAKE = 0.0;
   public static final double POSE_ALGAE_L = 5.4;
   public static final double POSE_ALGAE_H = 9.7;

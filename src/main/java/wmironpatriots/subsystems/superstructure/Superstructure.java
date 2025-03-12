@@ -33,7 +33,6 @@ public class Superstructure {
     roller = new RollerIOComp();
     chute = new ChuteIOComp();
 
-    // * DEFAULT COMMANDS
     elevator.setDefaultCommand(defaultElevatorCmmd());
     tail.setDefaultCommand(defaultTailCmmd());
     roller.setDefaultCommand(defaultRollerCmmd());
@@ -42,6 +41,7 @@ public class Superstructure {
     hasCoral = tail.hasCoral();
   }
 
+  // * DEFAULT COMMANDS
   /** Zeros elevator if it hasn't been zeroed since startup and runs elevator to neutral pose */
   public Command defaultElevatorCmmd() {
     return Commands.sequence(
@@ -68,6 +68,7 @@ public class Superstructure {
     return chute.runChuteSpeedCmmd(0.0);
   }
 
+  // * CORAL MANIPULATION
   /** Intakes and indexes coral */
   public Command intakeCoralCmmd() {
     return chute
@@ -96,7 +97,7 @@ public class Superstructure {
                 .repeatedly());
   }
 
-  /** Static score enums */
+  // * STATIC SCORE TARGET ENUMS
   public static enum ReefBranch {
     A,
     B,
