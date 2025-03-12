@@ -6,6 +6,9 @@
 
 package wmironpatriots.subsystems.superstructure;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -21,6 +24,10 @@ import wmironpatriots.subsystems.superstructure.tail.roller.Roller;
 import wmironpatriots.subsystems.superstructure.tail.roller.RollerIOComp;
 
 public class Superstructure {
+  // * CONSTANTS
+  public static Rectangle2d INTAKING_ZONE = 
+    new Rectangle2d(new Translation2d(), new Translation2d());
+
   private final Elevator elevator;
   private final Tail tail;
   private final Roller roller;
@@ -45,6 +52,10 @@ public class Superstructure {
     var disabled =
         new Trigger(() -> DriverStation.isEnabled())
             .onTrue(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
+
+    // Auto intake; if robot is close to source intaking sequence should start
+    var inSourceZone =
+        new Trigger(() -> INTAKING_ZONE.contains(new Pose2d().getTranslation())); // TODO get pose from swerve subsystem
   }
 
   // * DEFAULT COMMANDS
@@ -78,10 +89,9 @@ public class Superstructure {
   /** Automated intaking sequence; Will try to unjam if jammed */
   public Command runIntakeRoutineCmmd() {
     return Commands.sequence(
-      intakeCoralCmmd(),
-      outtakeCoralCmmd().andThen(intakeCoralCmmd())
-        .onlyIf(() -> chute.isStuck())
-    ).onlyIf(() -> !tail.hasCoral());
+            intakeCoralCmmd(),
+            outtakeCoralCmmd().andThen(intakeCoralCmmd()).onlyIf(() -> chute.isStuck()))
+        .onlyIf(() -> !tail.hasCoral());
   }
 
   /** Intakes and then indexes coral if it isn't jammed in chute */
