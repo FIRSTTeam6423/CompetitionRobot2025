@@ -1,10 +1,12 @@
 package wmironpatriots.subsystems.swerve.module;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import monologue.Annotations.Log;
 import wmironpatriots.utils.mechanismUtils.LoggedSubsystemComponent;
 
@@ -13,6 +15,7 @@ public abstract class Module extends LoggedSubsystemComponent {
     // mech constants
     public static final double PIVOT_REDUCTION = 0.0;
     public static final double DRIVE_REDUCTION = 0.0;
+    public static final double WHEEL_RADIUS_METERS = 2.7;
 
     public static record ModuleConfig(int pivotID, int driveID, int cancoderID, double cancoderOffsetRevs, boolean cancoderFlipped) {}
 
@@ -23,6 +26,11 @@ public abstract class Module extends LoggedSubsystemComponent {
 
     public static TalonFXConfiguration getDriveConf() {
         TalonFXConfiguration conf = new TalonFXConfiguration();
+        return conf;
+    }
+
+    public static CANcoderConfiguration getCancoderConf() {
+        CANcoderConfiguration conf = new CANcoderConfiguration();
         return conf;
     }
 
@@ -37,6 +45,9 @@ public abstract class Module extends LoggedSubsystemComponent {
     @Log public double driveCurrentAmps;
     @Log public double driveTorqueAmps;
 
+    private SwerveModuleState prevState = new SwerveModuleState();
+    private double prevTime;
+
     /**
      * Optimizes and runs desired swerve module state
      * 
@@ -47,6 +58,15 @@ public abstract class Module extends LoggedSubsystemComponent {
         // Cosine compensation; Decreases carpet wear and drift
         setpoint.optimize(getRotation2d());
         setpoint.speedMetersPerSecond *= setpoint.angle.minus(getRotation2d()).getCos();
+
+        setPivotPose(setpoint.angle.getRotations());
+        setDriveVel(
+            setpoint.speedMetersPerSecond, 
+            (setpoint.speedMetersPerSecond - prevState.speedMetersPerSecond)
+                / (Timer.getFPGATimestamp() - prevTime));
+
+        prevState = setpoint;
+        prevTime = Timer.getFPGATimestamp();
 
         return setpoint;
     }
@@ -90,7 +110,7 @@ public abstract class Module extends LoggedSubsystemComponent {
 
     protected abstract void setDriveVolts(double volts);
 
-    protected abstract void setDriveVel(double velMPS);
+    protected abstract void setDriveVel(double velMPS, double accelMPSSqrd);
 
     protected abstract void stopMotors();
 
