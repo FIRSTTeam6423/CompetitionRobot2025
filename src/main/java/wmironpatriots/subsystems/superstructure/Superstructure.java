@@ -25,8 +25,8 @@ import wmironpatriots.subsystems.superstructure.tail.roller.RollerIOComp;
 
 public class Superstructure {
   // * CONSTANTS
-  public static Rectangle2d INTAKING_ZONE = 
-    new Rectangle2d(new Translation2d(0.0, 0.0), new Translation2d(2.0, 1.5));
+  public static Rectangle2d INTAKING_ZONE =
+      new Rectangle2d(new Translation2d(0.0, 0.0), new Translation2d(2.0, 1.5));
 
   private final Elevator elevator;
   private final Tail tail;
