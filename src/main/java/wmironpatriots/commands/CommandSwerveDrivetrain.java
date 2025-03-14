@@ -17,6 +17,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -35,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.Optional;
 import java.util.function.Supplier;
 import wmironpatriots.commands.generated.TunerConstants.TunerSwerveDrivetrain;
+import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
@@ -288,19 +290,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
   }
 
-  //   public void updateEstimates(PoseEstimate... poses) {
-  //     Pose3d[] loggedEstimates = new Pose3d[poses.length];
-  //     for (int i = 0; i < poses.length; i++) {
-  //       loggedEstimates[i] = poses[i].estimatedPose().estimatedPose;
-  //       addVisionMeasurement(
-  //           poses[i].estimatedPose().estimatedPose.toPose2d(),
-  //           poses[i].estimatedPose().timestampSeconds,
-  //           poses[i].standardDev());
-  //       // field2d
-  //       //     .getObject("Cam " + i + " Est Pose")
-  //       //     .setPose(poses[i].estimatedPose().estimatedPose.toPose2d());
-  //     }
-  //   }
+    public void updateEstimates(PoseEstimate... poses) {
+      Pose3d[] loggedEstimates = new Pose3d[poses.length];
+      for (int i = 0; i < poses.length; i++) {
+        loggedEstimates[i] = poses[i].pose().estimatedPose;
+        addVisionMeasurement(
+            poses[i].pose().estimatedPose.toPose2d(),
+            poses[i].pose().timestampSeconds,
+            poses[i].stdevs());
+        // field2d
+        //     .getObject("Cam " + i + " Est Pose")
+        //     .setPose(poses[i].estimatedPose().estimatedPose.toPose2d());
+      }
+    }
 
   /**
    * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate

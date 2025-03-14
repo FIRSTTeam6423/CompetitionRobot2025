@@ -21,9 +21,9 @@ import wmironpatriots.utils.mechanismUtils.LoggedSubsystemComponent;
 public abstract class Module extends LoggedSubsystemComponent {
   // * CONSTANTS
   // mech constants
-  public static final double PIVOT_REDUCTION = 0.0;
-  public static final double DRIVE_REDUCTION = 0.0;
-  public static final double WHEEL_RADIUS_METERS = 2.7;
+  public static final double PIVOT_REDUCTION = 21.428571428571427;
+  public static final double DRIVE_REDUCTION = 6.122448979591837;
+  public static final double WHEEL_RADIUS_METERS = 0.049784;
 
   public static record ModuleConfig(
       int pivotID, int driveID, int cancoderID, double cancoderOffsetRevs, boolean pivotInverted) {}
@@ -50,11 +50,11 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Feedback.RotorToSensorRatio = PIVOT_REDUCTION;
     conf.Feedback.SensorToMechanismRatio = 1.0;
 
-    conf.Slot0.kP = 0.0;
-    conf.Slot0.kD = 0.0;
+    conf.Slot0.kP = 30.0;
+    conf.Slot0.kD = 0.5;
     conf.Slot0.kA = 0.0;
-    conf.Slot0.kV = 0.0;
-    conf.Slot0.kS = 0.0;
+    conf.Slot0.kV = 2.66;
+    conf.Slot0.kS = 0.1;
 
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     conf.ClosedLoopGeneral.ContinuousWrap = true;
@@ -75,10 +75,10 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     conf.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION;
 
-    conf.Slot0.kP = 0.0;
+    conf.Slot0.kP = 0.1;
     conf.Slot0.kD = 0.0;
     conf.Slot0.kA = 0.0;
-    conf.Slot0.kV = 0.0;
+    conf.Slot0.kV = 0.124;
     conf.Slot0.kS = 0.0;
 
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
@@ -135,7 +135,7 @@ public abstract class Module extends LoggedSubsystemComponent {
    * @return SwerveModuleState based on the current module state
    */
   public SwerveModuleState getModuleState() {
-    return new SwerveModuleState();
+    return new SwerveModuleState(driveVelMPS, getRotation2d());
   }
 
   /**
@@ -144,7 +144,7 @@ public abstract class Module extends LoggedSubsystemComponent {
    * @return SwerveModulePosition based on current module position
    */
   public SwerveModulePosition getModulePose() {
-    return new SwerveModulePosition();
+    return new SwerveModulePosition(drivePoseMeters, getRotation2d());
   }
 
   /**

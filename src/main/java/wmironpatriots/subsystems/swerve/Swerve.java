@@ -50,7 +50,7 @@ public class Swerve implements LoggedSubsystem {
       Rotation2d.fromRotations(
           DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
 
-  public static final double MAX_LINEAR_SPEED = 0.0;
+  public static final double MAX_LINEAR_SPEED = 5.11;
   public static final double MAX_ANGULAR_SPEED = 0.0;
 
   public static final double LINEAR_P = 0.0;
@@ -106,6 +106,7 @@ public class Swerve implements LoggedSubsystem {
   @Override
   public void periodic() {
     odo.update(getHeading(), getSwerveModulePoses());
+    f2d.setRobotPose(getPose());
 
     if (DriverStation.isDisabled()) {
       stop();
