@@ -6,6 +6,8 @@
 
 package wmironpatriots.subsystems.vision;
 
+import org.photonvision.EstimatedRobotPose;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -20,7 +22,7 @@ public abstract class Vision implements LoggedSubsystem {
   // * CONSTANTS
   public static record CameraConfig(
       String camID, double width, double height, double camFOV, Transform3d robotToCam) {}
-  public static record PoseEstimate(Pose3d pose, Matrix<N3, N1> stdevs) {}
+  public static record PoseEstimate(EstimatedRobotPose pose, Matrix<N3, N1> stdevs) {}
   
   public CameraConfig[] CAM_CONFIGS = new CameraConfig[] {};
 

@@ -9,6 +9,7 @@ package wmironpatriots.subsystems.swerve;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.DoubleSupplier;
 import wmironpatriots.Constants.MATRIXID;
@@ -24,6 +26,7 @@ import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.Module.ModuleConfig;
+import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
 import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
 
@@ -78,6 +81,8 @@ public class Swerve implements LoggedSubsystem {
 
   private final PIDController angularFeedback, linearFeedback;
 
+  private final Field2d f2d;
+
   public Swerve() {
     gyro = new GyroIOComp();
     modules = new ModuleIOComp[MODULE_CONFIGS.length];
@@ -89,6 +94,8 @@ public class Swerve implements LoggedSubsystem {
     odo =
         new SwerveDrivePoseEstimator(
             kinematics, getHeading(), getSwerveModulePoses(), new Pose2d());
+
+    f2d = new Field2d();
 
     angularFeedback = new PIDController(4.5, 0.0, 0.05);
     angularFeedback.enableContinuousInput(0, 2 * Math.PI);
@@ -134,7 +141,19 @@ public class Swerve implements LoggedSubsystem {
     }
   }
 
-  public void updateVisionEstimates() {}
+  public void updateVisionEstimates(PoseEstimate... poses) {
+    Pose3d[] estimates = new Pose3d[poses.length];
+    for (int i = 0; i < poses.length; i++) {
+      odo.addVisionMeasurement(
+        poses[i].pose().estimatedPose.toPose2d(), 
+        poses[i].pose().timestampSeconds, 
+        poses[i].stdevs());
+      
+      f2d
+        .getObject("estimated pose " + i)
+        .setPose(poses[i].pose().estimatedPose.toPose2d());
+    }
+  }
 
   public void resetOdo(Pose2d pose) {
     odo.resetPose(pose);

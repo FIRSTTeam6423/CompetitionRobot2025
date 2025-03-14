@@ -15,10 +15,13 @@ import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import wmironpatriots.subsystems.swerve.Swerve;
+import wmironpatriots.subsystems.vision.Vision;
+import wmironpatriots.subsystems.vision.VisionIOComp;
 
 public class Robot extends TimedRobot implements Logged {
   // private final Superstructure superstructure;
   private final Swerve swerve;
+  private final Vision vision;
 
   private final CommandXboxController operator;
   private final CommandXboxController joystick;
@@ -55,6 +58,8 @@ public class Robot extends TimedRobot implements Logged {
 
     // superstructure = new Superstructure();
     swerve = new Swerve();
+    vision = new VisionIOComp(); 
+    addPeriodic(() -> swerve.updateVisionEstimates(vision.getEstimatedPoses()), 0.02);
 
     // * SETUP BINDS
     double maxSpeed = Swerve.MAX_LINEAR_SPEED;

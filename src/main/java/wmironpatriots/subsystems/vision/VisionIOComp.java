@@ -51,7 +51,7 @@ public class VisionIOComp extends Vision {
       Optional<EstimatedRobotPose> estimate = Optional.empty();
       for (var result : results) {
         estimate = estimator.update(result);
-        estimate.ifPresent(e -> estimates.add(new PoseEstimate(e.estimatedPose, getStdevs(e.estimatedPose.toPose2d(), result))));
+        estimate.ifPresent(e -> estimates.add(new PoseEstimate(e, getStdevs(e.estimatedPose.toPose2d(), result))));
       }
     }
 
