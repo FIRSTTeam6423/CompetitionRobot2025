@@ -112,7 +112,8 @@ public class Superstructure {
   /** Scores to input level */
   public Command scoreCoralCmmd(ReefLevel level) {
     return Commands.parallel(
-            tail.runPoseCmmd(Tail.POSE_MAX)
+            tail
+                .runPoseCmmd(Tail.POSE_MAX)
                 .until(() -> tailSafe())
                 .andThen(tail.runPoseCmmd(level.tailPose)),
             roller
