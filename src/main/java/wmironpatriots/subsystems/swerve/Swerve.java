@@ -16,9 +16,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.DoubleSupplier;
 import wmironpatriots.Constants.MATRIXID;
@@ -26,8 +30,8 @@ import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.Module.ModuleConfig;
-import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
+import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
 
 public class Swerve implements LoggedSubsystem {
@@ -50,7 +54,7 @@ public class Swerve implements LoggedSubsystem {
       Rotation2d.fromRotations(
           DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
 
-  public static final double MAX_LINEAR_SPEED = 5.11;
+  public static final double MAX_LINEAR_SPEED = 1;
   public static final double MAX_ANGULAR_SPEED = 0.0;
 
   public static final double LINEAR_P = 0.0;
@@ -67,10 +71,30 @@ public class Swerve implements LoggedSubsystem {
 
   public static final ModuleConfig[] MODULE_CONFIGS =
       new ModuleConfig[] {
-        new ModuleConfig(MATRIXID.BL_PIVOT, MATRIXID.BL_DRIVE, MATRIXID.BL_CANCODER, 0.0, true),
-        new ModuleConfig(MATRIXID.FL_PIVOT, MATRIXID.FL_DRIVE, MATRIXID.FL_CANCODER, 0.0, true),
-        new ModuleConfig(MATRIXID.FR_PIVOT, MATRIXID.FR_DRIVE, MATRIXID.FR_CANCODER, 0.0, true),
-        new ModuleConfig(MATRIXID.BR_PIVOT, MATRIXID.BR_DRIVE, MATRIXID.BR_CANCODER, 0.0, true)
+        new ModuleConfig(
+            MATRIXID.BL_PIVOT,
+            MATRIXID.BL_DRIVE,
+            MATRIXID.BL_CANCODER,
+            Units.radiansToRotations(2.780),
+            true),
+        new ModuleConfig(
+            MATRIXID.FL_PIVOT,
+            MATRIXID.FL_DRIVE,
+            MATRIXID.FL_CANCODER,
+            Units.radiansToRotations(6.452),
+            true),
+        new ModuleConfig(
+            MATRIXID.FR_PIVOT,
+            MATRIXID.FR_DRIVE,
+            MATRIXID.FR_CANCODER,
+            Units.radiansToRotations(3.042),
+            false),
+        new ModuleConfig(
+            MATRIXID.BR_PIVOT,
+            MATRIXID.BR_DRIVE,
+            MATRIXID.BR_CANCODER,
+            Units.radiansToRotations(2.982),
+            false)
       };
 
   private final Module[] modules;
@@ -82,6 +106,15 @@ public class Swerve implements LoggedSubsystem {
   private final PIDController angularFeedback, linearFeedback;
 
   private final Field2d f2d;
+
+  StructArrayPublisher<SwerveModuleState> swervePublisher =
+      NetworkTableInstance.getDefault()
+          .getStructArrayTopic("SwerveStates", SwerveModuleState.struct)
+          .publish();
+  StructArrayPublisher<SwerveModuleState> setpoint =
+      NetworkTableInstance.getDefault()
+          .getStructArrayTopic("setpoints", SwerveModuleState.struct)
+          .publish();
 
   public Swerve() {
     gyro = new GyroIOComp();
@@ -96,6 +129,7 @@ public class Swerve implements LoggedSubsystem {
             kinematics, getHeading(), getSwerveModulePoses(), new Pose2d());
 
     f2d = new Field2d();
+    SmartDashboard.putData(f2d);
 
     angularFeedback = new PIDController(4.5, 0.0, 0.05);
     angularFeedback.enableContinuousInput(0, 2 * Math.PI);
@@ -107,6 +141,11 @@ public class Swerve implements LoggedSubsystem {
   public void periodic() {
     odo.update(getHeading(), getSwerveModulePoses());
     f2d.setRobotPose(getPose());
+    swervePublisher.set(getSwerveModuleStates());
+
+    for (Module module : modules) {
+      module.periodic();
+    }
 
     if (DriverStation.isDisabled()) {
       stop();
@@ -137,6 +176,7 @@ public class Swerve implements LoggedSubsystem {
     SwerveModuleState[] states =
         kinematics.toSwerveModuleStates(ChassisSpeeds.discretize(velocities, 0.02));
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_LINEAR_SPEED);
+    setpoint.set(states);
     for (int i = 0; i < states.length; i++) {
       modules[i].runModuleSetpoint(states[i]);
     }
@@ -146,13 +186,10 @@ public class Swerve implements LoggedSubsystem {
     Pose3d[] estimates = new Pose3d[poses.length];
     for (int i = 0; i < poses.length; i++) {
       odo.addVisionMeasurement(
-        poses[i].pose().estimatedPose.toPose2d(), 
-        poses[i].pose().timestampSeconds, 
-        poses[i].stdevs());
-      
-      f2d
-        .getObject("estimated pose " + i)
-        .setPose(poses[i].pose().estimatedPose.toPose2d());
+          poses[i].pose().estimatedPose.toPose2d(),
+          poses[i].pose().timestampSeconds,
+          poses[i].stdevs());
+      // f2d.getObject("estimated pose " + i).setPose(poses[i].pose().estimatedPose.toPose2d());
     }
   }
 

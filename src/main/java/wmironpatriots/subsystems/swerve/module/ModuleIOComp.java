@@ -6,6 +6,7 @@
 
 package wmironpatriots.subsystems.swerve.module;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -26,6 +27,9 @@ public class ModuleIOComp extends Module {
   private final PositionVoltage reqPose;
   private final VelocityTorqueCurrentFOC reqVel;
 
+  private final BaseStatusSignal pivotPose, pivotVolts, pivotCurrent;
+  private final BaseStatusSignal drivePose, driveVel, driveVolts, driveCurrent, driveTorque;
+
   public ModuleIOComp(ModuleConfig config) {
     pivot = new TalonFX(config.pivotID(), MATRIXID.CANCHAN);
     drive = new TalonFX(config.driveID(), MATRIXID.CANCHAN);
@@ -42,6 +46,37 @@ public class ModuleIOComp extends Module {
     reqVolts = new VoltageOut(0.0).withEnableFOC(true);
     reqPose = new PositionVoltage(0.0).withEnableFOC(true);
     reqVel = new VelocityTorqueCurrentFOC(0.0);
+
+    pivotPose = pivot.getPosition();
+    pivotVolts = pivot.getMotorVoltage();
+    pivotCurrent = pivot.getStatorCurrent();
+    drivePose = drive.getPosition();
+    driveVel = drive.getVelocity();
+    driveVolts = drive.getMotorVoltage();
+    driveCurrent = drive.getStatorCurrent();
+    driveTorque = drive.getTorqueCurrent();
+  }
+
+  @Override
+  public void periodic() {
+    BaseStatusSignal.refreshAll(
+        pivotPose,
+        pivotVolts,
+        pivotCurrent,
+        drivePose,
+        driveVel,
+        driveVolts,
+        driveCurrent,
+        driveTorque);
+    pivotPoseRevs = pivotPose.getValueAsDouble();
+    pivotAppliedVolts = pivotVolts.getValueAsDouble();
+    pivotCurrentAmps = pivotCurrent.getValueAsDouble();
+
+    drivePoseMeters = (drivePose.getValueAsDouble() * (2 * Math.PI * WHEEL_RADIUS_METERS)) / 60;
+    driveVelMPS = (driveVel.getValueAsDouble() * (2 * Math.PI * WHEEL_RADIUS_METERS)) / 60;
+    driveAppliedVolts = driveVolts.getValueAsDouble();
+    driveCurrentAmps = driveCurrent.getValueAsDouble();
+    driveTorqueAmps = driveTorque.getValueAsDouble();
   }
 
   @Override

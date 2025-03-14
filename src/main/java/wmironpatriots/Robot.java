@@ -20,8 +20,8 @@ import wmironpatriots.subsystems.vision.VisionIOComp;
 
 public class Robot extends TimedRobot implements Logged {
   // private final Superstructure superstructure;
-  private final Swerve swerve;
   private final Vision vision;
+  private final Swerve swerve;
 
   private final CommandXboxController operator;
   private final CommandXboxController joystick;
@@ -58,16 +58,17 @@ public class Robot extends TimedRobot implements Logged {
 
     // superstructure = new Superstructure();
     swerve = new Swerve();
-    vision = new VisionIOComp(); 
+    vision = new VisionIOComp();
     addPeriodic(() -> swerve.updateVisionEstimates(vision.getEstimatedPoses()), 0.02);
 
     // * SETUP BINDS
     double maxSpeed = Swerve.MAX_LINEAR_SPEED;
+    double angularSpeed = 2;
     swerve.setDefaultCommand(
         swerve.drive(
-            () -> joystick.getLeftY() * maxSpeed,
             () -> joystick.getLeftX() * maxSpeed,
-            () -> Math.atan2(joystick.getLeftY(), joystick.getLeftX()))); // Gets joystick angle
+            () -> joystick.getLeftY() * maxSpeed,
+            () -> joystick.getRightX() * angularSpeed));
   }
 
   @Override

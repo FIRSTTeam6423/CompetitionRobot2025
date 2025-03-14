@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -38,11 +40,8 @@ import java.util.function.Supplier;
 import wmironpatriots.commands.generated.TunerConstants.TunerSwerveDrivetrain;
 import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 
-/**
- * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
- * be used in command-based projects.
- */
-public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+/** Auto generated CTRe class for general testing */
+public class LegacyCmmdDrive extends TunerSwerveDrivetrain implements Subsystem {
   private static final double kSimLoopPeriod = 0.005; // 5 ms
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
@@ -115,6 +114,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               null,
               this));
 
+  private final Field2d f2d;
+
   /* The SysId routine to test */
   private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineSteer;
 
@@ -127,12 +128,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
    * @param modules Constants for each specific module
    */
-  public CommandSwerveDrivetrain(
+  public LegacyCmmdDrive(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
     super(drivetrainConstants, modules);
     if (Utils.isSimulation()) {
       startSimThread();
     }
+    f2d = new Field2d();
+    SmartDashboard.putData(f2d);
   }
 
   /**
@@ -146,7 +149,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
    * @param modules Constants for each specific module
    */
-  public CommandSwerveDrivetrain(
+  public LegacyCmmdDrive(
       SwerveDrivetrainConstants drivetrainConstants,
       double odometryUpdateFrequency,
       SwerveModuleConstants<?, ?, ?>... modules) {
@@ -154,6 +157,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     if (Utils.isSimulation()) {
       startSimThread();
     }
+    f2d = new Field2d();
+    SmartDashboard.putData(f2d);
   }
 
   public ChassisSpeeds getSpeeds() {
@@ -180,7 +185,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *     theta]ᵀ, with units in meters and radians
    * @param modules Constants for each specific module
    */
-  public CommandSwerveDrivetrain(
+  public LegacyCmmdDrive(
       SwerveDrivetrainConstants drivetrainConstants,
       double odometryUpdateFrequency,
       Matrix<N3, N1> odometryStandardDeviation,
@@ -195,6 +200,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     if (Utils.isSimulation()) {
       startSimThread();
     }
+    f2d = new Field2d();
+    SmartDashboard.putData(f2d);
   }
 
   public Pose2d getPose() {
@@ -264,6 +271,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
               });
     }
+    f2d.setRobotPose(getPose());
   }
 
   private void startSimThread() {
@@ -283,26 +291,31 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_simNotifier.startPeriodic(kSimLoopPeriod);
   }
 
-  public Command drivePose(Pose2d desiredPose) {
-    return this.run(
-        () -> {
-          Pose2d currentPose = getPose();
-        });
-  }
+  // public Command drivePose(Pose2d pose) {
+  //   return this.run(() -> {
+  //     Pose2d currentPose = getPose();
+  //     Vector<N3> difference =
+  //       VecBuilder.fill(
+  //         currentPose.getX() - pose.getX(),
+  //         currentPose.getY() - pose.getY(),
+  //         MathUtil.angleModulus(currentPose.getRotation().getRadians() -
+  // pose.getRotation().getRadians())
 
-    public void updateEstimates(PoseEstimate... poses) {
-      Pose3d[] loggedEstimates = new Pose3d[poses.length];
-      for (int i = 0; i < poses.length; i++) {
-        loggedEstimates[i] = poses[i].pose().estimatedPose;
-        addVisionMeasurement(
-            poses[i].pose().estimatedPose.toPose2d(),
-            poses[i].pose().timestampSeconds,
-            poses[i].stdevs());
-        // field2d
-        //     .getObject("Cam " + i + " Est Pose")
-        //     .setPose(poses[i].estimatedPose().estimatedPose.toPose2d());
-      }
+  //       );
+  //   });
+  // }
+
+  public void updateEstimates(PoseEstimate... poses) {
+    Pose3d[] loggedEstimates = new Pose3d[poses.length];
+    for (int i = 0; i < poses.length; i++) {
+      loggedEstimates[i] = poses[i].pose().estimatedPose;
+      addVisionMeasurement(
+          poses[i].pose().estimatedPose.toPose2d(),
+          poses[i].pose().timestampSeconds,
+          poses[i].stdevs());
+      // f2d.getObject("Cam " + i + " Est Pose").setPose(poses[i].pose().estimatedPose.toPose2d());
     }
+  }
 
   /**
    * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate

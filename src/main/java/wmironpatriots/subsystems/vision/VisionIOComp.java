@@ -6,20 +6,18 @@
 
 package wmironpatriots.subsystems.vision;
 
-import java.util.ArrayList;
-import java.util.Optional;
-
-import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.targeting.PhotonPipelineResult;
-
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import java.util.ArrayList;
+import java.util.Optional;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 public class VisionIOComp extends Vision {
   private final PhotonCamera[] cams;
@@ -32,17 +30,16 @@ public class VisionIOComp extends Vision {
     for (int i = 0; i < CAM_CONFIGS.length; i++) {
       CameraConfig conf = CAM_CONFIGS[i];
       cams[i] = new PhotonCamera(conf.camID());
-      estimators[i] = new PhotonPoseEstimator(
-        LAYOUT,
-        PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, 
-        conf.robotToCam());
+      estimators[i] =
+          new PhotonPoseEstimator(
+              LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, conf.robotToCam());
     }
   }
 
   @Override
   public PoseEstimate[] getEstimatedPoses() {
     ArrayList<PoseEstimate> estimates = new ArrayList<>();
-    for (int i = 0; i < cams.length; i++) {  
+    for (int i = 0; i < cams.length; i++) {
       // Gets all new cam results since last call
       var estimator = estimators[i];
       var results = cams[i].getAllUnreadResults();
@@ -51,7 +48,8 @@ public class VisionIOComp extends Vision {
       Optional<EstimatedRobotPose> estimate = Optional.empty();
       for (var result : results) {
         estimate = estimator.update(result);
-        estimate.ifPresent(e -> estimates.add(new PoseEstimate(e, getStdevs(e.estimatedPose.toPose2d(), result))));
+        estimate.ifPresent(
+            e -> estimates.add(new PoseEstimate(e, getStdevs(e.estimatedPose.toPose2d(), result))));
       }
     }
 
@@ -68,8 +66,7 @@ public class VisionIOComp extends Vision {
       var tagPose = LAYOUT.getTagPose(tgt.getFiducialId());
       if (tagPose.isEmpty()) continue;
       numTags++;
-      avgDist +=
-          tagPose.get().toPose2d().getTranslation().getDistance(estimated.getTranslation());
+      avgDist += tagPose.get().toPose2d().getTranslation().getDistance(estimated.getTranslation());
       avgWeight += TAG_WEIGHTS[tgt.getFiducialId() - 1];
     }
     if (numTags == 0) return estStdDevs;

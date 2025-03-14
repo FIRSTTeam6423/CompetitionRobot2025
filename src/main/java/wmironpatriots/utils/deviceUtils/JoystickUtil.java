@@ -18,8 +18,8 @@ public class JoystickUtil {
    * @return modified inputs
    */
   public static double applyTeleopModifier(double value, double deadband) {
-    value = MathUtil.applyDeadband(value, deadband);
-    return Math.copySign(Math.pow(value, 2), value);
+    var bah = MathUtil.applyDeadband(value, deadband);
+    return Math.copySign(Math.pow(bah, 2), bah);
   }
 
   /**

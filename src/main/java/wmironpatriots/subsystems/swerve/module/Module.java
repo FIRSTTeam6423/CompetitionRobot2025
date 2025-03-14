@@ -47,14 +47,14 @@ public abstract class Module extends LoggedSubsystemComponent {
 
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     conf.Feedback.FeedbackRemoteSensorID = cancoderID;
-    conf.Feedback.RotorToSensorRatio = PIVOT_REDUCTION;
-    conf.Feedback.SensorToMechanismRatio = 1.0;
+    conf.Feedback.SensorToMechanismRatio = PIVOT_REDUCTION;
+    // conf.Feedback.SensorToMechanismRatio = 1.0;
 
-    conf.Slot0.kP = 30.0;
-    conf.Slot0.kD = 0.5;
+    conf.Slot0.kP = 20;
+    conf.Slot0.kD = 0.0;
     conf.Slot0.kA = 0.0;
-    conf.Slot0.kV = 2.66;
-    conf.Slot0.kS = 0.1;
+    conf.Slot0.kV = 10;
+    conf.Slot0.kS = 0.014;
 
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     conf.ClosedLoopGeneral.ContinuousWrap = true;
@@ -80,6 +80,8 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Slot0.kA = 0.0;
     conf.Slot0.kV = 0.124;
     conf.Slot0.kS = 0.0;
+    conf.MotionMagic.MotionMagicCruiseVelocity = 1.0;
+    conf.MotionMagic.MotionMagicCruiseVelocity = 0.1;
 
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     conf.ClosedLoopGeneral.ContinuousWrap = true;
@@ -91,7 +93,6 @@ public abstract class Module extends LoggedSubsystemComponent {
   @Log public double pivotPoseRevs;
   @Log public double pivotAppliedVolts;
   @Log public double pivotCurrentAmps;
-  @Log public double pivotTorqueAmps;
   @Log public double drivePoseMeters;
   @Log public double driveVelMPS;
   @Log public double driveAppliedVolts;
