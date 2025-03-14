@@ -9,19 +9,14 @@ package wmironpatriots.commands;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -37,7 +32,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import wmironpatriots.generated.TunerConstants.TunerSwerveDrivetrain;
+import wmironpatriots.commands.generated.TunerConstants.TunerSwerveDrivetrain;
+
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
@@ -284,33 +282,26 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     m_simNotifier.startPeriodic(kSimLoopPeriod);
   }
 
-  // public Command drivePose(Pose2d pose) {
-  //   return this.run(() -> {
-  //     Pose2d currentPose = getPose();
-  //     Vector<N3> difference =
-  //       VecBuilder.fill(
-  //         currentPose.getX() - pose.getX(),
-  //         currentPose.getY() - pose.getY(),
-  //         MathUtil.angleModulus(currentPose.getRotation().getRadians() -
-  // pose.getRotation().getRadians())
+  public Command drivePose(Pose2d desiredPose) {
+    return this.run(
+        () -> {
+          Pose2d currentPose = getPose();
+        });
+  }
 
-  //       );
-  //   });
-  // }
-
-//   public void updateEstimates(PoseEstimate... poses) {
-//     Pose3d[] loggedEstimates = new Pose3d[poses.length];
-//     for (int i = 0; i < poses.length; i++) {
-//       loggedEstimates[i] = poses[i].estimatedPose().estimatedPose;
-//       addVisionMeasurement(
-//           poses[i].estimatedPose().estimatedPose.toPose2d(),
-//           poses[i].estimatedPose().timestampSeconds,
-//           poses[i].standardDev());
-//       // field2d
-//       //     .getObject("Cam " + i + " Est Pose")
-//       //     .setPose(poses[i].estimatedPose().estimatedPose.toPose2d());
-//     }
-//   }
+  //   public void updateEstimates(PoseEstimate... poses) {
+  //     Pose3d[] loggedEstimates = new Pose3d[poses.length];
+  //     for (int i = 0; i < poses.length; i++) {
+  //       loggedEstimates[i] = poses[i].estimatedPose().estimatedPose;
+  //       addVisionMeasurement(
+  //           poses[i].estimatedPose().estimatedPose.toPose2d(),
+  //           poses[i].estimatedPose().timestampSeconds,
+  //           poses[i].standardDev());
+  //       // field2d
+  //       //     .getObject("Cam " + i + " Est Pose")
+  //       //     .setPose(poses[i].estimatedPose().estimatedPose.toPose2d());
+  //     }
+  //   }
 
   /**
    * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate

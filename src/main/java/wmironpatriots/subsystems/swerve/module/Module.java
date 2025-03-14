@@ -8,6 +8,10 @@ package wmironpatriots.subsystems.swerve.module;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -27,20 +31,65 @@ public abstract class Module extends LoggedSubsystemComponent {
       int driveID,
       int cancoderID,
       double cancoderOffsetRevs,
-      boolean cancoderFlipped) {}
+      boolean pivotInverted) {}
 
-  public static TalonFXConfiguration getPivotConf() {
+  public static CANcoderConfiguration getCancoderConf(double cancoderOffsetRevs) {
+    CANcoderConfiguration conf = new CANcoderConfiguration();
+    conf.MagnetSensor.MagnetOffset = cancoderOffsetRevs;
+
+    return conf;
+  }
+
+  public static TalonFXConfiguration getPivotConf(int cancoderID, boolean inverted) {
     TalonFXConfiguration conf = new TalonFXConfiguration();
+    conf.Audio.AllowMusicDurDisable = true;
+    conf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    conf.MotorOutput.Inverted = inverted
+      ? InvertedValue.Clockwise_Positive
+      : InvertedValue.CounterClockwise_Positive;
+
+    conf.CurrentLimits.SupplyCurrentLimit = 20.0;
+    conf.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+    conf.Feedback.FeedbackRemoteSensorID = cancoderID;
+    conf.Feedback.RotorToSensorRatio = PIVOT_REDUCTION;
+    conf.Feedback.SensorToMechanismRatio = 1.0;
+
+    conf.Slot0.kP = 0.0;
+    conf.Slot0.kD = 0.0;
+    conf.Slot0.kA = 0.0;
+    conf.Slot0.kV = 0.0;
+    conf.Slot0.kS = 0.0;
+
+    conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    conf.ClosedLoopGeneral.ContinuousWrap = true;
+
     return conf;
   }
 
   public static TalonFXConfiguration getDriveConf() {
     TalonFXConfiguration conf = new TalonFXConfiguration();
-    return conf;
-  }
+    conf.Audio.AllowMusicDurDisable = true;
+    conf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-  public static CANcoderConfiguration getCancoderConf() {
-    CANcoderConfiguration conf = new CANcoderConfiguration();
+    conf.CurrentLimits.StatorCurrentLimit = 50.0;
+    conf.CurrentLimits.StatorCurrentLimitEnable = true;
+    conf.CurrentLimits.SupplyCurrentLimit = 120.0;
+    conf.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+    conf.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION;
+
+    conf.Slot0.kP = 0.0;
+    conf.Slot0.kD = 0.0;
+    conf.Slot0.kA = 0.0;
+    conf.Slot0.kV = 0.0;
+    conf.Slot0.kS = 0.0;
+
+    conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    conf.ClosedLoopGeneral.ContinuousWrap = true;
+
     return conf;
   }
 

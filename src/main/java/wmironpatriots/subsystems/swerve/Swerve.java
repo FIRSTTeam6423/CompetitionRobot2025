@@ -18,12 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-
 import java.util.function.DoubleSupplier;
-
-import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
-
-import wmironpatriots.Robot;
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
@@ -48,11 +43,9 @@ public class Swerve implements LoggedSubsystem {
         new Translation2d(-0.381, -0.381)
       };
 
-  public static final Rotation2d ALLIANCE_ROTATION = 
-  Rotation2d.fromRotations(
-    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-        ? 0
-        : 0.5);
+  public static final Rotation2d ALLIANCE_ROTATION =
+      Rotation2d.fromRotations(
+          DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
 
   public static final double MAX_LINEAR_SPEED = 0.0;
   public static final double MAX_ANGULAR_SPEED = 0.0;
@@ -108,13 +101,16 @@ public class Swerve implements LoggedSubsystem {
     odo.update(getHeading(), getSwerveModulePoses());
 
     if (DriverStation.isDisabled()) {
-        stop();
+      stop();
     }
   }
 
   public Command drive(
       DoubleSupplier xVelocity, DoubleSupplier yVelocity, Rotation2d desiredHeading) {
-        return drive(xVelocity, yVelocity, () -> angularFeedback.calculate(getHeading().getRadians(), desiredHeading.getRadians()));
+    return drive(
+        xVelocity,
+        yVelocity,
+        () -> angularFeedback.calculate(getHeading().getRadians(), desiredHeading.getRadians()));
   }
 
   public Command drive(
@@ -144,7 +140,7 @@ public class Swerve implements LoggedSubsystem {
 
   public void stop() {
     for (Module module : modules) {
-        module.stopModule();
+      module.stopModule();
     }
   }
 

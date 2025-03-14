@@ -23,7 +23,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class ElevatorIOComp extends Elevator {
   private final TalonFX parent, child;
-  private final TalonFXConfiguration motorConf;
+  private final TalonFXConfiguration conf;
 
   private final PositionVoltage reqPose;
   private final VoltageOut reqVolts;
@@ -34,23 +34,23 @@ public class ElevatorIOComp extends Elevator {
     parent = new TalonFX(ELEVATOR_PARENT, CANCHAN);
     child = new TalonFX(ELEVATOR_CHILD, CANCHAN);
 
-    motorConf = new TalonFXConfiguration();
-    motorConf.Audio.AllowMusicDurDisable = true;
-    motorConf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    motorConf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    conf = new TalonFXConfiguration();
+    conf.Audio.AllowMusicDurDisable = true;
+    conf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    conf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    motorConf.CurrentLimits.StatorCurrentLimit = 80.0;
-    motorConf.CurrentLimits.StatorCurrentLimitEnable = true;
-    motorConf.CurrentLimits.SupplyCurrentLimit = 40.0;
-    motorConf.CurrentLimits.SupplyCurrentLimitEnable = true;
+    conf.CurrentLimits.StatorCurrentLimit = 80.0;
+    conf.CurrentLimits.StatorCurrentLimitEnable = true;
+    conf.CurrentLimits.SupplyCurrentLimit = 40.0;
+    conf.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    motorConf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-    motorConf.Slot0.kG = 0.59;
-    motorConf.Slot0.kV = 4.12;
-    motorConf.Slot0.kP = 1;
-    motorConf.Slot0.kI = 0.0;
-    motorConf.Slot0.kD = 0.0;
-    motorConf.Slot0.GravityType = GravityTypeValue.Elevator_Static;
+    conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    conf.Slot0.kG = 0.59;
+    conf.Slot0.kV = 4.12;
+    conf.Slot0.kP = 1;
+    conf.Slot0.kI = 0.0;
+    conf.Slot0.kD = 0.0;
+    conf.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 
     // motorConf.MotionMagic.MotionMagicAcceleration = 0.5;
     // motorConf.MotionMagic.MotionMagicCruiseVelocity = 0.5;
@@ -58,9 +58,9 @@ public class ElevatorIOComp extends Elevator {
     // motorConf.MotionMagic.MotionMagicExpo_kA = 0.0;
     // motorConf.MotionMagic.MotionMagicJerk = 0.0;
 
-    parent.getConfigurator().apply(motorConf);
+    parent.getConfigurator().apply(conf);
     parent.setPosition(0.0);
-    child.getConfigurator().apply(motorConf);
+    child.getConfigurator().apply(conf);
     child.setControl(new Follower(parent.getDeviceID(), true));
 
     reqPose = new PositionVoltage(0.0).withEnableFOC(true);
@@ -103,7 +103,7 @@ public class ElevatorIOComp extends Elevator {
 
   @Override
   protected void motorCoasting(boolean enabled) {
-    motorConf.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
-    parent.getConfigurator().apply(motorConf);
+    conf.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
+    parent.getConfigurator().apply(conf);
   }
 }

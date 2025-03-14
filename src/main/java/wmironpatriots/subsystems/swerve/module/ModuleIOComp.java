@@ -32,14 +32,9 @@ public class ModuleIOComp extends Module {
     drive = new TalonFX(config.driveID(), MATRIXID.CANCHAN);
     cancoder = new CANcoder(config.cancoderID(), MATRIXID.CANCHAN);
 
-    pivotConf = getPivotConf();
+    pivotConf = getPivotConf(config.cancoderID(), config.pivotInverted());
     driveConf = getDriveConf();
-    cancoderConf = getCancoderConf();
-    cancoderConf.MagnetSensor.SensorDirection =
-        config.cancoderFlipped()
-            ? SensorDirectionValue.CounterClockwise_Positive
-            : SensorDirectionValue.Clockwise_Positive;
-    cancoderConf.MagnetSensor.MagnetOffset = config.cancoderOffsetRevs();
+    cancoderConf = getCancoderConf(config.cancoderOffsetRevs());
 
     pivot.getConfigurator().apply(pivotConf);
     drive.getConfigurator().apply(driveConf);
