@@ -32,10 +32,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import wmironpatriots.commands.generated.TunerConstants.TunerSwerveDrivetrain;
-
 import java.util.Optional;
 import java.util.function.Supplier;
+import wmironpatriots.commands.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily

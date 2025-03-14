@@ -134,6 +134,8 @@ public class Swerve implements LoggedSubsystem {
     }
   }
 
+  public void updateVisionEstimates() {}
+
   public void resetOdo(Pose2d pose) {
     odo.resetPose(pose);
   }
@@ -142,6 +144,10 @@ public class Swerve implements LoggedSubsystem {
     for (Module module : modules) {
       module.stopModule();
     }
+  }
+
+  public Pose2d getPose() {
+    return odo.getEstimatedPosition();
   }
 
   public Rotation2d getHeading() {

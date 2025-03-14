@@ -14,7 +14,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import wmironpatriots.Constants.MATRIXID;
 
 public class ModuleIOComp extends Module {
@@ -56,13 +55,13 @@ public class ModuleIOComp extends Module {
   }
 
   @Override
-  protected void setDriveVolts(double volts) {
-    drive.setControl(reqVolts.withOutput(volts));
+  protected void setDriveVolts(double volts, boolean focEnabled) {
+    drive.setControl(reqVolts.withOutput(volts).withEnableFOC(focEnabled));
   }
 
   @Override
   protected void setDriveVel(double velMPS, double accelMPSSqrd) {
-    if (velMPS == 0 && accelMPSSqrd == 0 && Math.abs(velMPS) > 0.1) setDriveVolts(0.0);
+    if (velMPS == 0 && accelMPSSqrd == 0 && Math.abs(velMPS) > 0.1) setDriveVolts(0.0, false);
     else
       drive.setControl(
           reqVel

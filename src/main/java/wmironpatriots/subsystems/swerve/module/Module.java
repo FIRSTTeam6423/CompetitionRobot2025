@@ -11,7 +11,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -27,11 +26,7 @@ public abstract class Module extends LoggedSubsystemComponent {
   public static final double WHEEL_RADIUS_METERS = 2.7;
 
   public static record ModuleConfig(
-      int pivotID,
-      int driveID,
-      int cancoderID,
-      double cancoderOffsetRevs,
-      boolean pivotInverted) {}
+      int pivotID, int driveID, int cancoderID, double cancoderOffsetRevs, boolean pivotInverted) {}
 
   public static CANcoderConfiguration getCancoderConf(double cancoderOffsetRevs) {
     CANcoderConfiguration conf = new CANcoderConfiguration();
@@ -44,9 +39,8 @@ public abstract class Module extends LoggedSubsystemComponent {
     TalonFXConfiguration conf = new TalonFXConfiguration();
     conf.Audio.AllowMusicDurDisable = true;
     conf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    conf.MotorOutput.Inverted = inverted
-      ? InvertedValue.Clockwise_Positive
-      : InvertedValue.CounterClockwise_Positive;
+    conf.MotorOutput.Inverted =
+        inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
 
     conf.CurrentLimits.SupplyCurrentLimit = 20.0;
     conf.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -167,7 +161,7 @@ public abstract class Module extends LoggedSubsystemComponent {
 
   protected abstract void setPivotPose(double poseRevs);
 
-  protected abstract void setDriveVolts(double volts);
+  protected abstract void setDriveVolts(double volts, boolean focEnabled);
 
   protected abstract void setDriveVel(double velMPS, double accelMPSSqrd);
 

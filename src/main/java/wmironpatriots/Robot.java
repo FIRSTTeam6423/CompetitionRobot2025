@@ -57,12 +57,12 @@ public class Robot extends TimedRobot implements Logged {
     swerve = new Swerve();
 
     // * SETUP BINDS
-    double maxSpeed = Swerve.MAX_LINEAR_SPEED; 
+    double maxSpeed = Swerve.MAX_LINEAR_SPEED;
     swerve.setDefaultCommand(
-      swerve.drive(
-        () -> joystick.getLeftY() * maxSpeed, 
-        () -> joystick.getLeftX() * maxSpeed, 
-        () -> Math.atan2(joystick.getLeftY(), joystick.getLeftX()))); // Gets joystick angle
+        swerve.drive(
+            () -> joystick.getLeftY() * maxSpeed,
+            () -> joystick.getLeftX() * maxSpeed,
+            () -> Math.atan2(joystick.getLeftY(), joystick.getLeftX()))); // Gets joystick angle
   }
 
   @Override
