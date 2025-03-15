@@ -241,6 +241,8 @@ public class Swerve implements LoggedSubsystem {
     f2d.setRobotPose(getPose());
     swervePublisher.set(getSwerveModuleStates());
 
+    SmartDashboard.putNumber("Speed MPS", getSpeedMPS());
+
     for (Module module : modules) {
       module.periodic();
     }
@@ -323,6 +325,15 @@ public class Swerve implements LoggedSubsystem {
 
   public Rotation2d getHeading() {
     return gyro.getRotation2d();
+  }
+
+  public double getSpeedMPS() {
+    return Math.hypot(
+        getCurrentVelocities().vxMetersPerSecond, getCurrentVelocities().vyMetersPerSecond);
+  }
+
+  public ChassisSpeeds getCurrentVelocities() {
+    return kinematics.toChassisSpeeds(getSwerveModuleStates());
   }
 
   public SwerveModuleState[] getSwerveModuleStates() {
