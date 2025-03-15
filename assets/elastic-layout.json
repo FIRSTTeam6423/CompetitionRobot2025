@@ -3,15 +3,15 @@
   "grid_size": 10,
   "tabs": [
     {
-      "name": "Teleoperated",
+      "name": "Ryan Gosling mode",
       "grid_layout": {
         "layouts": [],
         "containers": [
           {
-            "title": "Alerts",
+            "title": "Things that you may or may not want to look at",
             "x": 850.0,
             "y": 0.0,
-            "width": 410.0,
+            "width": 680.0,
             "height": 260.0,
             "type": "Alerts",
             "properties": {
@@ -24,7 +24,7 @@
             "x": 0.0,
             "y": 0.0,
             "width": 850.0,
-            "height": 400.0,
+            "height": 460.0,
             "type": "Field",
             "properties": {
               "topic": "/Field",
@@ -40,11 +40,11 @@
             }
           },
           {
-            "title": "Match Time",
+            "title": "Time until robot exploads",
             "x": 0.0,
-            "y": 400.0,
-            "width": 260.0,
-            "height": 210.0,
+            "y": 460.0,
+            "width": 440.0,
+            "height": 250.0,
             "type": "Match Time",
             "properties": {
               "topic": "/SmartDashboard/Match Time",
@@ -56,11 +56,11 @@
             }
           },
           {
-            "title": "Battery Volts",
-            "x": 260.0,
-            "y": 400.0,
-            "width": 350.0,
-            "height": 130.0,
+            "title": "Fun juice remaining",
+            "x": 440.0,
+            "y": 460.0,
+            "width": 410.0,
+            "height": 160.0,
             "type": "Voltage View",
             "properties": {
               "topic": "/SmartDashboard/Battery Volts",
@@ -74,11 +74,11 @@
             }
           },
           {
-            "title": "Brownout?",
-            "x": 260.0,
-            "y": 530.0,
-            "width": 350.0,
-            "height": 80.0,
+            "title": "Shit pants?",
+            "x": 440.0,
+            "y": 620.0,
+            "width": 410.0,
+            "height": 90.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/Brownout?",
@@ -91,11 +91,11 @@
             }
           },
           {
-            "title": "RSL status",
-            "x": 610.0,
-            "y": 400.0,
-            "width": 240.0,
-            "height": 210.0,
+            "title": "blink blink blink",
+            "x": 850.0,
+            "y": 260.0,
+            "width": 680.0,
+            "height": 80.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/RSL status",
@@ -108,15 +108,15 @@
             }
           },
           {
-            "title": "Second",
+            "title": "VRMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
             "x": 850.0,
-            "y": 260.0,
-            "width": 410.0,
-            "height": 350.0,
+            "y": 340.0,
+            "width": 680.0,
+            "height": 370.0,
             "type": "Radial Gauge",
             "properties": {
-              "topic": "/SmartDashboard/Speed Meters/Second",
-              "period": 0.02,
+              "topic": "/SmartDashboard/Speed MPS",
+              "period": 0.06,
               "data_type": "double",
               "start_angle": -140.0,
               "end_angle": 140.0,
@@ -132,22 +132,22 @@
       }
     },
     {
-      "name": "Autonomous",
+      "name": "Tesla mode",
       "grid_layout": {
         "layouts": [],
         "containers": []
       }
     },
     {
-      "name": "Debug",
+      "name": ">",
       "grid_layout": {
         "layouts": [
           {
             "title": "camchan",
-            "x": 10.0,
-            "y": 480.0,
-            "width": 260.0,
-            "height": 260.0,
+            "x": 0.0,
+            "y": 390.0,
+            "width": 290.0,
+            "height": 320.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -190,8 +190,8 @@
             "title": "0",
             "x": 880.0,
             "y": 0.0,
-            "width": 260.0,
-            "height": 260.0,
+            "width": 330.0,
+            "height": 350.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -313,10 +313,10 @@
           },
           {
             "title": "1",
-            "x": 1140.0,
+            "x": 1210.0,
             "y": 0.0,
-            "width": 260.0,
-            "height": 260.0,
+            "width": 320.0,
+            "height": 350.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -439,9 +439,9 @@
           {
             "title": "2",
             "x": 880.0,
-            "y": 260.0,
-            "width": 260.0,
-            "height": 260.0,
+            "y": 350.0,
+            "width": 330.0,
+            "height": 360.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -563,10 +563,10 @@
           },
           {
             "title": "3",
-            "x": 1140.0,
-            "y": 260.0,
-            "width": 260.0,
-            "height": 260.0,
+            "x": 1210.0,
+            "y": 350.0,
+            "width": 320.0,
+            "height": 360.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -773,18 +773,6 @@
             }
           },
           {
-            "title": "Alerts",
-            "x": 1420.0,
-            "y": 350.0,
-            "width": 260.0,
-            "height": 390.0,
-            "type": "Alerts",
-            "properties": {
-              "topic": "/SmartDashboard/Alerts",
-              "period": 0.06
-            }
-          },
-          {
             "title": "MonologueSetup",
             "x": 0.0,
             "y": 260.0,
@@ -796,6 +784,18 @@
               "period": 0.06,
               "data_type": "string",
               "show_submit_button": false
+            }
+          },
+          {
+            "title": "Alerts",
+            "x": 290.0,
+            "y": 390.0,
+            "width": 590.0,
+            "height": 320.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/Alerts",
+              "period": 0.06
             }
           }
         ]
