@@ -6,6 +6,8 @@
 
 package wmironpatriots.subsystems.superstructure;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -22,18 +24,21 @@ import wmironpatriots.subsystems.superstructure.tail.Tail;
 import wmironpatriots.subsystems.superstructure.tail.TailIOComp;
 import wmironpatriots.subsystems.superstructure.tail.roller.Roller;
 import wmironpatriots.subsystems.superstructure.tail.roller.RollerIOComp;
+import wmironpatriots.subsystems.swerve.Swerve;
 
 public class Superstructure {
   // * CONSTANTS
-  public static Rectangle2d INTAKING_ZONE =
+  public static Rectangle2d LOWER_INTAKING_ZONE =
       new Rectangle2d(new Translation2d(0.0, 0.0), new Translation2d(2.0, 1.5));
+  public static Rectangle2d HIGHER_INTAKING_ZONE =
+      new Rectangle2d(new Translation2d(0.0, 6.573), new Translation2d(2, 8.009));
 
   private final Elevator elevator;
   private final Tail tail;
   private final Roller roller;
   private final Chute chute;
 
-  public Superstructure() {
+  public Superstructure(Swerve swerve) {
     // * INIT SUBSYSTEMS
     elevator = new ElevatorIOComp();
     tail = new TailIOComp();
@@ -52,7 +57,10 @@ public class Superstructure {
         .onTrue(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
 
     // Auto intake; if robot is close to source intaking sequence should start
-    new Trigger(() -> INTAKING_ZONE.contains(new Pose2d().getTranslation())) // TODO GET FIELD AREA
+    Supplier<Pose2d> robotPoseSupplier = () -> swerve.getPose();
+    new Trigger(
+      () -> LOWER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation()) 
+        || HIGHER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation()))
         .whileTrue(runIntakeRoutineCmmd());
   }
 

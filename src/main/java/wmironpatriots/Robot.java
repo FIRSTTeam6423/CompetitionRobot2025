@@ -23,13 +23,36 @@ public class Robot extends TimedRobot implements Logged {
   private final Vision vision;
   private final Swerve swerve;
 
+  private final CommandXboxController driver;
   private final CommandXboxController operator;
-  private final CommandXboxController joystick;
 
   public Robot() {
     // * MONOLOGUE SETUP
     DriverStation.silenceJoystickConnectionWarning(true);
 
+    initMonologue();
+    SignalLogger.enableAutoLogging(false); // Kills signal logger and prevents it from clogging memory
+
+    // * INIT HARDWARE
+    driver = new CommandXboxController(0);
+    operator = new CommandXboxController(1);
+
+    // superstructure = new Superstructure();
+    swerve = new Swerve();
+    vision = new VisionIOComp();
+    addPeriodic(() -> swerve.updateVisionEstimates(vision.getEstimatedPoses()), 0.02);
+
+    // * SETUP BINDS
+    double maxSpeed = Swerve.MAX_LINEAR_SPEED;
+    double angularSpeed = 2;
+    swerve.setDefaultCommand(
+        swerve.drive(
+            () -> driver.getLeftX() * maxSpeed,
+            () -> driver.getLeftY() * maxSpeed,
+            () -> driver.getRightX() * angularSpeed));
+  }
+
+  private void initMonologue() {
     Monologue.setupMonologue(
         this,
         "/Robot",
@@ -48,27 +71,6 @@ public class Robot extends TimedRobot implements Logged {
     Monologue.log(meta + "GitSHA", BuildConstants.GIT_SHA);
     Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
     Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
-
-    SignalLogger.enableAutoLogging(false);
-    SignalLogger.stop();
-
-    // * INIT HARDWARE
-    operator = new CommandXboxController(1);
-    joystick = new CommandXboxController(0);
-
-    // superstructure = new Superstructure();
-    swerve = new Swerve();
-    vision = new VisionIOComp();
-    addPeriodic(() -> swerve.updateVisionEstimates(vision.getEstimatedPoses()), 0.02);
-
-    // * SETUP BINDS
-    double maxSpeed = Swerve.MAX_LINEAR_SPEED;
-    double angularSpeed = 2;
-    swerve.setDefaultCommand(
-        swerve.drive(
-            () -> joystick.getLeftX() * maxSpeed,
-            () -> joystick.getLeftY() * maxSpeed,
-            () -> joystick.getRightX() * angularSpeed));
   }
 
   @Override
