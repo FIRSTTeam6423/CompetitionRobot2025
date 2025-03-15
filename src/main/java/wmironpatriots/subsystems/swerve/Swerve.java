@@ -39,12 +39,13 @@ import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
 import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
 
+// TODO rewrite javadoc
 public class Swerve implements LoggedSubsystem {
   // * CONSTANTS
   public static final double MASS_KG = 54.8847;
   public static final double MOI = 5.503;
   public static final double SIDE_LENGTH_METERS = 0.7239;
-  public static final double BUMPER_WIDTH_METER = 0.0889; // TODO add value
+  public static final double BUMPER_WIDTH_METER = 0.0889;
   public static final double TRACK_WIDTH_METERS = 0.596201754;
 
   public static final Translation2d[] MODULE_LOCS =
@@ -162,6 +163,14 @@ public class Swerve implements LoggedSubsystem {
     }
   }
 
+  /**
+   * Drive based on input streams
+   * 
+   * @param xVelocity X velocity stream
+   * @param yVelocity Y velocity stream
+   * @param desiredHeading Desired heading stream
+   * @return Drive with input streams cmmd
+   */
   public Command drive(
       DoubleSupplier xVelocity, DoubleSupplier yVelocity, Rotation2d desiredHeading) {
     return drive(
@@ -170,6 +179,14 @@ public class Swerve implements LoggedSubsystem {
         () -> angularFeedback.calculate(getHeading().getRadians(), desiredHeading.getRadians()));
   }
 
+  /**
+   * Drive based on input streams
+   * 
+   * @param xVelocity X velocity stream
+   * @param yVelocity Y velocity stream
+   * @param omegaVelocity omega velocity stream
+   * @return Drive with input streams cmmd
+   */
   public Command drive(
       DoubleSupplier xVelocity, DoubleSupplier yVelocity, DoubleSupplier omegaVelocity) {
     return this.run(
