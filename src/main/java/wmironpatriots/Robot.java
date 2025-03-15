@@ -11,11 +11,14 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
 import monologue.Logged;
 import monologue.Monologue;
@@ -44,9 +47,12 @@ public class Robot extends TimedRobot implements Logged {
 
     Alert tuningEnabled = new Alert("Tuning mode is enabled!", AlertType.kWarning);
     Alert superstructureDisabled = new Alert("Superstructure is disabled!", AlertType.kWarning);
+    Alert browningOut = new Alert("Browning Out!", AlertType.kWarning);
 
     if (FLAGS.TUNING_MODE) tuningEnabled.set(true);
     if (!FLAGS.SUPERSTRUCTURE_ENABLED) superstructureDisabled.set(true);
+    new Trigger(() -> RobotController.isBrownedOut())
+        .onTrue(Commands.run(() -> browningOut.set(true)));
 
     // * INIT HARDWARE
     driver = new CommandXboxController(0);
@@ -105,6 +111,12 @@ public class Robot extends TimedRobot implements Logged {
     CommandScheduler.getInstance().run();
 
     Monologue.updateAll();
+
+    SmartDashboard.putNumber("Battery Volts", RobotController.getBatteryVoltage());
+    SmartDashboard.putBoolean("Brownout?", RobotController.isBrownedOut());
+    SmartDashboard.putNumber("CPU Temps", RobotController.getCPUTemp());
+    SmartDashboard.putBoolean("RSL status", RobotController.getRSLState());
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
   }
 
   @Override

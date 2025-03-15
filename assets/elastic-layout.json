@@ -9,7 +9,7 @@
         "containers": [
           {
             "title": "Alerts",
-            "x": 870.0,
+            "x": 1000.0,
             "y": 0.0,
             "width": 260.0,
             "height": 400.0,
@@ -23,7 +23,7 @@
             "title": "Where am I bro",
             "x": 0.0,
             "y": 0.0,
-            "width": 870.0,
+            "width": 1000.0,
             "height": 400.0,
             "type": "Field",
             "properties": {
@@ -40,17 +40,71 @@
             }
           },
           {
-            "title": "StationNumber",
-            "x": 720.0,
-            "y": 500.0,
-            "width": 130.0,
-            "height": 130.0,
-            "type": "Text Display",
+            "title": "Match Time",
+            "x": 0.0,
+            "y": 400.0,
+            "width": 260.0,
+            "height": 210.0,
+            "type": "Match Time",
             "properties": {
-              "topic": "/FMSInfo/StationNumber",
+              "topic": "/SmartDashboard/Match Time",
               "period": 0.06,
-              "data_type": "int",
-              "show_submit_button": false
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 15,
+              "yellow_start_time": 30
+            }
+          },
+          {
+            "title": "Battery Volts",
+            "x": 260.0,
+            "y": 400.0,
+            "width": 740.0,
+            "height": 130.0,
+            "type": "Voltage View",
+            "properties": {
+              "topic": "/SmartDashboard/Battery Volts",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": 4.0,
+              "max_value": 13.0,
+              "divisions": 5,
+              "inverted": false,
+              "orientation": "horizontal"
+            }
+          },
+          {
+            "title": "Brownout?",
+            "x": 260.0,
+            "y": 530.0,
+            "width": 740.0,
+            "height": 80.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Brownout?",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "RSL status",
+            "x": 1000.0,
+            "y": 400.0,
+            "width": 260.0,
+            "height": 210.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/RSL status",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           }
         ]
