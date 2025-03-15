@@ -6,6 +6,8 @@
 
 package wmironpatriots;
 
+import java.util.Optional;
+
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -14,12 +16,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
+import wmironpatriots.Constants.FLAGS;
+import wmironpatriots.subsystems.superstructure.Superstructure;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.vision.Vision;
 import wmironpatriots.subsystems.vision.VisionIOComp;
 
 public class Robot extends TimedRobot implements Logged {
-  // private final Superstructure superstructure;
+  private final Optional<Superstructure> superstructure;
   private final Vision vision;
   private final Swerve swerve;
 
@@ -38,10 +42,11 @@ public class Robot extends TimedRobot implements Logged {
     driver = new CommandXboxController(0);
     operator = new CommandXboxController(1);
 
-    // superstructure = new Superstructure();
     swerve = new Swerve();
     vision = new VisionIOComp();
     addPeriodic(() -> swerve.updateVisionEstimates(vision.getEstimatedPoses()), 0.02);
+
+    if (FLAGS.SUPERSTRUCTURE_ENABLED) superstructure = Optional.of(new Superstructure(swerve));
 
     // * SETUP BINDS
     double maxSpeed = Swerve.MAX_LINEAR_SPEED;
@@ -51,6 +56,9 @@ public class Robot extends TimedRobot implements Logged {
             () -> driver.getLeftX() * maxSpeed,
             () -> driver.getLeftY() * maxSpeed,
             () -> driver.getRightX() * angularSpeed));
+    
+    // configures bindings only if superstructure is enabled
+    if (superstructure.isPresent()) {}
   }
 
   private void initMonologue() {

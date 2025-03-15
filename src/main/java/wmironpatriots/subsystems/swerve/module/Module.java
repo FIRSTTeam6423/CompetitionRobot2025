@@ -185,11 +185,22 @@ public abstract class Module extends LoggedSubsystemComponent {
   /**
    * Run drive motor voltage for characterization
    *
-   * @param pivotPose pivot angle
+   * @param pivotPose Pivot angle
    * @param driveVolts Drive motor input
    */
   public void runCharacterizationVolts(Rotation2d pivotPose, double driveVolts) {
     setPivotPose(pivotPose.getRotations());
+    setDriveVolts(driveVolts, true);
+  }
+
+  /**
+   * Run drive & pivot motor voltage for characterization
+   *
+   * @param pivotPose Pivot motor input
+   * @param driveVolts Drive motor input
+   */
+  public void runCharacterizationVolts(double pivotVolts, double driveVolts) {
+    setPivotVolts(pivotVolts);
     setDriveVolts(driveVolts, true);
   }
 

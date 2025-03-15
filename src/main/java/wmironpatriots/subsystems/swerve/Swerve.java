@@ -9,6 +9,7 @@ package wmironpatriots.subsystems.swerve;
 import static edu.wpi.first.units.Units.Volt;
 
 import com.ctre.phoenix6.SignalLogger;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import java.util.Arrays;
 import java.util.Queue;
@@ -35,6 +37,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
+
+import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
@@ -120,7 +124,7 @@ public class Swerve implements LoggedSubsystem {
   public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
 
   private final PIDController angularFeedback, linearFeedback;
-  private final SysIdRoutine angularCharacterization, translationCharacterization;
+  private final SysIdRoutine angularCharacter, transCharacter, pivotCharacter;
 
   private final Field2d f2d;
 
@@ -153,7 +157,7 @@ public class Swerve implements LoggedSubsystem {
     angularFeedback.setTolerance(0.0523599);
     linearFeedback = new PIDController(0.0, 0.0, 0.0);
 
-    angularCharacterization =
+    angularCharacter =
         new SysIdRoutine(
             new SysIdRoutine.Config(
                 null,
@@ -170,7 +174,7 @@ public class Swerve implements LoggedSubsystem {
                 null,
                 this));
 
-    translationCharacterization =
+    transCharacter =
         new SysIdRoutine(
             new SysIdRoutine.Config(
                 null,
@@ -186,6 +190,39 @@ public class Swerve implements LoggedSubsystem {
                                     Rotation2d.fromDegrees(0), volts.baseUnitMagnitude())),
                 null,
                 this));
+
+    pivotCharacter =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null,
+                Volt.of(4),
+                null,
+                state -> SignalLogger.writeString("SysidAngularState", state.toString())),
+            new Mechanism(
+                volts ->
+                    Arrays.stream(modules)
+                        .forEach(
+                            m ->
+                                m.runCharacterizationVolts(volts.baseUnitMagnitude(), 0.0)),
+                null,
+                this));
+    
+    if (FLAGS.TUNING_MODE) {
+      SmartDashboard.putData("transQuasistaticForward", transCharacter.quasistatic(Direction.kForward));
+      SmartDashboard.putData("transQuasistaticReverse", transCharacter.quasistatic(Direction.kReverse));
+      SmartDashboard.putData("transDynamicForward", transCharacter.dynamic(Direction.kForward));
+      SmartDashboard.putData("transDynamicReverse", transCharacter.dynamic(Direction.kReverse));
+
+      SmartDashboard.putData("AngularQuasistaticForward", angularCharacter.quasistatic(Direction.kForward));
+      SmartDashboard.putData("AngularQuasistaticReverse", angularCharacter.quasistatic(Direction.kReverse));
+      SmartDashboard.putData("AngularDynamicForward", angularCharacter.dynamic(Direction.kForward));
+      SmartDashboard.putData("AngularDynamicReverse", angularCharacter.dynamic(Direction.kReverse));
+
+      SmartDashboard.putData("PivotQuasistaticForward", pivotCharacter.quasistatic(Direction.kForward));
+      SmartDashboard.putData("PivotQuasistaticReverse", pivotCharacter.quasistatic(Direction.kReverse));
+      SmartDashboard.putData("PivotDynamicForward", pivotCharacter.dynamic(Direction.kForward));
+      SmartDashboard.putData("PivotDynamicReverse", pivotCharacter.dynamic(Direction.kReverse));
+    }
   }
 
   @Override
