@@ -1,0 +1,730 @@
+{
+  "version": 1.0,
+  "grid_size": 10,
+  "tabs": [
+    {
+      "name": "Teleoperated",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Alerts",
+            "x": 870.0,
+            "y": 0.0,
+            "width": 260.0,
+            "height": 400.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/Alerts",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "Where am I bro",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 870.0,
+            "height": 400.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/Field",
+              "period": 0.02,
+              "field_game": "Reefscape",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295
+            }
+          },
+          {
+            "title": "StationNumber",
+            "x": 720.0,
+            "y": 500.0,
+            "width": 130.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/FMSInfo/StationNumber",
+              "period": 0.06,
+              "data_type": "int",
+              "show_submit_button": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Autonomous",
+      "grid_layout": {
+        "layouts": [],
+        "containers": []
+      }
+    },
+    {
+      "name": "Debug",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "camchan",
+            "x": 10.0,
+            "y": 480.0,
+            "width": 260.0,
+            "height": 260.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "driverModeRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/photonvision/camchan/driverModeRequest",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "pipelineIndexRequest",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/photonvision/camchan/pipelineIndexRequest",
+                  "period": 0.06,
+                  "data_type": "int",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "0",
+            "x": 880.0,
+            "y": 0.0,
+            "width": 260.0,
+            "height": 260.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "driveAppliedVolts",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/0/driveAppliedVolts",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveCurrentAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/0/driveCurrentAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "drivePoseMeters",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/0/drivePoseMeters",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveTorqueAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/0/driveTorqueAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveVelMPS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/0/driveVelMPS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotAppliedVolts",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/0/pivotAppliedVolts",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotCurrentAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/0/pivotCurrentAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotPoseRevs",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/0/pivotPoseRevs",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "1",
+            "x": 1140.0,
+            "y": 0.0,
+            "width": 260.0,
+            "height": 260.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "driveAppliedVolts",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/1/driveAppliedVolts",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveCurrentAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/1/driveCurrentAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "drivePoseMeters",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/1/drivePoseMeters",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveTorqueAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/1/driveTorqueAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveVelMPS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/1/driveVelMPS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotAppliedVolts",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/1/pivotAppliedVolts",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotCurrentAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/1/pivotCurrentAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotPoseRevs",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/1/pivotPoseRevs",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "2",
+            "x": 880.0,
+            "y": 260.0,
+            "width": 260.0,
+            "height": 260.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "driveAppliedVolts",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/2/driveAppliedVolts",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveCurrentAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/2/driveCurrentAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "drivePoseMeters",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/2/drivePoseMeters",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveTorqueAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/2/driveTorqueAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveVelMPS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/2/driveVelMPS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotAppliedVolts",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/2/pivotAppliedVolts",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotCurrentAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/2/pivotCurrentAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotPoseRevs",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/2/pivotPoseRevs",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "3",
+            "x": 1140.0,
+            "y": 260.0,
+            "width": 260.0,
+            "height": 260.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "driveAppliedVolts",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/3/driveAppliedVolts",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveCurrentAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/3/driveCurrentAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "drivePoseMeters",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/3/drivePoseMeters",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveTorqueAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/3/driveTorqueAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "driveVelMPS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/3/driveVelMPS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotAppliedVolts",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/3/pivotAppliedVolts",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotCurrentAmps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/3/pivotCurrentAmps",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "pivotPoseRevs",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Robot/swerve/modules/3/pivotPoseRevs",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "BuildDate",
+            "x": 510.0,
+            "y": 0.0,
+            "width": 240.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/BuildData/BuildDate",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "ProjectName",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 510.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/BuildData/ProjectName",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "GitSHA",
+            "x": 0.0,
+            "y": 130.0,
+            "width": 510.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/BuildData/GitSHA",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "GitBranch",
+            "x": 510.0,
+            "y": 130.0,
+            "width": 240.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/BuildData/GitBranch",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RuntimeType",
+            "x": 750.0,
+            "y": 0.0,
+            "width": 130.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/BuildData/RuntimeType",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "GitDirty",
+            "x": 750.0,
+            "y": 130.0,
+            "width": 130.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/BuildData/GitDirty",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Alerts",
+            "x": 1420.0,
+            "y": 350.0,
+            "width": 260.0,
+            "height": 390.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/Alerts",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "MonologueSetup",
+            "x": 0.0,
+            "y": 260.0,
+            "width": 880.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/MonologueSetup",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

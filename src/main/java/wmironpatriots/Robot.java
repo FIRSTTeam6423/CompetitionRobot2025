@@ -6,16 +6,17 @@
 
 package wmironpatriots;
 
-import java.util.Optional;
-
 import com.ctre.phoenix6.SignalLogger;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import java.util.Optional;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
@@ -34,12 +35,18 @@ public class Robot extends TimedRobot implements Logged {
   private final CommandXboxController operator;
 
   public Robot() {
-    // * MONOLOGUE SETUP
+    // * SYSTEMS INIT
     DriverStation.silenceJoystickConnectionWarning(true);
 
     initMonologue();
     SignalLogger.enableAutoLogging(
         false); // Kills signal logger and prevents it from clogging memory
+
+    Alert tuningEnabled = new Alert("Tuning mode is enabled!", AlertType.kWarning);
+    Alert superstructureDisabled = new Alert("Superstructure is disabled!", AlertType.kWarning);
+
+    if (FLAGS.TUNING_MODE) tuningEnabled.set(true);
+    if (!FLAGS.SUPERSTRUCTURE_ENABLED) superstructureDisabled.set(true);
 
     // * INIT HARDWARE
     driver = new CommandXboxController(0);
@@ -49,7 +56,8 @@ public class Robot extends TimedRobot implements Logged {
     vision = new VisionIOComp();
     addPeriodic(() -> swerve.updateVisionEstimates(vision.getEstimatedPoses()), 0.02);
 
-    superstructure = FLAGS.SUPERSTRUCTURE_ENABLED ? Optional.of(new Superstructure(swerve)) : Optional.empty();
+    superstructure =
+        FLAGS.SUPERSTRUCTURE_ENABLED ? Optional.of(new Superstructure(swerve)) : Optional.empty();
 
     // * SETUP BINDS
     double maxSpeed = Swerve.MAX_LINEAR_SPEED;
@@ -59,13 +67,14 @@ public class Robot extends TimedRobot implements Logged {
             () -> driver.getLeftX() * maxSpeed,
             () -> driver.getLeftY() * maxSpeed,
             () -> driver.getRightX() * angularSpeed));
-    
+
     // configures bindings only if superstructure is enabled
-    superstructure.ifPresent(s -> {
-      s.robotInIntakingZone.whileTrue(rumbleDriver(0.2));
-    });
+    superstructure.ifPresent(
+        s -> {
+          s.robotInIntakingZone.whileTrue(rumbleDriver(0.2));
+        });
   }
-  
+
   private Command rumbleDriver(double value) {
     return Commands.run(() -> driver.setRumble(RumbleType.kBothRumble, value));
   }
@@ -93,7 +102,7 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void robotPeriodic() {
-      CommandScheduler.getInstance().run();
+    CommandScheduler.getInstance().run();
 
     Monologue.updateAll();
   }

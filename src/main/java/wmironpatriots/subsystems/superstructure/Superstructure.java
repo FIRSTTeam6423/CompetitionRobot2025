@@ -54,8 +54,8 @@ public class Superstructure {
 
     disabledTrigger = new Trigger(() -> DriverStation.isDisabled());
     Supplier<Pose2d> robotPoseSupplier = () -> swerve.getPose();
-    robotInIntakingZone = 
-      new Trigger(
+    robotInIntakingZone =
+        new Trigger(
             () ->
                 LOWER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation())
                     || HIGHER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation()));

@@ -1,3 +1,9 @@
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
 package wmironpatriots.utils.ntUtils;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -5,9 +11,9 @@ import wmironpatriots.Constants.FLAGS;
 
 /**
  * Slightly modified version of 6328's 2022 TunableNumber class
- * 
- * Class for a tunable number. Gets value from dashboard in tuning mode, returns default if not or
- * value not in dashboard.
+ *
+ * <p>Class for a tunable number. Gets value from dashboard in tuning mode, returns default if not
+ * or value not in dashboard.
  */
 public class TunableValue {
   private static final String tableKey = "TunableNumbers";
@@ -18,7 +24,7 @@ public class TunableValue {
 
   /**
    * Create a new TunableNumber
-   * 
+   *
    * @param dashboardKey Key on dashboard
    */
   public TunableValue(String dashboardKey) {
@@ -27,7 +33,7 @@ public class TunableValue {
 
   /**
    * Create a new TunableNumber with the default value
-   * 
+   *
    * @param dashboardKey Key on dashboard
    * @param defaultValue Default value
    */
@@ -38,7 +44,7 @@ public class TunableValue {
 
   /**
    * Get the default value for the number that has been set
-   * 
+   *
    * @return The default value
    */
   public double getDefault() {
@@ -47,7 +53,7 @@ public class TunableValue {
 
   /**
    * Set the default value of the number
-   * 
+   *
    * @param defaultValue The default value
    */
   public void setDefault(double defaultValue) {
@@ -57,19 +63,18 @@ public class TunableValue {
 
   /**
    * Get the current value, from dashboard if available and in tuning mode
-   * 
+   *
    * @return The current value
    */
   public double get() {
-    return FLAGS.TUNING_MODE ? SmartDashboard.getNumber(key, defaultValue)
-        : defaultValue;
+    return FLAGS.TUNING_MODE ? SmartDashboard.getNumber(key, defaultValue) : defaultValue;
   }
 
   /**
    * Checks whether the number has changed since our last check
-   * 
+   *
    * @return True if the number has changed since the last time this method was called, false
-   *         otherwise
+   *     otherwise
    */
   public boolean hasChanged() {
     double currentValue = get();

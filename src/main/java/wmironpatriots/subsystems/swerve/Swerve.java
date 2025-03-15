@@ -9,7 +9,6 @@ package wmironpatriots.subsystems.swerve;
 import static edu.wpi.first.units.Units.Volt;
 
 import com.ctre.phoenix6.SignalLogger;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -37,7 +36,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
-
 import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
@@ -170,10 +168,14 @@ public class Swerve implements LoggedSubsystem {
                 state -> SignalLogger.writeString("SysidAngularState", state.toString())),
             new Mechanism(
                 volts -> {
-                  modules[0].runCharacterizationVolts(Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
-                  modules[1].runCharacterizationVolts(Rotation2d.fromDegrees(-45), volts.baseUnitMagnitude());
-                  modules[2].runCharacterizationVolts(Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
-                  modules[3].runCharacterizationVolts(Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
+                  modules[0].runCharacterizationVolts(
+                      Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
+                  modules[1].runCharacterizationVolts(
+                      Rotation2d.fromDegrees(-45), volts.baseUnitMagnitude());
+                  modules[2].runCharacterizationVolts(
+                      Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
+                  modules[3].runCharacterizationVolts(
+                      Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
                 },
                 null,
                 this));
@@ -205,25 +207,29 @@ public class Swerve implements LoggedSubsystem {
             new Mechanism(
                 volts ->
                     Arrays.stream(modules)
-                        .forEach(
-                            m ->
-                                m.runCharacterizationVolts(volts.baseUnitMagnitude(), 0.0)),
+                        .forEach(m -> m.runCharacterizationVolts(volts.baseUnitMagnitude(), 0.0)),
                 null,
                 this));
-    
+
     if (FLAGS.TUNING_MODE) {
-      SmartDashboard.putData("transQuasistaticForward", transCharacter.quasistatic(Direction.kForward));
-      SmartDashboard.putData("transQuasistaticReverse", transCharacter.quasistatic(Direction.kReverse));
+      SmartDashboard.putData(
+          "transQuasistaticForward", transCharacter.quasistatic(Direction.kForward));
+      SmartDashboard.putData(
+          "transQuasistaticReverse", transCharacter.quasistatic(Direction.kReverse));
       SmartDashboard.putData("transDynamicForward", transCharacter.dynamic(Direction.kForward));
       SmartDashboard.putData("transDynamicReverse", transCharacter.dynamic(Direction.kReverse));
 
-      SmartDashboard.putData("AngularQuasistaticForward", angularCharacter.quasistatic(Direction.kForward));
-      SmartDashboard.putData("AngularQuasistaticReverse", angularCharacter.quasistatic(Direction.kReverse));
+      SmartDashboard.putData(
+          "AngularQuasistaticForward", angularCharacter.quasistatic(Direction.kForward));
+      SmartDashboard.putData(
+          "AngularQuasistaticReverse", angularCharacter.quasistatic(Direction.kReverse));
       SmartDashboard.putData("AngularDynamicForward", angularCharacter.dynamic(Direction.kForward));
       SmartDashboard.putData("AngularDynamicReverse", angularCharacter.dynamic(Direction.kReverse));
 
-      SmartDashboard.putData("PivotQuasistaticForward", pivotCharacter.quasistatic(Direction.kForward));
-      SmartDashboard.putData("PivotQuasistaticReverse", pivotCharacter.quasistatic(Direction.kReverse));
+      SmartDashboard.putData(
+          "PivotQuasistaticForward", pivotCharacter.quasistatic(Direction.kForward));
+      SmartDashboard.putData(
+          "PivotQuasistaticReverse", pivotCharacter.quasistatic(Direction.kReverse));
       SmartDashboard.putData("PivotDynamicForward", pivotCharacter.dynamic(Direction.kForward));
       SmartDashboard.putData("PivotDynamicReverse", pivotCharacter.dynamic(Direction.kReverse));
     }
