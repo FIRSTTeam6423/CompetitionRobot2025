@@ -46,7 +46,7 @@ public class Robot extends TimedRobot implements Logged {
     vision = new VisionIOComp();
     addPeriodic(() -> swerve.updateVisionEstimates(vision.getEstimatedPoses()), 0.02);
 
-    if (FLAGS.SUPERSTRUCTURE_ENABLED) superstructure = Optional.of(new Superstructure(swerve));
+    superstructure = FLAGS.SUPERSTRUCTURE_ENABLED ? Optional.of(new Superstructure(swerve)) : Optional.empty();
 
     // * SETUP BINDS
     double maxSpeed = Swerve.MAX_LINEAR_SPEED;

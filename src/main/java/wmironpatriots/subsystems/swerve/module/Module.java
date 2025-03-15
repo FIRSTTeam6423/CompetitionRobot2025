@@ -26,7 +26,7 @@ public abstract class Module extends LoggedSubsystemComponent {
   public static final double WHEEL_RADIUS_METERS = 0.049784;
 
   public static record ModuleConfig(
-      int pivotID, int driveID, int cancoderID, double cancoderOffsetRevs, boolean pivotInverted) {}
+      int index, int pivotID, int driveID, int cancoderID, double cancoderOffsetRevs, boolean pivotInverted) {}
 
   public static CANcoderConfiguration getCancoderConf(double cancoderOffsetRevs) {
     CANcoderConfiguration conf = new CANcoderConfiguration();
