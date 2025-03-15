@@ -31,7 +31,8 @@ public class Robot extends TimedRobot implements Logged {
     DriverStation.silenceJoystickConnectionWarning(true);
 
     initMonologue();
-    SignalLogger.enableAutoLogging(false); // Kills signal logger and prevents it from clogging memory
+    SignalLogger.enableAutoLogging(
+        false); // Kills signal logger and prevents it from clogging memory
 
     // * INIT HARDWARE
     driver = new CommandXboxController(0);

@@ -6,12 +6,9 @@
 
 package wmironpatriots.subsystems.swerve;
 
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.DoubleSupplier;
+import static edu.wpi.first.units.Units.Volt;
 
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,6 +27,14 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
+import java.util.Arrays;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.DoubleSupplier;
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
@@ -115,6 +120,7 @@ public class Swerve implements LoggedSubsystem {
   public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
 
   private final PIDController angularFeedback, linearFeedback;
+  private final SysIdRoutine angularCharacterization, translationCharacterization;
 
   private final Field2d f2d;
 
@@ -146,6 +152,40 @@ public class Swerve implements LoggedSubsystem {
     angularFeedback.enableContinuousInput(0, 2 * Math.PI);
     angularFeedback.setTolerance(0.0523599);
     linearFeedback = new PIDController(0.0, 0.0, 0.0);
+
+    angularCharacterization =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null,
+                Volt.of(4),
+                null,
+                state -> SignalLogger.writeString("SysidAngularState", state.toString())),
+            new Mechanism(
+                volts -> {
+                  modules[0].runCharacterizationVolts(Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
+                  modules[1].runCharacterizationVolts(Rotation2d.fromDegrees(-45), volts.baseUnitMagnitude());
+                  modules[2].runCharacterizationVolts(Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
+                  modules[3].runCharacterizationVolts(Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
+                },
+                null,
+                this));
+
+    translationCharacterization =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null,
+                Volt.of(4),
+                null,
+                state -> SignalLogger.writeString("SysidAngularState", state.toString())),
+            new Mechanism(
+                volts ->
+                    Arrays.stream(modules)
+                        .forEach(
+                            m ->
+                                m.runCharacterizationVolts(
+                                    Rotation2d.fromDegrees(0), volts.baseUnitMagnitude())),
+                null,
+                this));
   }
 
   @Override
@@ -165,7 +205,7 @@ public class Swerve implements LoggedSubsystem {
 
   /**
    * Drive based on input streams
-   * 
+   *
    * @param xVelocity X velocity stream
    * @param yVelocity Y velocity stream
    * @param desiredHeading Desired heading stream
@@ -181,7 +221,7 @@ public class Swerve implements LoggedSubsystem {
 
   /**
    * Drive based on input streams
-   * 
+   *
    * @param xVelocity X velocity stream
    * @param yVelocity Y velocity stream
    * @param omegaVelocity omega velocity stream

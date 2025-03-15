@@ -11,7 +11,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -43,8 +42,12 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.MotorOutput.Inverted =
         inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
 
-    conf.CurrentLimits.SupplyCurrentLimit = 20.0;
-    conf.CurrentLimits.SupplyCurrentLimitEnable = true;
+    conf.CurrentLimits.StatorCurrentLimit = 40.0;
+    conf.CurrentLimits.StatorCurrentLimitEnable = true;
+
+    conf.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
+    conf.TorqueCurrent.PeakReverseTorqueCurrent = 40.0;
+    conf.TorqueCurrent.TorqueNeutralDeadband = 0.0;
 
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     conf.Feedback.FeedbackRemoteSensorID = cancoderID;
@@ -68,10 +71,12 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Audio.AllowMusicDurDisable = true;
     conf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    conf.CurrentLimits.StatorCurrentLimit = 50.0;
-    conf.CurrentLimits.StatorCurrentLimitEnable = true;
     conf.CurrentLimits.SupplyCurrentLimit = 120.0;
     conf.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    conf.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
+    conf.TorqueCurrent.PeakReverseTorqueCurrent = 120.0;
+    conf.TorqueCurrent.TorqueNeutralDeadband = 0.0;
 
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     conf.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION;
@@ -81,8 +86,6 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Slot0.kA = 0.0;
     conf.Slot0.kV = 0.124;
     conf.Slot0.kS = 0.0;
-    conf.MotionMagic.MotionMagicCruiseVelocity = 1.0;
-    conf.MotionMagic.MotionMagicCruiseVelocity = 0.1;
 
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     conf.ClosedLoopGeneral.ContinuousWrap = true;
@@ -154,8 +157,8 @@ public abstract class Module extends LoggedSubsystemComponent {
 
   /**
    * Get all module poses since last tick
-   * 
-   * @return {@link SwerveModulePosition} array of all module poses since last tick 
+   *
+   * @return {@link SwerveModulePosition} array of all module poses since last tick
    */
   public SwerveModulePosition[] getModulePoses() {
     int minOdometryPositions =
@@ -179,6 +182,17 @@ public abstract class Module extends LoggedSubsystemComponent {
   }
 
   // * HARDWARE METHODS
+  /**
+   * Run drive motor voltage for characterization
+   *
+   * @param pivotPose pivot angle
+   * @param driveVolts Drive motor input
+   */
+  public void runCharacterizationVolts(Rotation2d pivotPose, double driveVolts) {
+    setPivotPose(pivotPose.getRotations());
+    setDriveVolts(driveVolts, true);
+  }
+
   protected abstract void setPivotVolts(double volts);
 
   protected abstract void setPivotPose(double poseRevs);

@@ -1,31 +1,28 @@
-// Copyright (c) 2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file at
-// the root directory of this project.
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
 package wmironpatriots.subsystems.swerve;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.hardware.ParentDevice;
+import edu.wpi.first.wpilibj.RobotController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.hardware.ParentDevice;
-
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 import wmironpatriots.Constants;
 
 /**
  * Inspired by FRC 6328's 2024 odometry thread
- * 
- * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
+ *
+ * <p>Provides an interface for asynchronously reading high-frequency measurements to a set of
+ * queues.
  *
  * <p>This version is intended for Phoenix 6 devices on both the RIO and CANivore buses. When using
  * a CANivore, the thread uses the "waitForAll" blocking method to enable more consistent sampling.

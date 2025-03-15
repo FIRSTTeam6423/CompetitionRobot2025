@@ -6,17 +6,17 @@
 
 package wmironpatriots.subsystems.swerve.module;
 
-import java.util.Queue;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import java.util.Queue;
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.swerve.TalonOdoThread;
@@ -28,7 +28,8 @@ public class ModuleIOComp extends Module {
   private final CANcoderConfiguration cancoderConf;
 
   private final VoltageOut reqVolts;
-  private final PositionVoltage reqPose;
+  private final TorqueCurrentFOC reqTorque;
+  private final PositionTorqueCurrentFOC reqPose;
   private final VelocityTorqueCurrentFOC reqVel;
 
   private final BaseStatusSignal pivotPose, pivotVolts, pivotCurrent;
@@ -49,7 +50,8 @@ public class ModuleIOComp extends Module {
     cancoder.getConfigurator().apply(cancoderConf);
 
     reqVolts = new VoltageOut(0.0).withEnableFOC(true);
-    reqPose = new PositionVoltage(0.0).withEnableFOC(true);
+    reqTorque = new TorqueCurrentFOC(0.0);
+    reqPose = new PositionTorqueCurrentFOC(0.0);
     reqVel = new VelocityTorqueCurrentFOC(0.0);
 
     pivotPose = pivot.getPosition();
@@ -61,7 +63,8 @@ public class ModuleIOComp extends Module {
     driveCurrent = drive.getStatorCurrent();
     driveTorque = drive.getTorqueCurrent();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(100.0, pivotVolts, pivotCurrent, driveVel, driveVolts, driveCurrent, driveTorque);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        100.0, pivotVolts, pivotCurrent, driveVel, driveVolts, driveCurrent, driveTorque);
     BaseStatusSignal.setUpdateFrequencyForAll(Swerve.ODO_FREQ, pivotPose, drivePose);
 
     pivotPoseQueue = TalonOdoThread.getInstance().registerSignal(pivot, pivotPose);
@@ -92,14 +95,11 @@ public class ModuleIOComp extends Module {
     driveCurrentAmps = driveCurrent.getValueAsDouble();
     driveTorqueAmps = driveTorque.getValueAsDouble();
 
-    odoPivotPoseRevsQueue = 
-      pivotPoseQueue.stream()
-        .mapToDouble(sigValue -> sigValue)
-        .toArray();
+    odoPivotPoseRevsQueue = pivotPoseQueue.stream().mapToDouble(sigValue -> sigValue).toArray();
     odoDrivePoseMetersQueue =
-      drivePoseQueue.stream()
-        .mapToDouble(sigValue -> (sigValue * 2 * Math.PI * WHEEL_RADIUS_METERS)/60)
-        .toArray();
+        drivePoseQueue.stream()
+            .mapToDouble(sigValue -> (sigValue * 2 * Math.PI * WHEEL_RADIUS_METERS) / 60)
+            .toArray();
     pivotPoseQueue.clear();
     drivePoseQueue.clear();
   }

@@ -262,8 +262,7 @@ public class TunerConstants {
    * program,.
    */
   public static LegacyCmmdDrive createDrivetrain() {
-    return new LegacyCmmdDrive(
-        DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight);
+    return new LegacyCmmdDrive(DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight);
   }
 
   /** Swerve Drive class utilizing CTR Electronics' Phoenix 6 API with the selected device types. */

@@ -6,8 +6,6 @@
 
 package wmironpatriots.subsystems.superstructure;
 
-import java.util.function.Supplier;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -16,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import java.util.function.Supplier;
 import wmironpatriots.subsystems.superstructure.chute.Chute;
 import wmironpatriots.subsystems.superstructure.chute.ChuteIOComp;
 import wmironpatriots.subsystems.superstructure.elevator.Elevator;
@@ -59,8 +58,9 @@ public class Superstructure {
     // Auto intake; if robot is close to source intaking sequence should start
     Supplier<Pose2d> robotPoseSupplier = () -> swerve.getPose();
     new Trigger(
-      () -> LOWER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation()) 
-        || HIGHER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation()))
+            () ->
+                LOWER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation())
+                    || HIGHER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation()))
         .whileTrue(runIntakeRoutineCmmd());
   }
 
