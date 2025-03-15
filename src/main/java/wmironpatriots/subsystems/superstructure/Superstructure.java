@@ -37,6 +37,9 @@ public class Superstructure {
   private final Roller roller;
   private final Chute chute;
 
+  public final Trigger disabledTrigger;
+  public final Trigger robotInIntakingZone;
+
   public Superstructure(Swerve swerve) {
     // * INIT SUBSYSTEMS
     elevator = new ElevatorIOComp();
@@ -49,19 +52,20 @@ public class Superstructure {
     roller.setDefaultCommand(defaultRollerCmmd());
     chute.setDefaultCommand(defaultChuteCmmd());
 
-    // Turn off brake mode when disabled
-    new Trigger(() -> DriverStation.isDisabled())
-        .onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
-    new Trigger(() -> DriverStation.isEnabled())
-        .onTrue(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
-
-    // Auto intake; if robot is close to source intaking sequence should start
+    disabledTrigger = new Trigger(() -> DriverStation.isDisabled());
     Supplier<Pose2d> robotPoseSupplier = () -> swerve.getPose();
-    new Trigger(
+    robotInIntakingZone = 
+      new Trigger(
             () ->
                 LOWER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation())
-                    || HIGHER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation()))
-        .whileTrue(runIntakeRoutineCmmd());
+                    || HIGHER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation()));
+
+    // Turn off brake mode when disabled
+    disabledTrigger.onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
+    disabledTrigger.onFalse(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
+
+    // Auto intake; if robot is close to source intaking sequence should start
+    robotInIntakingZone.whileTrue(runIntakeRoutineCmmd());
   }
 
   // * DEFAULT COMMANDS

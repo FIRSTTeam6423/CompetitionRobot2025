@@ -11,7 +11,10 @@ import java.util.Optional;
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import monologue.Logged;
 import monologue.Monologue;
@@ -58,7 +61,13 @@ public class Robot extends TimedRobot implements Logged {
             () -> driver.getRightX() * angularSpeed));
     
     // configures bindings only if superstructure is enabled
-    if (superstructure.isPresent()) {}
+    superstructure.ifPresent(s -> {
+      s.robotInIntakingZone.whileTrue(rumbleDriver(0.2));
+    });
+  }
+  
+  private Command rumbleDriver(double value) {
+    return Commands.run(() -> driver.setRumble(RumbleType.kBothRumble, value));
   }
 
   private void initMonologue() {
@@ -84,7 +93,7 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void robotPeriodic() {
-    CommandScheduler.getInstance().run();
+      CommandScheduler.getInstance().run();
 
     Monologue.updateAll();
   }
