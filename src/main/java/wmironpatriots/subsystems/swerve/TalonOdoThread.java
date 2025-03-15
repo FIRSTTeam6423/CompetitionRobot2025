@@ -18,6 +18,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.ParentDevice;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import wmironpatriots.Constants;
 
@@ -88,8 +89,8 @@ public class TalonOdoThread extends Thread {
       } finally {
         signalsLock.unlock();
       }
-      double fpgaTimestamp = Timer.getFPGATimestamp();
 
+      double fpgaTimestamp = RobotController.getFPGATime() / 1e6;
       // Save new data to queues
       Swerve.odoLock.lock();
       try {
