@@ -6,6 +6,12 @@
 
 package wmironpatriots.subsystems.swerve;
 
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,7 +30,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import java.util.function.DoubleSupplier;
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
@@ -69,6 +74,8 @@ public class Swerve implements LoggedSubsystem {
   public static final double HEADING_I = 0.0;
   public static final double HEADING_D = 0.0;
 
+  public static final double ODO_FREQ = 250.0;
+
   public static final ModuleConfig[] MODULE_CONFIGS =
       new ModuleConfig[] {
         new ModuleConfig(
@@ -102,6 +109,9 @@ public class Swerve implements LoggedSubsystem {
 
   private final SwerveDriveKinematics kinematics;
   private final SwerveDrivePoseEstimator odo;
+
+  public static final Lock odoLock = new ReentrantLock();
+  public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
 
   private final PIDController angularFeedback, linearFeedback;
 
