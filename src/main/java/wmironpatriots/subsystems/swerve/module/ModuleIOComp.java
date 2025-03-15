@@ -6,6 +6,8 @@
 
 package wmironpatriots.subsystems.swerve.module;
 
+import java.util.Queue;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -16,6 +18,8 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import wmironpatriots.Constants.MATRIXID;
+import wmironpatriots.subsystems.swerve.Swerve;
+import wmironpatriots.subsystems.swerve.TalonOdoThread;
 
 public class ModuleIOComp extends Module {
   private final TalonFX pivot, drive;
@@ -29,6 +33,7 @@ public class ModuleIOComp extends Module {
 
   private final BaseStatusSignal pivotPose, pivotVolts, pivotCurrent;
   private final BaseStatusSignal drivePose, driveVel, driveVolts, driveCurrent, driveTorque;
+  private final Queue<Double> pivotPoseQueue, drivePoseQueue;
 
   public ModuleIOComp(ModuleConfig config) {
     pivot = new TalonFX(config.pivotID(), MATRIXID.CANCHAN);
@@ -55,6 +60,15 @@ public class ModuleIOComp extends Module {
     driveVolts = drive.getMotorVoltage();
     driveCurrent = drive.getStatorCurrent();
     driveTorque = drive.getTorqueCurrent();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(100.0, pivotVolts, pivotCurrent, driveVel, driveVolts, driveCurrent, driveTorque);
+    BaseStatusSignal.setUpdateFrequencyForAll(Swerve.ODO_FREQ, pivotPose, drivePose);
+
+    pivotPoseQueue = TalonOdoThread.getInstance().registerSignal(pivot, pivotPose);
+    drivePoseQueue = TalonOdoThread.getInstance().registerSignal(drive, drivePose);
+
+    pivot.optimizeBusUtilization(0, 0.1);
+    drive.optimizeBusUtilization(0, 0.1);
   }
 
   @Override
@@ -72,11 +86,22 @@ public class ModuleIOComp extends Module {
     pivotAppliedVolts = pivotVolts.getValueAsDouble();
     pivotCurrentAmps = pivotCurrent.getValueAsDouble();
 
-    drivePoseMeters = (drivePose.getValueAsDouble() * (2 * Math.PI * WHEEL_RADIUS_METERS)) / 60;
-    driveVelMPS = (driveVel.getValueAsDouble() * (2 * Math.PI * WHEEL_RADIUS_METERS)) / 60;
+    drivePoseMeters = (drivePose.getValueAsDouble() * 2 * Math.PI * WHEEL_RADIUS_METERS) / 60;
+    driveVelMPS = (driveVel.getValueAsDouble() * 2 * Math.PI * WHEEL_RADIUS_METERS) / 60;
     driveAppliedVolts = driveVolts.getValueAsDouble();
     driveCurrentAmps = driveCurrent.getValueAsDouble();
     driveTorqueAmps = driveTorque.getValueAsDouble();
+
+    odoPivotPoseRevsQueue = 
+      pivotPoseQueue.stream()
+        .mapToDouble(sigValue -> sigValue)
+        .toArray();
+    odoDrivePoseMetersQueue =
+      drivePoseQueue.stream()
+        .mapToDouble(sigValue -> (sigValue * 2 * Math.PI * WHEEL_RADIUS_METERS)/60)
+        .toArray();
+    pivotPoseQueue.clear();
+    drivePoseQueue.clear();
   }
 
   @Override

@@ -18,7 +18,6 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.ParentDevice;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import wmironpatriots.Constants;
 
@@ -54,7 +53,7 @@ public class TalonOdoThread extends Thread {
     start();
   }
 
-  public Queue<Double> registerSignal(ParentDevice device, StatusSignal<Double> signal) {
+  public Queue<Double> registerSignal(ParentDevice device, BaseStatusSignal signal) {
     Queue<Double> queue = new ArrayBlockingQueue<>(20);
     signalsLock.lock();
     Swerve.odoLock.lock();
