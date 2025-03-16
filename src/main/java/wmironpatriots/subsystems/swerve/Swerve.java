@@ -287,7 +287,10 @@ public class Swerve implements LoggedSubsystem {
    * @return Drive with input streams cmmd
    */
   public Command drive(
-      DoubleSupplier xVelocity, DoubleSupplier yVelocity, Rotation2d desiredHeading, DoubleSupplier speedSupplier) {
+      DoubleSupplier xVelocity,
+      DoubleSupplier yVelocity,
+      Rotation2d desiredHeading,
+      DoubleSupplier speedSupplier) {
     return drive(
         xVelocity,
         yVelocity,
@@ -304,7 +307,10 @@ public class Swerve implements LoggedSubsystem {
    * @return Drive with input streams cmmd
    */
   public Command drive(
-      DoubleSupplier xVelocity, DoubleSupplier yVelocity, DoubleSupplier omegaVelocity, DoubleSupplier speedSupplier) {
+      DoubleSupplier xVelocity,
+      DoubleSupplier yVelocity,
+      DoubleSupplier omegaVelocity,
+      DoubleSupplier speedSupplier) {
     return this.run(
         () ->
             runVelocities(

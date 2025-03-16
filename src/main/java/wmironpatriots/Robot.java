@@ -7,7 +7,6 @@
 package wmironpatriots;
 
 import com.ctre.phoenix6.SignalLogger;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -15,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -27,6 +27,7 @@ import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import org.ironmaple.simulation.SimulatedArena;
 import wmironpatriots.Constants.FLAGS;
+import wmironpatriots.commands.Autonomous;
 import wmironpatriots.subsystems.superstructure.Superstructure;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.vision.Vision;
@@ -42,6 +43,8 @@ public class Robot extends TimedRobot implements Logged {
   private final Swerve swerve;
 
   private final Alert tuningEnabled, superstructureDisabled, browningOut;
+
+  private final SendableChooser<Command> autoChooser;
 
   public Robot() {
     // * SYSTEMS INIT
@@ -90,13 +93,16 @@ public class Robot extends TimedRobot implements Logged {
             () -> JoystickUtil.applyTeleopModifier(driver::getLeftY),
             () -> JoystickUtil.applyTeleopModifier(driver::getLeftX),
             () -> JoystickUtil.applyTeleopModifier(driver::getRightX),
-            () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 1.0, 0.0)));
+            () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 0.0, 1.0)));
 
     // configures bindings only if superstructure is enabled
     superstructure.ifPresent(
         s -> {
           s.robotInIntakingZone.whileTrue(rumbleDriver(0.2));
         });
+
+    autoChooser = Autonomous.configureAutons(swerve);
+    SmartDashboard.putData(autoChooser);
   }
 
   /** Command for driver controller rumble */
@@ -150,7 +156,9 @@ public class Robot extends TimedRobot implements Logged {
   public void disabledExit() {}
 
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    autoChooser.getSelected().schedule();
+  }
 
   @Override
   public void autonomousPeriodic() {}
