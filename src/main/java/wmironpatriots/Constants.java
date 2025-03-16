@@ -44,13 +44,13 @@ public class Constants {
                             Volts.of(0.2),
                             Meter.of(Module.WHEEL_RADIUS_METERS),
                             KilogramSquareMeters.of(0.03),
-                            1.5))
+                            1.2))
                     // Configures the track length and track width (spacing between swerve modules)
-                    .withTrackLengthTrackWidth(
-                        Meter.of(Swerve.TRACK_WIDTH_METERS), Meter.of(Swerve.TRACK_WIDTH_METERS))
-                    // Configures the bumper size (dimensions of the robot bumper)
-                    .withBumperSize(Inches.of(30), Inches.of(30))
-                    .withRobotMass(Kilograms.of(Swerve.MASS_KG))
+                    // .withTrackLengthTrackWidth(
+                    //     Meter.of(Swerve.TRACK_WIDTH_METERS), Meter.of(Swerve.TRACK_WIDTH_METERS))
+                    // // Configures the bumper size (dimensions of the robot bumper)
+                    // .withBumperSize(Inches.of(30), Inches.of(30))
+                    // .withRobotMass(Kilograms.of(Swerve.MASS_KG))
                     .withCustomModuleTranslations(Swerve.MODULE_LOCS))
             : Optional.empty();
   }

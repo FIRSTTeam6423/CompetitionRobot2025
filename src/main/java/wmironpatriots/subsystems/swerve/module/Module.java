@@ -86,7 +86,7 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION / (WHEEL_RADIUS_METERS * 2 * Math.PI);
     conf.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
 
-    conf.Slot0.kP = 10000.0;
+    conf.Slot0.kP = 35.0;
     conf.Slot0.kD = 0.0;
     conf.Slot0.kA = 0.0;
     conf.Slot0.kV = 0.0;
@@ -123,7 +123,7 @@ public abstract class Module extends LoggedSubsystemComponent {
   public SwerveModuleState runModuleSetpoint(SwerveModuleState setpoint) {
     // Cosine compensation; Decreases carpet wear and drift
     setpoint.optimize(getRotation2d());
-    setpoint.speedMetersPerSecond *= setpoint.angle.minus(getRotation2d()).getCos();
+    setpoint.speedMetersPerSecond *= Math.cos(setpoint.angle.minus(getRotation2d()).getRadians());
 
     setPivotPose(setpoint.angle.getRotations());
     setDriveVel(setpoint.speedMetersPerSecond);

@@ -162,6 +162,7 @@ public class Swerve implements LoggedSubsystem {
               new SwerveDriveSimulation(
                   MAPPLESIM.driveTrainSimulationConfig.get(),
                   new Pose2d(3.28, 3.28, new Rotation2d())));
+      simulation.get().removeAllFixtures();
 
       gyro = new GyroIOSim(simulation.get().getGyroSimulation());
       modules = new ModuleIOSim[MODULE_CONFIGS.length];
@@ -261,7 +262,7 @@ public class Swerve implements LoggedSubsystem {
 
   @Override
   public void periodic() {
-    odo.update(getHeading(), getSwerveModulePoses());
+    odo.update(gyro.getRotation2d(), getSwerveModulePoses());
     f2d.setRobotPose(getPose());
     swervePublisher.set(getSwerveModuleStates());
 

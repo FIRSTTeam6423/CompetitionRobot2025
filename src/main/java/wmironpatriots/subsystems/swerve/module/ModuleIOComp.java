@@ -123,9 +123,7 @@ public class ModuleIOComp extends Module {
 
   @Override
   protected void setDriveVel(double velMPS) {
-    if (Math.abs(velMPS) < 0.1) setDriveVolts(0.0, false);
-    else
-      drive.setControl(reqVel.withVelocity(velMPS).withFeedForward(feedforward.calculate(velMPS)));
+    drive.setControl(reqVel.withVelocity(velMPS).withFeedForward(feedforward.calculate(velMPS)));
   }
 
   @Override
