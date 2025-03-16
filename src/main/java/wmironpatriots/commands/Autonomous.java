@@ -39,7 +39,7 @@ public class Autonomous {
         swerve::getPose,
         swerve::resetOdo,
         swerve::getCurrentVelocities,
-        (velocities, ff) -> swerve.runVelocities(velocities),
+        swerve::runVelocities,
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0, 0), new PIDConstants(5.0, 0, 0), Constants.TICK_SPEED),
         robotConfig,
