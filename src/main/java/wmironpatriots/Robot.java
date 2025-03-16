@@ -7,6 +7,8 @@
 package wmironpatriots;
 
 import com.ctre.phoenix6.SignalLogger;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -87,7 +89,8 @@ public class Robot extends TimedRobot implements Logged {
         swerve.drive(
             () -> JoystickUtil.applyTeleopModifier(driver::getLeftY),
             () -> JoystickUtil.applyTeleopModifier(driver::getLeftX),
-            () -> JoystickUtil.applyTeleopModifier(driver::getRightX)));
+            () -> JoystickUtil.applyTeleopModifier(driver::getRightX),
+            () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 1.0, 0.0)));
 
     // configures bindings only if superstructure is enabled
     superstructure.ifPresent(

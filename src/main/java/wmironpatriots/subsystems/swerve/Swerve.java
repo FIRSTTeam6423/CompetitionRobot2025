@@ -73,8 +73,9 @@ public class Swerve implements LoggedSubsystem {
       Rotation2d.fromRotations(
           DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
 
-  public static final double MAX_LINEAR_SPEED = 20;
-  public static final double MAX_ANGULAR_SPEED = 2.0;
+  public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
+  public static final double MAX_ANGULAR_SPEED =
+      MAX_LINEAR_SPEED / (Math.hypot((TRACK_WIDTH_METERS / 2.0), (TRACK_WIDTH_METERS / 2.0)));
 
   public static final double LINEAR_P = 0.0;
   public static final double LINEAR_I = 0.0;
@@ -286,11 +287,12 @@ public class Swerve implements LoggedSubsystem {
    * @return Drive with input streams cmmd
    */
   public Command drive(
-      DoubleSupplier xVelocity, DoubleSupplier yVelocity, Rotation2d desiredHeading) {
+      DoubleSupplier xVelocity, DoubleSupplier yVelocity, Rotation2d desiredHeading, DoubleSupplier speedSupplier) {
     return drive(
         xVelocity,
         yVelocity,
-        () -> angularFeedback.calculate(getHeading().getRadians(), desiredHeading.getRadians()));
+        () -> angularFeedback.calculate(getHeading().getRadians(), desiredHeading.getRadians()),
+        speedSupplier);
   }
 
   /**
@@ -302,13 +304,13 @@ public class Swerve implements LoggedSubsystem {
    * @return Drive with input streams cmmd
    */
   public Command drive(
-      DoubleSupplier xVelocity, DoubleSupplier yVelocity, DoubleSupplier omegaVelocity) {
+      DoubleSupplier xVelocity, DoubleSupplier yVelocity, DoubleSupplier omegaVelocity, DoubleSupplier speedSupplier) {
     return this.run(
         () ->
             runVelocities(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xVelocity.getAsDouble() * MAX_LINEAR_SPEED,
-                    yVelocity.getAsDouble() * MAX_LINEAR_SPEED,
+                    xVelocity.getAsDouble() * MAX_LINEAR_SPEED * speedSupplier.getAsDouble(),
+                    yVelocity.getAsDouble() * MAX_LINEAR_SPEED * speedSupplier.getAsDouble(),
                     omegaVelocity.getAsDouble() * MAX_ANGULAR_SPEED,
                     DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
                         ? getHeading()
