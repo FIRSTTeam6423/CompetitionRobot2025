@@ -20,26 +20,6 @@
             }
           },
           {
-            "title": "Where am I bro",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 850.0,
-            "height": 460.0,
-            "type": "Field",
-            "properties": {
-              "topic": "/Field",
-              "period": 0.02,
-              "field_game": "Reefscape",
-              "robot_width": 0.85,
-              "robot_length": 0.85,
-              "show_other_objects": true,
-              "show_trajectories": true,
-              "field_rotation": 0.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4294967295
-            }
-          },
-          {
             "title": "Time until robot exploads",
             "x": 0.0,
             "y": 460.0,
@@ -126,6 +106,26 @@
               "wrap_value": false,
               "show_pointer": true,
               "show_ticks": true
+            }
+          },
+          {
+            "title": "Where am I bro",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 850.0,
+            "height": 460.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field",
+              "period": 0.02,
+              "field_game": "Reefscape",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295
             }
           }
         ]
@@ -796,6 +796,19 @@
             "properties": {
               "topic": "/SmartDashboard/Alerts",
               "period": 0.06
+            }
+          },
+          {
+            "title": "transQuasistaticForward",
+            "x": 1680.0,
+            "y": 100.0,
+            "width": 260.0,
+            "height": 130.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/transQuasistaticForward",
+              "period": 0.06,
+              "show_type": true
             }
           }
         ]

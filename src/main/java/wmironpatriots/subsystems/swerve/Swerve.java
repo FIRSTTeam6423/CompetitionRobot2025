@@ -73,7 +73,7 @@ public class Swerve implements LoggedSubsystem {
       Rotation2d.fromRotations(
           DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
 
-  public static final double MAX_LINEAR_SPEED = 1;
+  public static final double MAX_LINEAR_SPEED = 20;
   public static final double MAX_ANGULAR_SPEED = 2.0;
 
   public static final double LINEAR_P = 0.0;

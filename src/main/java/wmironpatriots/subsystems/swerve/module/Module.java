@@ -57,10 +57,11 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     conf.Feedback.FeedbackRemoteSensorID = cancoderID;
     conf.Feedback.SensorToMechanismRatio = PIVOT_REDUCTION;
+    conf.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
     // conf.Feedback.SensorToMechanismRatio = 1.0;
 
-    conf.Slot0.kP = 20;
-    conf.Slot0.kD = 0.0;
+    conf.Slot0.kP = 430.0;
+    conf.Slot0.kD = 50.0;
     conf.Slot0.kA = 0.0;
     conf.Slot0.kV = 10;
     conf.Slot0.kS = 0.014;
@@ -76,21 +77,20 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Audio.AllowMusicDurDisable = true;
     conf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    conf.CurrentLimits.SupplyCurrentLimit = 120.0;
-    conf.CurrentLimits.SupplyCurrentLimitEnable = true;
+    conf.CurrentLimits.StatorCurrentLimit = 120.0;
+    conf.CurrentLimits.StatorCurrentLimitEnable = true;
 
     conf.TorqueCurrent.PeakForwardTorqueCurrent = 120.0;
-    conf.TorqueCurrent.PeakReverseTorqueCurrent = 120.0;
-    conf.TorqueCurrent.TorqueNeutralDeadband = 0.0;
+    conf.TorqueCurrent.PeakReverseTorqueCurrent = -120.0;
 
-    conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    conf.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION;
+    conf.Feedback.SensorToMechanismRatio = DRIVE_REDUCTION / (WHEEL_RADIUS_METERS * 2 * Math.PI);
+    conf.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
 
-    conf.Slot0.kP = 0.1;
+    conf.Slot0.kP = 10000.0;
     conf.Slot0.kD = 0.0;
     conf.Slot0.kA = 0.0;
-    conf.Slot0.kV = 0.124;
-    conf.Slot0.kS = 0.0;
+    conf.Slot0.kV = 0.0;
+    conf.Slot0.kS = 5.0;
 
     conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     conf.ClosedLoopGeneral.ContinuousWrap = true;
@@ -126,12 +126,9 @@ public abstract class Module extends LoggedSubsystemComponent {
     setpoint.speedMetersPerSecond *= setpoint.angle.minus(getRotation2d()).getCos();
 
     setPivotPose(setpoint.angle.getRotations());
-    setDriveVel(
-        setpoint.speedMetersPerSecond,
-        (setpoint.speedMetersPerSecond - prevState.speedMetersPerSecond)
-            / (Timer.getFPGATimestamp() - prevTime));
+    setDriveVel(setpoint.speedMetersPerSecond);
 
-    prevState = setpoint;
+    prevState = getModuleState();
     prevTime = Timer.getFPGATimestamp();
 
     return setpoint;
@@ -215,7 +212,7 @@ public abstract class Module extends LoggedSubsystemComponent {
 
   protected abstract void setDriveVolts(double volts, boolean focEnabled);
 
-  protected abstract void setDriveVel(double velMPS, double accelMPSSqrd);
+  protected abstract void setDriveVel(double velMPS);
 
   protected abstract void stopMotors();
 

@@ -11,13 +11,14 @@ import static edu.wpi.first.units.Units.Rotation;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.Angle;
 import java.util.Queue;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -34,8 +35,10 @@ public class ModuleIOSim extends Module {
 
   private final VoltageOut reqVolts;
   private final TorqueCurrentFOC reqTorque;
-  private final PositionVoltage reqPose;
-  private final VelocityVoltage reqVel;
+  private final PositionTorqueCurrentFOC reqPose;
+  private final VelocityTorqueCurrentFOC reqVel;
+
+  private final SimpleMotorFeedforward feedforward;
 
   private final BaseStatusSignal pivotPose, pivotVolts, pivotCurrent;
   private final BaseStatusSignal drivePose, driveVel, driveVolts, driveCurrent, driveTorque;
@@ -58,8 +61,8 @@ public class ModuleIOSim extends Module {
 
     reqVolts = new VoltageOut(0.0).withEnableFOC(true);
     reqTorque = new TorqueCurrentFOC(0.0);
-    reqPose = new PositionVoltage(0.0).withEnableFOC(true);
-    reqVel = new VelocityVoltage(0.0).withEnableFOC(true);
+    reqPose = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0);
+    reqVel = new VelocityTorqueCurrentFOC(0.0).withUpdateFreqHz(0);
 
     pivotPose = pivot.getPosition();
     pivotVolts = pivot.getMotorVoltage();
@@ -69,6 +72,8 @@ public class ModuleIOSim extends Module {
     driveVolts = drive.getMotorVoltage();
     driveCurrent = drive.getStatorCurrent();
     driveTorque = drive.getTorqueCurrent();
+
+    feedforward = new SimpleMotorFeedforward(5.0, 0.134);
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         100.0, pivotVolts, pivotCurrent, driveVel, driveVolts, driveCurrent, driveTorque);
@@ -106,17 +111,14 @@ public class ModuleIOSim extends Module {
     pivotAppliedVolts = pivotVolts.getValueAsDouble();
     pivotCurrentAmps = pivotCurrent.getValueAsDouble();
 
-    drivePoseMeters = (drivePose.getValueAsDouble() * 2 * Math.PI * WHEEL_RADIUS_METERS) / 60;
-    driveVelMPS = (driveVel.getValueAsDouble() * 2 * Math.PI * WHEEL_RADIUS_METERS) / 60;
+    drivePoseMeters = drivePose.getValueAsDouble();
+    driveVelMPS = driveVel.getValueAsDouble();
     driveAppliedVolts = driveVolts.getValueAsDouble();
     driveCurrentAmps = driveCurrent.getValueAsDouble();
     driveTorqueAmps = driveTorque.getValueAsDouble();
 
     odoPivotPoseRevsQueue = pivotPoseQueue.stream().mapToDouble(sigValue -> sigValue).toArray();
-    odoDrivePoseMetersQueue =
-        drivePoseQueue.stream()
-            .mapToDouble(sigValue -> (sigValue * 2 * Math.PI * WHEEL_RADIUS_METERS) / 60)
-            .toArray();
+    odoDrivePoseMetersQueue = drivePoseQueue.stream().mapToDouble(sigValue -> sigValue).toArray();
     pivotPoseQueue.clear();
     drivePoseQueue.clear();
   }
@@ -137,13 +139,9 @@ public class ModuleIOSim extends Module {
   }
 
   @Override
-  protected void setDriveVel(double velMPS, double accelMPSSqrd) {
-    if (velMPS == 0 && accelMPSSqrd == 0 && Math.abs(velMPS) > 0.1) setDriveVolts(0.0, false);
-    else
-      drive.setControl(
-          reqVel
-              .withVelocity((velMPS * 60) / (2 * Math.PI * WHEEL_RADIUS_METERS))
-              .withAcceleration(accelMPSSqrd));
+  protected void setDriveVel(double velMPS) {
+    System.out.println(velMPS + " with ff of " + feedforward.calculate(velMPS));
+    drive.setControl(reqVel.withVelocity(velMPS).withFeedForward(feedforward.calculate(velMPS)));
   }
 
   @Override
