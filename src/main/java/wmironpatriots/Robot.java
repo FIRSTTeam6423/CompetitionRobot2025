@@ -20,6 +20,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
+
+import org.ironmaple.simulation.SimulatedArena;
+
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
@@ -30,27 +33,35 @@ import wmironpatriots.subsystems.vision.Vision;
 import wmironpatriots.subsystems.vision.VisionIOComp;
 
 public class Robot extends TimedRobot implements Logged {
-  private final Optional<Superstructure> superstructure;
-  private final Vision vision;
-  private final Swerve swerve;
-
   private final CommandXboxController driver;
   private final CommandXboxController operator;
 
+  private final Optional<Superstructure> superstructure;
+  private final Optional<Vision> vision;
+  private final Swerve swerve;
+
+  private final Alert tuningEnabled, superstructureDisabled, browningOut;
+
   public Robot() {
     // * SYSTEMS INIT
+    // Shuts up driverstation
     DriverStation.silenceJoystickConnectionWarning(true);
 
+    // Initalize logging
     initMonologue();
     SignalLogger.enableAutoLogging(
         false); // Kills signal logger and prevents it from clogging memory
 
-    Alert tuningEnabled = new Alert("Tuning mode is enabled!", AlertType.kWarning);
-    Alert superstructureDisabled = new Alert("Superstructure is disabled!", AlertType.kWarning);
-    Alert browningOut = new Alert("Browning Out!", AlertType.kWarning);
+    // Sets up alerts
+    tuningEnabled = new Alert("Tuning mode is enabled!", AlertType.kWarning);
+    superstructureDisabled = new Alert("Superstructure is disabled!", AlertType.kWarning);
+    browningOut = new Alert("Browning Out!", AlertType.kWarning);
 
+    // Flag checks
     if (FLAGS.TUNING_MODE) tuningEnabled.set(true);
     if (!FLAGS.SUPERSTRUCTURE_ENABLED) superstructureDisabled.set(true);
+
+    // Brownout trigger
     new Trigger(() -> RobotController.isBrownedOut())
         .onTrue(Commands.run(() -> browningOut.set(true)));
 
@@ -58,10 +69,17 @@ public class Robot extends TimedRobot implements Logged {
     driver = new CommandXboxController(0);
     operator = new CommandXboxController(1);
 
-    swerve = new Swerve();
-    vision = new VisionIOComp();
-    addPeriodic(() -> swerve.updateVisionEstimates(vision.getEstimatedPoses()), 0.02);
+    if (Robot.isReal()) {
+      swerve = new Swerve();
+      vision = Optional.of(new VisionIOComp());
+      addPeriodic(() -> swerve.updateVisionEstimates(vision.get().getEstimatedPoses()), 0.02);
+    } else {
+      swerve = new Swerve();
+      vision = Optional.empty();
 
+      SimulatedArena.getInstance().addDriveTrainSimulation(swerve.getSimulation().get());
+      swerve.resetOdo(swerve.getSimulation().get().getSimulatedDriveTrainPose());
+    }
     superstructure =
         FLAGS.SUPERSTRUCTURE_ENABLED ? Optional.of(new Superstructure(swerve)) : Optional.empty();
 
@@ -81,10 +99,12 @@ public class Robot extends TimedRobot implements Logged {
         });
   }
 
+  /** Command for driver controller rumble */
   private Command rumbleDriver(double value) {
     return Commands.run(() -> driver.setRumble(RumbleType.kBothRumble, value));
   }
 
+  /** Initalizes monologue from generated build constants */
   private void initMonologue() {
     Monologue.setupMonologue(
         this,
@@ -109,6 +129,7 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    if (Robot.isReal()) SimulatedArena.getInstance().simulationPeriodic();
 
     Monologue.updateAll();
 

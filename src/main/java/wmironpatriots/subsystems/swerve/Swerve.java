@@ -31,18 +31,26 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
+
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+
+import wmironpatriots.Robot;
 import wmironpatriots.Constants.FLAGS;
+import wmironpatriots.Constants.MAPPLESIM;
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
+import wmironpatriots.subsystems.swerve.gyro.GyroIOSim;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.Module.ModuleConfig;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
+import wmironpatriots.subsystems.swerve.module.ModuleIOSim;
 import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
 
@@ -130,6 +138,8 @@ public class Swerve implements LoggedSubsystem {
 
   private final Field2d f2d;
 
+  private final Optional<SwerveDriveSimulation> simulation;
+
   StructArrayPublisher<SwerveModuleState> swervePublisher =
       NetworkTableInstance.getDefault()
           .getStructArrayTopic("SwerveStates", SwerveModuleState.struct)
@@ -140,10 +150,25 @@ public class Swerve implements LoggedSubsystem {
           .publish();
 
   public Swerve() {
-    gyro = new GyroIOComp();
-    modules = new ModuleIOComp[MODULE_CONFIGS.length];
-    for (int i = 0; i < modules.length; i++) {
-      modules[i] = new ModuleIOComp(MODULE_CONFIGS[i]);
+    if (Robot.isReal()) {
+      gyro = new GyroIOComp();
+      modules = new ModuleIOComp[MODULE_CONFIGS.length];
+      for (int i = 0; i < modules.length; i++) {
+        modules[i] = new ModuleIOComp(MODULE_CONFIGS[i]);
+      }
+
+      simulation = Optional.empty();
+    } else {
+      simulation = Optional.of(
+        new SwerveDriveSimulation(
+          MAPPLESIM.driveTrainSimulationConfig.get(), 
+          new Pose2d(3.28, 3.28, new Rotation2d())));
+
+      gyro = new GyroIOSim(simulation.get().getGyroSimulation());
+      modules = new ModuleIOSim[MODULE_CONFIGS.length];
+      for (int i = 0; i < modules.length; i++) {
+        modules[i] = new ModuleIOSim(MODULE_CONFIGS[i], simulation.get().getModules()[i]);
+      }
     }
 
     kinematics = new SwerveDriveKinematics(MODULE_LOCS);
@@ -311,6 +336,10 @@ public class Swerve implements LoggedSubsystem {
 
   public void resetOdo(Pose2d pose) {
     odo.resetPose(pose);
+    simulation.ifPresent(s -> {
+      s.setSimulationWorldPose(pose);
+      s.setRobotSpeeds(new ChassisSpeeds());
+    });
   }
 
   public void stop() {
@@ -350,5 +379,9 @@ public class Swerve implements LoggedSubsystem {
       poses[i] = modules[i].getModulePose();
     }
     return poses;
+  }
+
+  public Optional<SwerveDriveSimulation> getSimulation() {
+    return simulation;
   }
 }

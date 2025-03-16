@@ -116,7 +116,7 @@
             "type": "Radial Gauge",
             "properties": {
               "topic": "/SmartDashboard/Speed MPS",
-              "period": 0.06,
+              "period": 0.02,
               "data_type": "double",
               "start_angle": -140.0,
               "end_angle": 140.0,
@@ -139,7 +139,7 @@
       }
     },
     {
-      "name": ">",
+      "name": ":nerd-emoji:",
       "grid_layout": {
         "layouts": [
           {

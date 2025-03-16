@@ -23,7 +23,7 @@ public class GyroIOComp extends Gyro {
   @Override
   public void periodic() {
     BaseStatusSignal.refreshAll(yaw);
-    headingRevs = yaw.getValueAsDouble();
+    headingDegrees = yaw.getValueAsDouble();
   }
 
   @Override

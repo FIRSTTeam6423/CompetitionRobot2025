@@ -11,7 +11,7 @@ import monologue.Annotations.Log;
 import wmironpatriots.utils.mechanismUtils.LoggedSubsystemComponent;
 
 public abstract class Gyro extends LoggedSubsystemComponent {
-  @Log public double headingRevs;
+  @Log public double headingDegrees;
 
   public abstract Rotation2d getRotation2d();
 }
