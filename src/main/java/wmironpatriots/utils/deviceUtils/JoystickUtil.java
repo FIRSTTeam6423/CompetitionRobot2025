@@ -7,6 +7,7 @@
 package wmironpatriots.utils.deviceUtils;
 
 import edu.wpi.first.math.MathUtil;
+import java.util.function.DoubleSupplier;
 
 public class JoystickUtil {
   /**
@@ -29,7 +30,7 @@ public class JoystickUtil {
    * @param value axis input
    * @return modified inputs
    */
-  public static double applyTeleopModifier(double value) {
-    return applyTeleopModifier(value);
+  public static double applyTeleopModifier(DoubleSupplier value) {
+    return applyTeleopModifier(value.getAsDouble(), 0.02);
   }
 }

@@ -37,13 +37,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
-
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-
-import wmironpatriots.Robot;
 import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.Constants.MAPPLESIM;
 import wmironpatriots.Constants.MATRIXID;
+import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOSim;
@@ -76,7 +74,7 @@ public class Swerve implements LoggedSubsystem {
           DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
 
   public static final double MAX_LINEAR_SPEED = 1;
-  public static final double MAX_ANGULAR_SPEED = 0.0;
+  public static final double MAX_ANGULAR_SPEED = 2.0;
 
   public static final double LINEAR_P = 0.0;
   public static final double LINEAR_I = 0.0;
@@ -159,10 +157,11 @@ public class Swerve implements LoggedSubsystem {
 
       simulation = Optional.empty();
     } else {
-      simulation = Optional.of(
-        new SwerveDriveSimulation(
-          MAPPLESIM.driveTrainSimulationConfig.get(), 
-          new Pose2d(3.28, 3.28, new Rotation2d())));
+      simulation =
+          Optional.of(
+              new SwerveDriveSimulation(
+                  MAPPLESIM.driveTrainSimulationConfig.get(),
+                  new Pose2d(3.28, 3.28, new Rotation2d())));
 
       gyro = new GyroIOSim(simulation.get().getGyroSimulation());
       modules = new ModuleIOSim[MODULE_CONFIGS.length];
@@ -174,7 +173,7 @@ public class Swerve implements LoggedSubsystem {
     kinematics = new SwerveDriveKinematics(MODULE_LOCS);
     odo =
         new SwerveDrivePoseEstimator(
-            kinematics, getHeading(), getSwerveModulePoses(), new Pose2d());
+            kinematics, gyro.getRotation2d(), getSwerveModulePoses(), new Pose2d());
 
     f2d = new Field2d();
     SmartDashboard.putData(f2d);
@@ -307,10 +306,12 @@ public class Swerve implements LoggedSubsystem {
         () ->
             runVelocities(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xVelocity.getAsDouble(),
-                    yVelocity.getAsDouble(),
-                    omegaVelocity.getAsDouble(),
-                    getHeading().plus(ALLIANCE_ROTATION))));
+                    xVelocity.getAsDouble() * MAX_LINEAR_SPEED,
+                    yVelocity.getAsDouble() * MAX_LINEAR_SPEED,
+                    omegaVelocity.getAsDouble() * MAX_ANGULAR_SPEED,
+                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                        ? getHeading()
+                        : getHeading().minus(Rotation2d.fromDegrees(180)))));
   }
 
   public void runVelocities(ChassisSpeeds velocities) {
@@ -336,10 +337,11 @@ public class Swerve implements LoggedSubsystem {
 
   public void resetOdo(Pose2d pose) {
     odo.resetPose(pose);
-    simulation.ifPresent(s -> {
-      s.setSimulationWorldPose(pose);
-      s.setRobotSpeeds(new ChassisSpeeds());
-    });
+    simulation.ifPresent(
+        s -> {
+          s.setSimulationWorldPose(pose);
+          s.setRobotSpeeds(new ChassisSpeeds());
+        });
   }
 
   public void stop() {
@@ -353,7 +355,7 @@ public class Swerve implements LoggedSubsystem {
   }
 
   public Rotation2d getHeading() {
-    return gyro.getRotation2d();
+    return getPose().getRotation();
   }
 
   public double getSpeedMPS() {

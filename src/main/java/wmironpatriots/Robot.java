@@ -20,17 +20,16 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
-
-import org.ironmaple.simulation.SimulatedArena;
-
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
+import org.ironmaple.simulation.SimulatedArena;
 import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.subsystems.superstructure.Superstructure;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.vision.Vision;
 import wmironpatriots.subsystems.vision.VisionIOComp;
+import wmironpatriots.utils.deviceUtils.JoystickUtil;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandXboxController driver;
@@ -84,13 +83,11 @@ public class Robot extends TimedRobot implements Logged {
         FLAGS.SUPERSTRUCTURE_ENABLED ? Optional.of(new Superstructure(swerve)) : Optional.empty();
 
     // * SETUP BINDS
-    double maxSpeed = Swerve.MAX_LINEAR_SPEED;
-    double angularSpeed = 2;
     swerve.setDefaultCommand(
         swerve.drive(
-            () -> driver.getLeftX() * maxSpeed,
-            () -> driver.getLeftY() * maxSpeed,
-            () -> driver.getRightX() * angularSpeed));
+            () -> JoystickUtil.applyTeleopModifier(driver::getLeftY),
+            () -> JoystickUtil.applyTeleopModifier(driver::getLeftX),
+            () -> JoystickUtil.applyTeleopModifier(driver::getRightX)));
 
     // configures bindings only if superstructure is enabled
     superstructure.ifPresent(
@@ -129,7 +126,7 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    if (Robot.isReal()) SimulatedArena.getInstance().simulationPeriodic();
+    if (Robot.isSimulation()) SimulatedArena.getInstance().simulationPeriodic();
 
     Monologue.updateAll();
 

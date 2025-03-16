@@ -6,25 +6,21 @@
 
 package wmironpatriots.subsystems.swerve.module;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.units.measure.Angle;
-
-import static edu.wpi.first.units.Units.Rotation;
-
 import java.util.Queue;
-
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
-
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.swerve.TalonOdoThread;
@@ -38,8 +34,8 @@ public class ModuleIOSim extends Module {
 
   private final VoltageOut reqVolts;
   private final TorqueCurrentFOC reqTorque;
-  private final PositionTorqueCurrentFOC reqPose;
-  private final VelocityTorqueCurrentFOC reqVel;
+  private final PositionVoltage reqPose;
+  private final VelocityVoltage reqVel;
 
   private final BaseStatusSignal pivotPose, pivotVolts, pivotCurrent;
   private final BaseStatusSignal drivePose, driveVel, driveVolts, driveCurrent, driveTorque;
@@ -62,8 +58,8 @@ public class ModuleIOSim extends Module {
 
     reqVolts = new VoltageOut(0.0).withEnableFOC(true);
     reqTorque = new TorqueCurrentFOC(0.0);
-    reqPose = new PositionTorqueCurrentFOC(0.0);
-    reqVel = new VelocityTorqueCurrentFOC(0.0);
+    reqPose = new PositionVoltage(0.0).withEnableFOC(true);
+    reqVel = new VelocityVoltage(0.0).withEnableFOC(true);
 
     pivotPose = pivot.getPosition();
     pivotVolts = pivot.getMotorVoltage();
@@ -85,7 +81,13 @@ public class ModuleIOSim extends Module {
     drive.optimizeBusUtilization(0, 0.1);
 
     this.simulation = simulation;
-    simulation.useSteerMotorController(new MaplePhoenixUtil.TalonFXMotorControllerWithRemoteCancoderSim(pivot, config.pivotInverted(), cancoder, false, Angle.ofBaseUnits(config.cancoderOffsetRevs(), Rotation)));
+    simulation.useSteerMotorController(
+        new MaplePhoenixUtil.TalonFXMotorControllerWithRemoteCancoderSim(
+            pivot,
+            config.pivotInverted(),
+            cancoder,
+            false,
+            Angle.ofBaseUnits(config.cancoderOffsetRevs(), Rotation)));
     simulation.useDriveMotorController(new MaplePhoenixUtil.TalonFXMotorControllerSim(drive, true));
   }
 
@@ -141,7 +143,7 @@ public class ModuleIOSim extends Module {
       drive.setControl(
           reqVel
               .withVelocity((velMPS * 60) / (2 * Math.PI * WHEEL_RADIUS_METERS))
-              .withAcceleration(0.0));
+              .withAcceleration(accelMPSSqrd));
   }
 
   @Override
