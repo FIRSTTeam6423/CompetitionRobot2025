@@ -37,6 +37,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.Constants.MAPPLESIM;
@@ -60,6 +61,8 @@ public class Swerve implements LoggedSubsystem {
   public static final double SIDE_LENGTH_METERS = 0.7239;
   public static final double BUMPER_WIDTH_METER = 0.0889;
   public static final double TRACK_WIDTH_METERS = 0.596201754;
+  public static final double RADIUS_METERS =
+      Math.hypot(TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0);
 
   public static final Translation2d[] MODULE_LOCS =
       new Translation2d[] {
@@ -74,20 +77,15 @@ public class Swerve implements LoggedSubsystem {
           DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
 
   public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
-  public static final double MAX_ANGULAR_SPEED =
-      MAX_LINEAR_SPEED / (Math.hypot((TRACK_WIDTH_METERS / 2.0), (TRACK_WIDTH_METERS / 2.0)));
+  public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / RADIUS_METERS;
 
-  public static final double LINEAR_P = 0.0;
+  public static final double LINEAR_P = 20.0;
   public static final double LINEAR_I = 0.0;
-  public static final double LINEAR_D = 0.0;
+  public static final double LINEAR_D = 2.0;
 
-  public static final double ANGULAR_P = 0.0;
+  public static final double ANGULAR_P = 1;
   public static final double ANGULAR_I = 0.0;
-  public static final double ANGULAR_D = 0.0;
-
-  public static final double HEADING_P = 0.0;
-  public static final double HEADING_I = 0.0;
-  public static final double HEADING_D = 0.0;
+  public static final double ANGULAR_D = 0.009;
 
   public static final double ODO_FREQ = 250.0;
 
@@ -132,7 +130,7 @@ public class Swerve implements LoggedSubsystem {
   public static final Lock odoLock = new ReentrantLock();
   public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
 
-  private final PIDController angularFeedback, linearFeedback;
+  private final PIDController angularFeedback, linearFeedback, linearYFeedback;
   private final SysIdRoutine angularCharacter, transCharacter, pivotCharacter;
 
   private final Field2d f2d;
@@ -180,10 +178,9 @@ public class Swerve implements LoggedSubsystem {
     f2d = new Field2d();
     SmartDashboard.putData(f2d);
 
-    angularFeedback = new PIDController(4.5, 0.0, 0.05);
-    angularFeedback.enableContinuousInput(0, 2 * Math.PI);
-    angularFeedback.setTolerance(0.0523599);
-    linearFeedback = new PIDController(0.0, 0.0, 0.0);
+    angularFeedback = new PIDController(ANGULAR_P, ANGULAR_I, ANGULAR_D);
+    linearFeedback = new PIDController(LINEAR_P, LINEAR_I, LINEAR_D);
+    linearYFeedback = new PIDController(LINEAR_P, LINEAR_I, LINEAR_D);
 
     angularCharacter =
         new SysIdRoutine(
@@ -321,6 +318,23 @@ public class Swerve implements LoggedSubsystem {
                     DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
                         ? getHeading()
                         : getHeading().minus(Rotation2d.fromDegrees(180)))));
+  }
+
+  public Command driveToPose(Supplier<Pose2d> desiredPoseSupplier) {
+    return this.run(
+        () -> {
+          Pose2d currentPose = getPose();
+          Pose2d desiredPose = desiredPoseSupplier.get();
+          var velocities =
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  linearFeedback.calculate(currentPose.getX(), desiredPose.getX()),
+                  linearYFeedback.calculate(currentPose.getY(), desiredPose.getY()),
+                  angularFeedback.calculate(
+                      currentPose.getRotation().getRadians(),
+                      desiredPose.getRotation().getRadians()),
+                  getHeading());
+          runVelocities(velocities);
+        });
   }
 
   public void runVelocities(ChassisSpeeds velocities) {
