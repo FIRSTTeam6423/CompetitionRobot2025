@@ -8,8 +8,10 @@ package wmironpatriots.subsystems.superstructure;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -32,6 +34,7 @@ public class Superstructure {
   public static Rectangle2d HIGHER_INTAKING_ZONE =
       new Rectangle2d(new Translation2d(0.0, 6.573), new Translation2d(2, 8.009));
 
+  private final Swerve swerve;
   private final Elevator elevator;
   private final Tail tail;
   private final Roller roller;
@@ -42,6 +45,7 @@ public class Superstructure {
 
   public Superstructure(Swerve swerve) {
     // * INIT SUBSYSTEMS
+    this.swerve = swerve;
     elevator = new ElevatorIOComp();
     tail = new TailIOComp();
     roller = new RollerIOComp();
@@ -93,6 +97,11 @@ public class Superstructure {
   /** Turns off chute rollers */
   public Command defaultChuteCmmd() {
     return chute.runChuteSpeedCmmd(0.0);
+  }
+
+  // * DT
+  public Command autoAlignCmmd(ReefBranch branch) {
+    return swerve.driveToPose(() -> branch.dtPose);
   }
 
   // * CORAL MANIPULATION
@@ -165,19 +174,28 @@ public class Superstructure {
   }
 
   // * STATIC SCORE TARGET ENUMS
+  private static double allianceScale = 
+      DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Blue
+        ? 0.0
+        : 0.0;
   public static enum ReefBranch {
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    I,
-    J,
-    K,
-    L
+    A(new Pose2d(3.23172676579 + allianceScale, 4.20105441609, Rotation2d.fromRadians(3.14159265359))),
+    B(new Pose2d()),
+    C(new Pose2d()),
+    D(new Pose2d()),
+    E(new Pose2d()),
+    F(new Pose2d()),
+    G(new Pose2d()),
+    H(new Pose2d()),
+    I(new Pose2d()),
+    J(new Pose2d()),
+    K(new Pose2d()),
+    L(new Pose2d());
+    private Pose2d dtPose;
+
+    private ReefBranch(Pose2d dtPose) {
+      this.dtPose = dtPose;
+    }
   };
 
   public static enum ReefLevel {
