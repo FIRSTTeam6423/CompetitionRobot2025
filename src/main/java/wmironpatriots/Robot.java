@@ -29,7 +29,7 @@ import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.subsystems.superstructure.Superstructure;
 import wmironpatriots.subsystems.superstructure.Superstructure.ReefLevel;
 import wmironpatriots.subsystems.swerve.Swerve;
-import wmironpatriots.subsystems.swerve.Swerve.ScoreTargets;
+import wmironpatriots.subsystems.swerve.Swerve.AlignTargets;
 import wmironpatriots.subsystems.vision.Vision;
 import wmironpatriots.subsystems.vision.VisionIOComp;
 import wmironpatriots.utils.deviceUtils.JoystickUtil;
@@ -43,7 +43,7 @@ public class Robot extends TimedRobot implements Logged {
 
   private final Alert tuningEnabled, superstructureDisabled, browningOut;
 
-  private ScoreTargets target;
+  private AlignTargets target;
 
   public Robot() {
     // * SYSTEMS INIT
@@ -113,7 +113,7 @@ public class Robot extends TimedRobot implements Logged {
             () -> JoystickUtil.applyTeleopModifier(driver::getRightX),
             () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 0.0, 1.0)));
 
-    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(() -> ScoreTargets.D));
+    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(() -> AlignTargets.D));
 
     // configures bindings only if superstructure is enabled
     superstructure.ifPresent(
@@ -147,7 +147,7 @@ public class Robot extends TimedRobot implements Logged {
     SmartDashboard.putBoolean("RSL status", RobotController.getRSLState());
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
 
-    target = ScoreTargets.values()[(int) SmartDashboard.getNumber("target", 0)];
+    target = AlignTargets.values()[(int) SmartDashboard.getNumber("target", 0)];
   }
 
   @Override

@@ -3,6 +3,7 @@
 // 
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
+
 package wmironpatriots.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.Volt;
@@ -269,7 +270,7 @@ public class Swerve implements LoggedSubsystem {
    *
    * @param targetSupplier scoring target supplier
    */
-  public Command driveToPoseCmmd(Supplier<ScoreTargets> targetSupplier) {
+  public Command driveToPoseCmmd(Supplier<AlignTargets> targetSupplier) {
     return driveToPoseCmmd(targetSupplier.get().pose);
   }
 
@@ -405,58 +406,100 @@ public class Swerve implements LoggedSubsystem {
 
   /**
    * Calculates reef align pose based on two values
-   * 
-   * @param a an integer between 0-5 that represents reef side (Goes ccw from 0 which is the side facing the barge)
+   *
+   * @param a an integer between 0-5 that represents reef side (Goes ccw from 0 which is the side
+   *     facing the barge)
    * @param b either -1 or 1 (-1 is right when facing wall)
-   * @return {@link Pose2d} of desired alignment pose
+   * @return {@link Pose2d} of desired alignment pose if values are valid; else, returns pose of a=0
+   *     & b=0
    */
   public static Pose2d calculateReefPose(int a, int b) {
-    double x = ((50.49 * Math.cos((a * Math.PI)/3) + (0.137 * b)) + 177.25)/39.37;
-    double y = ((50.49 * Math.sin((a * Math.PI)/3) + (0.137 * b)) + 177.25)/39.37;
-    double theta = (a * Math.PI)/3;
+    if (a > 5 || a < 0) {
+      a = 0;
+    }
+
+    if (!(b >= -1 || b <= 1)) {
+      b = 0;
+    }
+
+    double x = ((50.49 * Math.cos((a * Math.PI) / 3) + (0.137 * b)) + 177.25) / 39.37;
+    double y = ((50.49 * Math.sin((a * Math.PI) / 3) + (0.137 * b)) + 177.25) / 39.37;
+    double theta = (a * Math.PI) / 3;
 
     return new Pose2d(x, y, Rotation2d.fromRadians(theta));
   }
 
-  /** A cursed static enum containing all score target poses */
-  public static enum ScoreTargets {
-    A(
-        new Pose2d(
-            allianceAddition(3.23172676579), 4.20105441609, Rotation2d.fromRadians(3.14159265359))),
-    B(
-        new Pose2d(
-            allianceAddition(3.23172676579), 3.85076168754, Rotation2d.fromRadians(3.14159265359))),
-    C(
-        new Pose2d(
-            allianceAddition(3.71526168421), 3.0132546416, Rotation2d.fromRadians(4.18879020479))),
-    D(
-        new Pose2d(
-            allianceAddition(4.0186240859), 2.83810827733, Rotation2d.fromRadians(4.18879020479))),
-    E(
-        new Pose2d(
-            allianceAddition(4.98569392274), 2.83810827733, Rotation2d.fromRadians(5.23598775598))),
-    F(
-        new Pose2d(
-            allianceAddition(5.28905632442), 3.0132546416, Rotation2d.fromRadians(5.23598775598))),
-    G(new Pose2d(allianceAddition(5.77259124284), 3.85076168754, Rotation2d.fromRadians(0))),
-    H(new Pose2d(allianceAddition(5.77259124284), 4.20105441609, Rotation2d.fromRadians(0))),
-    I(
-        new Pose2d(
-            allianceAddition(5.28905632442), 5.03856146203, Rotation2d.fromRadians(1.0471975512))),
-    J(
-        new Pose2d(
-            allianceAddition(4.98569392274), 5.2137078263, Rotation2d.fromRadians(1.0471975512))),
-    K(
-        new Pose2d(
-            allianceAddition(4.0186240859), 5.2137078263, Rotation2d.fromRadians(2.09439510239))),
-    L(
-        new Pose2d(
-            allianceAddition(3.71526168421), 5.03856146203, Rotation2d.fromRadians(2.09439510239)));
+  /** static enum containing align targets */
+  public static enum AlignTargets {
+    A(calculateReefPose(3, -1)),
+    B(calculateReefPose(3, 1)),
+    C(calculateReefPose(4, -1)),
+    D(calculateReefPose(4, 1)),
+    E(calculateReefPose(5, -1)),
+    F(calculateReefPose(5, 1)),
+    G(calculateReefPose(0, -1)),
+    H(calculateReefPose(0, 1)),
+    I(calculateReefPose(1, -1)),
+    J(calculateReefPose(1, 1)),
+    K(calculateReefPose(2, -1)),
+    L(calculateReefPose(2, 1));
 
     private Pose2d pose;
 
-    private ScoreTargets(Pose2d pose) {
+    private AlignTargets(Pose2d pose) {
       this.pose = pose;
     }
   }
+
+  // /** A cursed static enum containing all score target poses */
+  // public static enum ScoreTargets {
+  //   A(
+  //       new Pose2d(
+  //           allianceAddition(3.23172676579), 4.20105441609,
+  // Rotation2d.fromRadians(3.14159265359))),
+  //   B(
+  //       new Pose2d(
+  //           allianceAddition(3.23172676579), 3.85076168754,
+  // Rotation2d.fromRadians(3.14159265359))),
+  //   C(
+  //       new Pose2d(
+  //           allianceAddition(3.71526168421), 3.0132546416,
+  // Rotation2d.fromRadians(4.18879020479))),
+  //   D(
+  //       new Pose2d(
+  //           allianceAddition(4.0186240859), 2.83810827733,
+  // Rotation2d.fromRadians(4.18879020479))),
+  //   E(
+  //       new Pose2d(
+  //           allianceAddition(4.98569392274), 2.83810827733,
+  // Rotation2d.fromRadians(5.23598775598))),
+  //   F(
+  //       new Pose2d(
+  //           allianceAddition(5.28905632442), 3.0132546416,
+  // Rotation2d.fromRadians(5.23598775598))),
+  //   G(new Pose2d(allianceAddition(5.77259124284), 3.85076168754, Rotation2d.fromRadians(0))),
+  //   H(new Pose2d(allianceAddition(5.77259124284), 4.20105441609, Rotation2d.fromRadians(0))),
+  //   I(
+  //       new Pose2d(
+  //           allianceAddition(5.28905632442), 5.03856146203,
+  // Rotation2d.fromRadians(1.0471975512))),
+  //   J(
+  //       new Pose2d(
+  //           allianceAddition(4.98569392274), 5.2137078263,
+  // Rotation2d.fromRadians(1.0471975512))),
+  //   K(
+  //       new Pose2d(
+  //           allianceAddition(4.0186240859), 5.2137078263,
+  // Rotation2d.fromRadians(2.09439510239))),
+  //   L(
+  //       new Pose2d(
+  //           allianceAddition(3.71526168421), 5.03856146203,
+  // Rotation2d.fromRadians(2.09439510239)));
+
+  //   private Pose2d pose;
+
+  //   private ScoreTargets(Pose2d pose) {
+  //     this.pose = pose;
+  //   }
+  // }
 }
