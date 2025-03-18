@@ -29,6 +29,8 @@ import org.ironmaple.simulation.SimulatedArena;
 import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.commands.Autonomous;
 import wmironpatriots.subsystems.superstructure.Superstructure;
+import wmironpatriots.subsystems.superstructure.Superstructure.ReefBranch;
+import wmironpatriots.subsystems.superstructure.Superstructure.ReefLevel;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.swerve.Swerve.ScoreTargets;
 import wmironpatriots.subsystems.vision.Vision;
@@ -54,8 +56,8 @@ public class Robot extends TimedRobot implements Logged {
 
     // Initalize logging
     initMonologue();
-    SignalLogger.enableAutoLogging(
-        false); // Kills signal logger and prevents it from clogging memory
+    // Frees memory DO NOT remove
+    SignalLogger.enableAutoLogging(false);
 
     // Sets up alerts
     tuningEnabled = new Alert("Tuning mode is enabled!", AlertType.kWarning);
@@ -78,15 +80,19 @@ public class Robot extends TimedRobot implements Logged {
       swerve = new Swerve();
       vision = Optional.of(new VisionIOComp());
       addPeriodic(() -> swerve.updateVisionEstimates(vision.get().getEstimatedPoses()), 0.02);
+
+      superstructure =
+          FLAGS.SUPERSTRUCTURE_ENABLED ? Optional.of(new Superstructure(swerve)) : Optional.empty();
     } else {
       swerve = new Swerve();
       vision = Optional.empty();
 
       SimulatedArena.getInstance().addDriveTrainSimulation(swerve.getSimulation().get());
       swerve.resetOdo(swerve.getSimulation().get().getSimulatedDriveTrainPose());
+
+      superstructure = Optional.empty();
+      superstructureDisabled.set(true);
     }
-    superstructure =
-        FLAGS.SUPERSTRUCTURE_ENABLED ? Optional.of(new Superstructure(swerve)) : Optional.empty();
 
     // * SETUP BINDS
     swerve.setDefaultCommand(
@@ -102,6 +108,10 @@ public class Robot extends TimedRobot implements Logged {
     superstructure.ifPresent(
         s -> {
           s.robotInIntakingZone.whileTrue(rumbleDriver(0.2));
+
+          driver.a().whileTrue(s.scoreCoralCmmd(ReefLevel.L4));
+
+          driver.b().whileTrue(s.autoAlignCmmd(ReefBranch.A));
         });
 
     autoChooser = Autonomous.configureAutons(swerve);

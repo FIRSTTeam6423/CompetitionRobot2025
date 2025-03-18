@@ -40,7 +40,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import wmironpatriots.Constants.FLAGS;
-import wmironpatriots.Constants.MAPPLESIM;
+import wmironpatriots.Constants.SIMULATION;
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
@@ -159,7 +159,7 @@ public class Swerve implements LoggedSubsystem {
       simulation =
           Optional.of(
               new SwerveDriveSimulation(
-                  MAPPLESIM.driveTrainSimulationConfig.get(),
+                  SIMULATION.driveTrainSimulationConfig.get(),
                   new Pose2d(3.28, 3.28, new Rotation2d())));
       simulation.get().removeAllFixtures();
 

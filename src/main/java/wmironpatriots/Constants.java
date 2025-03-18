@@ -22,37 +22,6 @@ import wmironpatriots.subsystems.swerve.module.Module;
 public class Constants {
   public static double TICK_SPEED = 0.02;
 
-  public static final class MAPPLESIM {
-    public static final Optional<DriveTrainSimulationConfig> driveTrainSimulationConfig =
-        Robot.isSimulation()
-            ? Optional.of(
-                DriveTrainSimulationConfig.Default()
-                    // Specify gyro type (for realistic gyro drifting and error simulation). i dont
-                    // wanna
-                    // deal w too much error lol
-                    .withGyro(() -> new GyroSimulation(0.0, 0.0))
-                    // Specify swerve module (for realistic swerve dynamics)
-                    .withSwerveModule(
-                        new SwerveModuleSimulationConfig(
-                            DCMotor.getKrakenX60Foc(1),
-                            DCMotor.getKrakenX60Foc(1),
-                            Module.DRIVE_REDUCTION,
-                            Module.PIVOT_REDUCTION,
-                            Volts.of(0.1),
-                            Volts.of(0.2),
-                            Meter.of(Module.WHEEL_RADIUS_METERS),
-                            KilogramSquareMeters.of(0.03),
-                            1.2))
-                    // Configures the track length and track width (spacing between swerve modules)
-                    // .withTrackLengthTrackWidth(
-                    //     Meter.of(Swerve.TRACK_WIDTH_METERS), Meter.of(Swerve.TRACK_WIDTH_METERS))
-                    // // Configures the bumper size (dimensions of the robot bumper)
-                    // .withBumperSize(Inches.of(30), Inches.of(30))
-                    // .withRobotMass(Kilograms.of(Swerve.MASS_KG))
-                    .withCustomModuleTranslations(Swerve.MODULE_LOCS))
-            : Optional.empty();
-  }
-
   /** Flags for runtime */
   public static class FLAGS {
     public static final boolean TUNING_MODE = true;
@@ -84,5 +53,37 @@ public class Constants {
     public static final int TAIL_ROLLER = 1;
     public static final int CHUTE_ROLLER = 2;
     public static final int TAIL_PIVOT = 13;
+  }
+
+  /** static class containing simulation constants */
+  public static final class SIMULATION {
+    public static final Optional<DriveTrainSimulationConfig> driveTrainSimulationConfig =
+        Robot.isSimulation()
+            ? Optional.of(
+                DriveTrainSimulationConfig.Default()
+                    // Specify gyro type (for realistic gyro drifting and error simulation). i dont
+                    // wanna
+                    // deal w too much error lol
+                    .withGyro(() -> new GyroSimulation(0.0, 0.0))
+                    // Specify swerve module (for realistic swerve dynamics)
+                    .withSwerveModule(
+                        new SwerveModuleSimulationConfig(
+                            DCMotor.getKrakenX60Foc(1),
+                            DCMotor.getKrakenX60Foc(1),
+                            Module.DRIVE_REDUCTION,
+                            Module.PIVOT_REDUCTION,
+                            Volts.of(0.1),
+                            Volts.of(0.2),
+                            Meter.of(Module.WHEEL_RADIUS_METERS),
+                            KilogramSquareMeters.of(0.03),
+                            1.2))
+                    // Configures the track length and track width (spacing between swerve modules)
+                    // .withTrackLengthTrackWidth(
+                    //     Meter.of(Swerve.TRACK_WIDTH_METERS), Meter.of(Swerve.TRACK_WIDTH_METERS))
+                    // // Configures the bumper size (dimensions of the robot bumper)
+                    // .withBumperSize(Inches.of(30), Inches.of(30))
+                    // .withRobotMass(Kilograms.of(Swerve.MASS_KG))
+                    .withCustomModuleTranslations(Swerve.MODULE_LOCS))
+            : Optional.empty();
   }
 }
