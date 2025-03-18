@@ -164,22 +164,6 @@ public class Superstructure {
     return tail.poseRevs > Tail.POSE_SAFTEY;
   }
 
-  // * STATIC SCORE TARGET ENUMS
-  public static enum ReefBranch {
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    I,
-    J,
-    K,
-    L
-  };
-
   public static enum ReefLevel {
     L1(Elevator.POSE_L1, Tail.POSE_L1),
     L2(Elevator.POSE_L2, Tail.POSE_L2),

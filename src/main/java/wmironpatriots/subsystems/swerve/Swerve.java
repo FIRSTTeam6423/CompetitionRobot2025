@@ -179,6 +179,7 @@ public class Swerve implements LoggedSubsystem {
     SmartDashboard.putData(f2d);
 
     angularFeedback = new PIDController(ANGULAR_P, ANGULAR_I, ANGULAR_D);
+    angularFeedback.enableContinuousInput(-Math.PI, Math.PI);
     linearFeedback = new PIDController(LINEAR_P, LINEAR_I, LINEAR_D);
     linearYFeedback = new PIDController(LINEAR_P, LINEAR_I, LINEAR_D);
 
@@ -320,18 +321,22 @@ public class Swerve implements LoggedSubsystem {
                         : getHeading().minus(Rotation2d.fromDegrees(180)))));
   }
 
-  public Command driveToPose(Supplier<Pose2d> desiredPoseSupplier) {
+  public Command driveToPoseCmmd(Supplier<ScoreTargets> targetSupplier) {
+    return driveToPoseCmmd(targetSupplier.get().pose);
+  }
+
+  public Command driveToPoseCmmd(Pose2d desiredPose) {
     return this.run(
         () -> {
           Pose2d currentPose = getPose();
-          Pose2d desiredPose = desiredPoseSupplier.get();
           var velocities =
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearFeedback.calculate(currentPose.getX(), desiredPose.getX()),
                   linearYFeedback.calculate(currentPose.getY(), desiredPose.getY()),
-                  angularFeedback.calculate(
-                      currentPose.getRotation().getRadians(),
-                      desiredPose.getRotation().getRadians()),
+                  0.0,
+                  // angularFeedback.calculate(
+                  //     currentPose.getRotation().getRadians(),
+                  //     desiredPose.getRotation().getRadians()),
                   getHeading());
           runVelocities(velocities);
         });
@@ -408,5 +413,31 @@ public class Swerve implements LoggedSubsystem {
 
   public Optional<SwerveDriveSimulation> getSimulation() {
     return simulation;
+  }
+
+  public static double allianceAddition(double value) {
+    return DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red
+      ? Units.inchesToMeters(689.938458) - value
+      : value;
+  }
+  public static enum ScoreTargets {
+    A(new Pose2d(allianceAddition(3.23172676579), 4.20105441609, Rotation2d.fromRadians(3.14159265359))),
+    B(new Pose2d()),
+    C(new Pose2d()),
+    D(new Pose2d()),
+    E(new Pose2d()),
+    F(new Pose2d()),
+    G(new Pose2d()),
+    H(new Pose2d()),
+    I(new Pose2d()),
+    J(new Pose2d()),
+    K(new Pose2d()),
+    L(new Pose2d());
+
+    private Pose2d pose;
+
+    private ScoreTargets(Pose2d pose) {
+      this.pose = pose;
+    }
   }
 }
