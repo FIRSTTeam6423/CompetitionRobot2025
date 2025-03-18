@@ -29,7 +29,6 @@ import org.ironmaple.simulation.SimulatedArena;
 import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.commands.Autonomous;
 import wmironpatriots.subsystems.superstructure.Superstructure;
-import wmironpatriots.subsystems.superstructure.Superstructure.ReefBranch;
 import wmironpatriots.subsystems.superstructure.Superstructure.ReefLevel;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.swerve.Swerve.ScoreTargets;
@@ -102,7 +101,7 @@ public class Robot extends TimedRobot implements Logged {
             () -> JoystickUtil.applyTeleopModifier(driver::getRightX),
             () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 0.0, 1.0)));
 
-    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(() -> ScoreTargets.A));
+    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(() -> ScoreTargets.D));
 
     // configures bindings only if superstructure is enabled
     superstructure.ifPresent(
@@ -110,8 +109,6 @@ public class Robot extends TimedRobot implements Logged {
           s.robotInIntakingZone.whileTrue(rumbleDriver(0.2));
 
           driver.a().whileTrue(s.scoreCoralCmmd(ReefLevel.L4));
-
-          driver.b().whileTrue(s.autoAlignCmmd(ReefBranch.A));
         });
 
     autoChooser = Autonomous.configureAutons(swerve);

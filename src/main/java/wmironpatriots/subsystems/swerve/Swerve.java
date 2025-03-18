@@ -40,8 +40,8 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import wmironpatriots.Constants.FLAGS;
-import wmironpatriots.Constants.SIMULATION;
 import wmironpatriots.Constants.MATRIXID;
+import wmironpatriots.Constants.SIMULATION;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
@@ -316,7 +316,7 @@ public class Swerve implements LoggedSubsystem {
                     xVelocity.getAsDouble() * MAX_LINEAR_SPEED * speedSupplier.getAsDouble(),
                     yVelocity.getAsDouble() * MAX_LINEAR_SPEED * speedSupplier.getAsDouble(),
                     omegaVelocity.getAsDouble() * MAX_ANGULAR_SPEED,
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
                         ? getHeading()
                         : getHeading().minus(Rotation2d.fromDegrees(180)))));
   }
@@ -333,10 +333,9 @@ public class Swerve implements LoggedSubsystem {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearFeedback.calculate(currentPose.getX(), desiredPose.getX()),
                   linearYFeedback.calculate(currentPose.getY(), desiredPose.getY()),
-                  0.0,
-                  // angularFeedback.calculate(
-                  //     currentPose.getRotation().getRadians(),
-                  //     desiredPose.getRotation().getRadians()),
+                  angularFeedback.calculate(
+                      currentPose.getRotation().getRadians(),
+                      desiredPose.getRotation().getRadians()),
                   getHeading());
           runVelocities(velocities);
         });
@@ -417,22 +416,43 @@ public class Swerve implements LoggedSubsystem {
 
   public static double allianceAddition(double value) {
     return DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red
-      ? Units.inchesToMeters(689.938458) - value
-      : value;
+        ? Units.inchesToMeters(689.938458) - value
+        : value;
   }
+
   public static enum ScoreTargets {
-    A(new Pose2d(allianceAddition(3.23172676579), 4.20105441609, Rotation2d.fromRadians(3.14159265359))),
-    B(new Pose2d()),
-    C(new Pose2d()),
-    D(new Pose2d()),
-    E(new Pose2d()),
-    F(new Pose2d()),
-    G(new Pose2d()),
-    H(new Pose2d()),
-    I(new Pose2d()),
-    J(new Pose2d()),
-    K(new Pose2d()),
-    L(new Pose2d());
+    A(
+        new Pose2d(
+            allianceAddition(3.23172676579), 4.20105441609, Rotation2d.fromRadians(3.14159265359))),
+    B(
+        new Pose2d(
+            allianceAddition(3.23172676579), 3.85076168754, Rotation2d.fromRadians(3.14159265359))),
+    C(
+        new Pose2d(
+            allianceAddition(3.71526168421), 3.0132546416, Rotation2d.fromRadians(4.18879020479))),
+    D(
+        new Pose2d(
+            allianceAddition(4.0186240859), 2.83810827733, Rotation2d.fromRadians(4.18879020479))),
+    E(
+        new Pose2d(
+            allianceAddition(4.98569392274), 2.83810827733, Rotation2d.fromRadians(5.23598775598))),
+    F(
+        new Pose2d(
+            allianceAddition(5.28905632442), 3.0132546416, Rotation2d.fromRadians(5.23598775598))),
+    G(new Pose2d(allianceAddition(5.77259124284), 3.85076168754, Rotation2d.fromRadians(0))),
+    H(new Pose2d(allianceAddition(5.77259124284), 4.20105441609, Rotation2d.fromRadians(0))),
+    I(
+        new Pose2d(
+            allianceAddition(5.28905632442), 5.03856146203, Rotation2d.fromRadians(1.0471975512))),
+    J(
+        new Pose2d(
+            allianceAddition(4.98569392274), 5.2137078263, Rotation2d.fromRadians(1.0471975512))),
+    K(
+        new Pose2d(
+            allianceAddition(4.0186240859), 5.2137078263, Rotation2d.fromRadians(2.09439510239))),
+    L(
+        new Pose2d(
+            allianceAddition(3.71526168421), 5.03856146203, Rotation2d.fromRadians(2.09439510239)));
 
     private Pose2d pose;
 

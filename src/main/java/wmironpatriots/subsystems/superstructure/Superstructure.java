@@ -8,10 +8,8 @@ package wmironpatriots.subsystems.superstructure;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -99,11 +97,6 @@ public class Superstructure {
     return chute.runChuteSpeedCmmd(0.0);
   }
 
-  // * DT
-  public Command autoAlignCmmd(ReefBranch branch) {
-    return swerve.driveToPose(() -> branch.dtPose);
-  }
-
   // * CORAL MANIPULATION
   /** Automated intaking sequence; Will try to unjam if jammed */
   public Command runIntakeRoutineCmmd() {
@@ -172,22 +165,6 @@ public class Superstructure {
   private boolean tailDeployed() {
     return tail.poseRevs > Tail.POSE_SAFTEY;
   }
-
-  // * STATIC SCORE TARGET ENUMS
-  public static enum ReefBranch {
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    I,
-    J,
-    K,
-    L
-  };
 
   public static enum ReefLevel {
     L1(Elevator.POSE_L1, Tail.POSE_L1),
