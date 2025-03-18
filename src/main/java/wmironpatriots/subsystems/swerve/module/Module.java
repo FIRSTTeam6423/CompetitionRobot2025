@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -35,9 +36,13 @@ public abstract class Module extends LoggedSubsystemComponent {
       boolean driveInverted,
       boolean encoderInverted) {}
 
-  public static CANcoderConfiguration getCancoderConf(double cancoderOffsetRevs) {
+  public static CANcoderConfiguration getCancoderConf(double cancoderOffsetRevs, boolean inverted) {
     CANcoderConfiguration conf = new CANcoderConfiguration();
     conf.MagnetSensor.MagnetOffset = cancoderOffsetRevs;
+    conf.MagnetSensor.SensorDirection =
+        inverted
+            ? SensorDirectionValue.Clockwise_Positive
+            : SensorDirectionValue.CounterClockwise_Positive;
 
     return conf;
   }
@@ -73,10 +78,12 @@ public abstract class Module extends LoggedSubsystemComponent {
     return conf;
   }
 
-  public static TalonFXConfiguration getDriveConf() {
+  public static TalonFXConfiguration getDriveConf(boolean inverted) {
     TalonFXConfiguration conf = new TalonFXConfiguration();
     conf.Audio.AllowMusicDurDisable = true;
     conf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    conf.MotorOutput.Inverted =
+        inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
 
     conf.CurrentLimits.StatorCurrentLimit = 120.0;
     conf.CurrentLimits.StatorCurrentLimitEnable = true;

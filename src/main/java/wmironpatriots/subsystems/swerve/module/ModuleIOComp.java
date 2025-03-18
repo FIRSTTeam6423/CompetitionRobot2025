@@ -6,6 +6,8 @@
 
 package wmironpatriots.subsystems.swerve.module;
 
+import static wmironpatriots.subsystems.swerve.SwerveConstants.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -19,7 +21,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import java.util.Queue;
 import wmironpatriots.Constants.MATRIXID;
-import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.swerve.TalonOdoThread;
 
 public class ModuleIOComp extends Module {
@@ -45,8 +46,8 @@ public class ModuleIOComp extends Module {
     cancoder = new CANcoder(config.cancoderID(), MATRIXID.CANCHAN);
 
     pivotConf = getPivotConf(config.cancoderID(), config.pivotInverted());
-    driveConf = getDriveConf();
-    cancoderConf = getCancoderConf(config.cancoderOffsetRevs());
+    driveConf = getDriveConf(config.driveInverted());
+    cancoderConf = getCancoderConf(config.cancoderOffsetRevs(), config.encoderInverted());
 
     pivot.getConfigurator().apply(pivotConf);
     drive.getConfigurator().apply(driveConf);
@@ -71,7 +72,7 @@ public class ModuleIOComp extends Module {
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         100.0, pivotVolts, pivotCurrent, driveVel, driveVolts, driveCurrent, driveTorque);
-    BaseStatusSignal.setUpdateFrequencyForAll(Swerve.ODO_FREQ, pivotPose, drivePose);
+    BaseStatusSignal.setUpdateFrequencyForAll(ODO_FREQ, pivotPose, drivePose);
 
     pivotPoseQueue = TalonOdoThread.getInstance().registerSignal(pivot, pivotPose);
     drivePoseQueue = TalonOdoThread.getInstance().registerSignal(drive, drivePose);
@@ -92,7 +93,7 @@ public class ModuleIOComp extends Module {
         driveCurrent,
         driveTorque);
     pivotPoseRevs = pivotPose.getValueAsDouble();
-    cancoderPoserevs = cancoderPose.getValueAsDouble();
+    cancoderPoseRevs = cancoderPose.getValueAsDouble();
     pivotAppliedVolts = pivotVolts.getValueAsDouble();
     pivotCurrentAmps = pivotCurrent.getValueAsDouble();
 

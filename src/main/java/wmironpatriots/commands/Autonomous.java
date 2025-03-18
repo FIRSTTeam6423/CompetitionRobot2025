@@ -6,6 +6,8 @@
 
 package wmironpatriots.commands;
 
+import static wmironpatriots.subsystems.swerve.SwerveConstants.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -24,16 +26,16 @@ public class Autonomous {
   public static SendableChooser<Command> configureAutons(Swerve swerve) {
     RobotConfig robotConfig =
         new RobotConfig(
-            Swerve.MASS_KG,
+            MASS_KG,
             5.053,
             new ModuleConfig(
                 Module.WHEEL_RADIUS_METERS,
-                Swerve.MAX_LINEAR_SPEED,
+                MAX_LINEAR_SPEED,
                 1.0,
                 DCMotor.getKrakenX60Foc(1),
                 60.0,
                 1),
-            Swerve.MODULE_LOCS);
+            MODULE_LOCS);
 
     AutoBuilder.configure(
         swerve::getPose,

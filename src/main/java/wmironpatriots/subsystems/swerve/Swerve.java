@@ -7,6 +7,7 @@
 package wmironpatriots.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.Volt;
+import static wmironpatriots.subsystems.swerve.SwerveConstants.*;
 
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.controller.PIDController;
@@ -14,7 +15,6 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -38,113 +38,36 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import wmironpatriots.Constants.FLAGS;
-import wmironpatriots.Constants.MATRIXID;
-import wmironpatriots.Constants.SIMULATION;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOSim;
 import wmironpatriots.subsystems.swerve.module.Module;
-import wmironpatriots.subsystems.swerve.module.Module.ModuleConfig;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
 import wmironpatriots.subsystems.swerve.module.ModuleIOSim;
 import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
 
-// TODO rewrite javadoc
 public class Swerve implements LoggedSubsystem {
-  // * CONSTANTS
-  public static final double MASS_KG = 54.8847;
-  public static final double MOI = 5.503;
-  public static final double SIDE_LENGTH_METERS = 0.7239;
-  public static final double BUMPER_WIDTH_METER = 0.0889;
-  public static final double TRACK_WIDTH_METERS = 0.596201754;
-  public static final double RADIUS_METERS =
-      Math.hypot(TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0);
-
-  public static final Translation2d[] MODULE_LOCS =
-      new Translation2d[] {
-        new Translation2d(0.381, 0.381),
-        new Translation2d(0.381, -0.381),
-        new Translation2d(-0.381, 0.381),
-        new Translation2d(-0.381, -0.381)
-      };
-
-  public static final Rotation2d ALLIANCE_ROTATION =
-      Rotation2d.fromRotations(
-          DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
-
-  public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
-  public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / RADIUS_METERS;
-
-  public static final double LINEAR_P = 20.0;
-  public static final double LINEAR_I = 0.0;
-  public static final double LINEAR_D = 2.0;
-
-  public static final double ANGULAR_P = 1;
-  public static final double ANGULAR_I = 0.0;
-  public static final double ANGULAR_D = 0.009;
-
-  public static final double ODO_FREQ = 250.0;
-
-  public static final ModuleConfig[] MODULE_CONFIGS =
-      new ModuleConfig[] {
-        new ModuleConfig(
-            0,
-            MATRIXID.BL_PIVOT,
-            MATRIXID.BL_DRIVE,
-            MATRIXID.BL_CANCODER,
-            Units.radiansToRotations(2.780),
-            true,
-            false,
-            false),
-        new ModuleConfig(
-            1,
-            MATRIXID.FL_PIVOT,
-            MATRIXID.FL_DRIVE,
-            MATRIXID.FL_CANCODER,
-            Units.radiansToRotations(6.452),
-            true,
-            false,
-            false),
-        new ModuleConfig(
-            2,
-            MATRIXID.FR_PIVOT,
-            MATRIXID.FR_DRIVE,
-            MATRIXID.FR_CANCODER,
-            Units.radiansToRotations(3.042),
-            true,
-            false,
-            false),
-        new ModuleConfig(
-            3,
-            MATRIXID.BR_PIVOT,
-            MATRIXID.BR_DRIVE,
-            MATRIXID.BR_CANCODER,
-            Units.radiansToRotations(2.982),
-            true,
-            false,
-            false)
-      };
-
   private final Module[] modules;
   private final Gyro gyro;
 
   private final SwerveDriveKinematics kinematics;
-  private final SwerveDrivePoseEstimator odo;
 
   public static final Lock odoLock = new ReentrantLock();
   public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
+  private final SwerveDrivePoseEstimator odo;
 
   private final PIDController angularFeedback, linearFeedback, linearYFeedback;
-  private final SysIdRoutine angularCharacter, transCharacter, pivotCharacter;
+  private final SysIdRoutine angularCharacterization, linearCharacterization, pivotCharacterization;
+
+  private final Optional<SelfControlledSwerveDriveSimulation> simulation;
 
   private final Field2d f2d;
-
-  private final Optional<SwerveDriveSimulation> simulation;
-
   StructArrayPublisher<SwerveModuleState> swervePublisher =
       NetworkTableInstance.getDefault()
           .getStructArrayTopic("SwerveStates", SwerveModuleState.struct)
@@ -155,6 +78,7 @@ public class Swerve implements LoggedSubsystem {
           .publish();
 
   public Swerve() {
+    // * INIT HARDWARE
     if (Robot.isReal()) {
       gyro = new GyroIOComp();
       modules = new ModuleIOComp[MODULE_CONFIGS.length];
@@ -166,15 +90,19 @@ public class Swerve implements LoggedSubsystem {
     } else {
       simulation =
           Optional.of(
-              new SwerveDriveSimulation(
-                  SIMULATION.driveTrainSimulationConfig.get(),
-                  new Pose2d(3.28, 3.28, new Rotation2d())));
-      simulation.get().removeAllFixtures();
+              new SelfControlledSwerveDriveSimulation(
+                  new SwerveDriveSimulation(
+                      driveTrainSimulationConfig.get(), new Pose2d(3.28, 3.28, new Rotation2d()))));
+      simulation.get().getDriveTrainSimulation().removeAllFixtures();
+      SimulatedArena.getInstance()
+          .addDriveTrainSimulation(simulation.get().getDriveTrainSimulation());
 
-      gyro = new GyroIOSim(simulation.get().getGyroSimulation());
+      gyro = new GyroIOSim(simulation.get().getDriveTrainSimulation().getGyroSimulation());
       modules = new ModuleIOSim[MODULE_CONFIGS.length];
       for (int i = 0; i < modules.length; i++) {
-        modules[i] = new ModuleIOSim(MODULE_CONFIGS[i], simulation.get().getModules()[i]);
+        modules[i] =
+            new ModuleIOSim(
+                MODULE_CONFIGS[i], simulation.get().getDriveTrainSimulation().getModules()[i]);
       }
     }
 
@@ -191,7 +119,7 @@ public class Swerve implements LoggedSubsystem {
     linearFeedback = new PIDController(LINEAR_P, LINEAR_I, LINEAR_D);
     linearYFeedback = new PIDController(LINEAR_P, LINEAR_I, LINEAR_D);
 
-    angularCharacter =
+    angularCharacterization =
         new SysIdRoutine(
             new SysIdRoutine.Config(
                 null,
@@ -212,7 +140,7 @@ public class Swerve implements LoggedSubsystem {
                 null,
                 this));
 
-    transCharacter =
+    linearCharacterization =
         new SysIdRoutine(
             new SysIdRoutine.Config(
                 null,
@@ -229,7 +157,7 @@ public class Swerve implements LoggedSubsystem {
                 null,
                 this));
 
-    pivotCharacter =
+    pivotCharacterization =
         new SysIdRoutine(
             new SysIdRoutine.Config(
                 null,
@@ -245,25 +173,31 @@ public class Swerve implements LoggedSubsystem {
 
     if (FLAGS.TUNING_MODE) {
       SmartDashboard.putData(
-          "transQuasistaticForward", transCharacter.quasistatic(Direction.kForward));
+          "transQuasistaticForward", linearCharacterization.quasistatic(Direction.kForward));
       SmartDashboard.putData(
-          "transQuasistaticReverse", transCharacter.quasistatic(Direction.kReverse));
-      SmartDashboard.putData("transDynamicForward", transCharacter.dynamic(Direction.kForward));
-      SmartDashboard.putData("transDynamicReverse", transCharacter.dynamic(Direction.kReverse));
+          "transQuasistaticReverse", linearCharacterization.quasistatic(Direction.kReverse));
+      SmartDashboard.putData(
+          "transDynamicForward", linearCharacterization.dynamic(Direction.kForward));
+      SmartDashboard.putData(
+          "transDynamicReverse", linearCharacterization.dynamic(Direction.kReverse));
 
       SmartDashboard.putData(
-          "AngularQuasistaticForward", angularCharacter.quasistatic(Direction.kForward));
+          "AngularQuasistaticForward", angularCharacterization.quasistatic(Direction.kForward));
       SmartDashboard.putData(
-          "AngularQuasistaticReverse", angularCharacter.quasistatic(Direction.kReverse));
-      SmartDashboard.putData("AngularDynamicForward", angularCharacter.dynamic(Direction.kForward));
-      SmartDashboard.putData("AngularDynamicReverse", angularCharacter.dynamic(Direction.kReverse));
+          "AngularQuasistaticReverse", angularCharacterization.quasistatic(Direction.kReverse));
+      SmartDashboard.putData(
+          "AngularDynamicForward", angularCharacterization.dynamic(Direction.kForward));
+      SmartDashboard.putData(
+          "AngularDynamicReverse", angularCharacterization.dynamic(Direction.kReverse));
 
       SmartDashboard.putData(
-          "PivotQuasistaticForward", pivotCharacter.quasistatic(Direction.kForward));
+          "PivotQuasistaticForward", pivotCharacterization.quasistatic(Direction.kForward));
       SmartDashboard.putData(
-          "PivotQuasistaticReverse", pivotCharacter.quasistatic(Direction.kReverse));
-      SmartDashboard.putData("PivotDynamicForward", pivotCharacter.dynamic(Direction.kForward));
-      SmartDashboard.putData("PivotDynamicReverse", pivotCharacter.dynamic(Direction.kReverse));
+          "PivotQuasistaticReverse", pivotCharacterization.quasistatic(Direction.kReverse));
+      SmartDashboard.putData(
+          "PivotDynamicForward", pivotCharacterization.dynamic(Direction.kForward));
+      SmartDashboard.putData(
+          "PivotDynamicReverse", pivotCharacterization.dynamic(Direction.kReverse));
     }
   }
 
@@ -284,13 +218,17 @@ public class Swerve implements LoggedSubsystem {
     }
   }
 
+  @Override
+  public void simulationPeriodic() {
+    simulation.get().periodic();
+  }
+
   /**
-   * Drive based on input streams
+   * Drive based on input streams.
    *
-   * @param xVelocity X velocity stream
+   * @param xVelocity X velocity
    * @param yVelocity Y velocity stream
    * @param desiredHeading Desired heading stream
-   * @return Drive with input streams cmmd
    */
   public Command drive(
       DoubleSupplier xVelocity,
@@ -310,7 +248,6 @@ public class Swerve implements LoggedSubsystem {
    * @param xVelocity X velocity stream
    * @param yVelocity Y velocity stream
    * @param omegaVelocity omega velocity stream
-   * @return Drive with input streams cmmd
    */
   public Command drive(
       DoubleSupplier xVelocity,
@@ -329,10 +266,20 @@ public class Swerve implements LoggedSubsystem {
                         : getHeading().minus(Rotation2d.fromDegrees(180)))));
   }
 
+  /**
+   * Drives to scoring target
+   *
+   * @param targetSupplier scoring target supplier
+   */
   public Command driveToPoseCmmd(Supplier<ScoreTargets> targetSupplier) {
     return driveToPoseCmmd(targetSupplier.get().pose);
   }
 
+  /**
+   * Drives to desired pose using feedback controllers
+   *
+   * @param desiredPose Desired pose
+   */
   public Command driveToPoseCmmd(Pose2d desiredPose) {
     return this.run(
         () -> {
@@ -349,6 +296,11 @@ public class Swerve implements LoggedSubsystem {
         });
   }
 
+  /**
+   * Run desired chassis velocities
+   *
+   * @param velocities desired velocities
+   */
   public void runVelocities(ChassisSpeeds velocities) {
     SwerveModuleState[] states =
         kinematics.toSwerveModuleStates(ChassisSpeeds.discretize(velocities, 0.02));
@@ -359,6 +311,11 @@ public class Swerve implements LoggedSubsystem {
     }
   }
 
+  /**
+   * Update odometry with vision estimates
+   *
+   * @param poses estimates
+   */
   public void updateVisionEstimates(PoseEstimate... poses) {
     Pose3d[] estimates = new Pose3d[poses.length];
     for (int i = 0; i < poses.length; i++) {
@@ -366,42 +323,63 @@ public class Swerve implements LoggedSubsystem {
           poses[i].pose().estimatedPose.toPose2d(),
           poses[i].pose().timestampSeconds,
           poses[i].stdevs());
-      // f2d.getObject("estimated pose " + i).setPose(poses[i].pose().estimatedPose.toPose2d());
+      f2d.getObject("estimated pose " + i).setPose(poses[i].pose().estimatedPose.toPose2d());
     }
   }
 
+  /**
+   * Resets odometry to pose
+   *
+   * @param pose odometry reset pose
+   */
   public void resetOdo(Pose2d pose) {
     odo.resetPose(pose);
     simulation.ifPresent(
         s -> {
           s.setSimulationWorldPose(pose);
-          s.setRobotSpeeds(new ChassisSpeeds());
+          s.getDriveTrainSimulation().setRobotSpeeds(new ChassisSpeeds());
         });
   }
 
+  /** Stops all motor input for dt */
   public void stop() {
     for (Module module : modules) {
       module.stopModule();
     }
   }
 
+  /**
+   * @return current odometry estimated pose
+   */
   public Pose2d getPose() {
     return odo.getEstimatedPosition();
   }
 
+  /**
+   * @return current odometry estimated heading
+   */
   public Rotation2d getHeading() {
     return getPose().getRotation();
   }
 
+  /**
+   * @return current chassis speed in Meters/Second
+   */
   public double getSpeedMPS() {
     return Math.hypot(
         getCurrentVelocities().vxMetersPerSecond, getCurrentVelocities().vyMetersPerSecond);
   }
 
+  /**
+   * @return current chassis velocities
+   */
   public ChassisSpeeds getCurrentVelocities() {
     return kinematics.toChassisSpeeds(getSwerveModuleStates());
   }
 
+  /**
+   * @return current swerve states
+   */
   public SwerveModuleState[] getSwerveModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[modules.length];
     for (int i = 0; i < modules.length; i++) {
@@ -410,6 +388,9 @@ public class Swerve implements LoggedSubsystem {
     return states;
   }
 
+  /**
+   * @return current swerve poses on field
+   */
   public SwerveModulePosition[] getSwerveModulePoses() {
     SwerveModulePosition[] poses = new SwerveModulePosition[modules.length];
     for (int i = 0; i < modules.length; i++) {
@@ -418,16 +399,14 @@ public class Swerve implements LoggedSubsystem {
     return poses;
   }
 
-  public Optional<SwerveDriveSimulation> getSimulation() {
-    return simulation;
-  }
-
+  // ! This might be stupid as hell lol
   public static double allianceAddition(double value) {
     return DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red
         ? Units.inchesToMeters(689.938458) - value
         : value;
   }
 
+  /** A cursed static enum containing all score target poses */
   public static enum ScoreTargets {
     A(
         new Pose2d(

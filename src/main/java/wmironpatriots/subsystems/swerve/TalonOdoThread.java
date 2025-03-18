@@ -6,6 +6,8 @@
 
 package wmironpatriots.subsystems.swerve;
 
+import static wmironpatriots.subsystems.swerve.SwerveConstants.ODO_FREQ;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -78,7 +80,7 @@ public class TalonOdoThread extends Thread {
         if (isCANFD) {
           BaseStatusSignal.waitForAll(Constants.TICK_SPEED, signals);
         } else {
-          Thread.sleep((long) (1000.0 / Swerve.ODO_FREQ)); // * ODO FREQ goes here
+          Thread.sleep((long) (1000.0 / ODO_FREQ)); // * ODO FREQ goes here
           if (signals.length > 0) BaseStatusSignal.refreshAll(signals);
         }
       } catch (InterruptedException e) {

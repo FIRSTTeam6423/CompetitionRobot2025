@@ -7,6 +7,7 @@
 package wmironpatriots.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.Rotation;
+import static wmironpatriots.subsystems.swerve.SwerveConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -23,7 +24,6 @@ import edu.wpi.first.units.measure.Angle;
 import java.util.Queue;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import wmironpatriots.Constants.MATRIXID;
-import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.swerve.TalonOdoThread;
 import wmironpatriots.utils.simUtils.MaplePhoenixUtil;
 
@@ -52,8 +52,8 @@ public class ModuleIOSim extends Module {
     cancoder = new CANcoder(config.cancoderID(), MATRIXID.CANCHAN);
 
     pivotConf = getPivotConf(config.cancoderID(), config.pivotInverted());
-    driveConf = getDriveConf();
-    cancoderConf = getCancoderConf(config.cancoderOffsetRevs());
+    driveConf = getDriveConf(config.driveInverted());
+    cancoderConf = getCancoderConf(config.cancoderOffsetRevs(), config.encoderInverted());
 
     pivot.getConfigurator().apply(pivotConf);
     drive.getConfigurator().apply(driveConf);
@@ -77,7 +77,7 @@ public class ModuleIOSim extends Module {
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         100.0, pivotVolts, pivotCurrent, driveVel, driveVolts, driveCurrent, driveTorque);
-    BaseStatusSignal.setUpdateFrequencyForAll(Swerve.ODO_FREQ, pivotPose, drivePose);
+    BaseStatusSignal.setUpdateFrequencyForAll(ODO_FREQ, pivotPose, drivePose);
 
     pivotPoseQueue = TalonOdoThread.getInstance().registerSignal(pivot, pivotPose);
     drivePoseQueue = TalonOdoThread.getInstance().registerSignal(drive, drivePose);

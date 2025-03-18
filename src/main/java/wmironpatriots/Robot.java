@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -27,7 +26,6 @@ import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import org.ironmaple.simulation.SimulatedArena;
 import wmironpatriots.Constants.FLAGS;
-import wmironpatriots.commands.Autonomous;
 import wmironpatriots.subsystems.superstructure.Superstructure;
 import wmironpatriots.subsystems.superstructure.Superstructure.ReefLevel;
 import wmironpatriots.subsystems.swerve.Swerve;
@@ -37,8 +35,7 @@ import wmironpatriots.subsystems.vision.VisionIOComp;
 import wmironpatriots.utils.deviceUtils.JoystickUtil;
 
 public class Robot extends TimedRobot implements Logged {
-  private final CommandXboxController driver;
-  private final CommandXboxController operator;
+  private final CommandXboxController driver, operator;
 
   private final Optional<Superstructure> superstructure;
   private final Optional<Vision> vision;
@@ -46,16 +43,31 @@ public class Robot extends TimedRobot implements Logged {
 
   private final Alert tuningEnabled, superstructureDisabled, browningOut;
 
-  private final SendableChooser<Command> autoChooser;
-
   public Robot() {
     // * SYSTEMS INIT
     // Shuts up driverstation
     DriverStation.silenceJoystickConnectionWarning(true);
 
     // Initalize logging
-    initMonologue();
-    // Frees memory DO NOT remove
+    Monologue.setupMonologue(
+        this,
+        "/Robot",
+        new MonologueConfig(DriverStation::isFMSAttached, "", false, true)
+            .withLazyLogging(true)
+            .withDatalogPrefix("")
+            .withOptimizeBandwidth(DriverStation::isFMSAttached));
+
+    // logs build data to the datalog
+    final String meta = "/BuildData/";
+    Monologue.log(meta + "RuntimeType", getRuntimeType().toString());
+    Monologue.log(meta + "ProjectName", BuildConstants.MAVEN_NAME);
+    Monologue.log(meta + "Version", BuildConstants.VERSION);
+    Monologue.log(meta + "BuildDate", BuildConstants.BUILD_DATE);
+    Monologue.log(meta + "GitDirty", String.valueOf(BuildConstants.DIRTY));
+    Monologue.log(meta + "GitSHA", BuildConstants.GIT_SHA);
+    Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
+    Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
+    // Frees memory DO NOT REMOVE
     SignalLogger.enableAutoLogging(false);
 
     // Sets up alerts
@@ -79,17 +91,13 @@ public class Robot extends TimedRobot implements Logged {
       swerve = new Swerve();
       vision = Optional.of(new VisionIOComp());
       addPeriodic(() -> swerve.updateVisionEstimates(vision.get().getEstimatedPoses()), 0.02);
-
       superstructure =
           FLAGS.SUPERSTRUCTURE_ENABLED ? Optional.of(new Superstructure(swerve)) : Optional.empty();
     } else {
       swerve = new Swerve();
-      vision = Optional.empty();
-
-      SimulatedArena.getInstance().addDriveTrainSimulation(swerve.getSimulation().get());
-      swerve.resetOdo(swerve.getSimulation().get().getSimulatedDriveTrainPose());
 
       superstructure = Optional.empty();
+      vision = Optional.empty();
       superstructureDisabled.set(true);
     }
 
@@ -110,9 +118,6 @@ public class Robot extends TimedRobot implements Logged {
 
           driver.a().whileTrue(s.scoreCoralCmmd(ReefLevel.L4));
         });
-
-    autoChooser = Autonomous.configureAutons(swerve);
-    SmartDashboard.putData(autoChooser);
   }
 
   /** Command for driver controller rumble */
@@ -120,26 +125,9 @@ public class Robot extends TimedRobot implements Logged {
     return Commands.run(() -> driver.setRumble(RumbleType.kBothRumble, value));
   }
 
-  /** Initalizes monologue from generated build constants */
-  private void initMonologue() {
-    Monologue.setupMonologue(
-        this,
-        "/Robot",
-        new MonologueConfig(DriverStation::isFMSAttached, "", false, true)
-            .withLazyLogging(true)
-            .withDatalogPrefix("")
-            .withOptimizeBandwidth(DriverStation::isFMSAttached));
-
-    // logs build data to the datalog
-    final String meta = "/BuildData/";
-    Monologue.log(meta + "RuntimeType", getRuntimeType().toString());
-    Monologue.log(meta + "ProjectName", BuildConstants.MAVEN_NAME);
-    Monologue.log(meta + "Version", BuildConstants.VERSION);
-    Monologue.log(meta + "BuildDate", BuildConstants.BUILD_DATE);
-    Monologue.log(meta + "GitDirty", String.valueOf(BuildConstants.DIRTY));
-    Monologue.log(meta + "GitSHA", BuildConstants.GIT_SHA);
-    Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
-    Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
+  /** Command for driver controller rumble */
+  private Command rumbleOperator(double value) {
+    return Commands.run(() -> operator.setRumble(RumbleType.kBothRumble, value));
   }
 
   @Override
@@ -166,9 +154,7 @@ public class Robot extends TimedRobot implements Logged {
   public void disabledExit() {}
 
   @Override
-  public void autonomousInit() {
-    autoChooser.getSelected().schedule();
-  }
+  public void autonomousInit() {}
 
   @Override
   public void autonomousPeriodic() {}
