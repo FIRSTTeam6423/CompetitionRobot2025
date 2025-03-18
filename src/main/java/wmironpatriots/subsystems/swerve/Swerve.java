@@ -403,6 +403,21 @@ public class Swerve implements LoggedSubsystem {
         : value;
   }
 
+  /**
+   * Calculates reef align pose based on two values
+   * 
+   * @param a an integer between 0-5 that represents reef side (Goes ccw from 0 which is the side facing the barge)
+   * @param b either -1 or 1 (-1 is right when facing wall)
+   * @return {@link Pose2d} of desired alignment pose
+   */
+  public static Pose2d calculateReefPose(int a, int b) {
+    double x = ((50.49 * Math.cos((a * Math.PI)/3) + (0.137 * b)) + 177.25)/39.37;
+    double y = ((50.49 * Math.sin((a * Math.PI)/3) + (0.137 * b)) + 177.25)/39.37;
+    double theta = (a * Math.PI)/3;
+
+    return new Pose2d(x, y, Rotation2d.fromRadians(theta));
+  }
+
   /** A cursed static enum containing all score target poses */
   public static enum ScoreTargets {
     A(
