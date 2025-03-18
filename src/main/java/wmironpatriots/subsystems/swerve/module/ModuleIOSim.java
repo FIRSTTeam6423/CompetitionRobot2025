@@ -33,7 +33,6 @@ public class ModuleIOSim extends Module {
   private final TalonFXConfiguration pivotConf, driveConf;
   private final CANcoderConfiguration cancoderConf;
 
-  private final VoltageOut reqVolts;
   private final TorqueCurrentFOC reqTorque;
   private final PositionTorqueCurrentFOC reqPose;
   private final VelocityTorqueCurrentFOC reqVel;
@@ -59,7 +58,6 @@ public class ModuleIOSim extends Module {
     drive.getConfigurator().apply(driveConf);
     cancoder.getConfigurator().apply(cancoderConf);
 
-    reqVolts = new VoltageOut(0.0).withEnableFOC(true);
     reqTorque = new TorqueCurrentFOC(0.0);
     reqPose = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0);
     reqVel = new VelocityTorqueCurrentFOC(0.0).withUpdateFreqHz(0);
@@ -124,8 +122,13 @@ public class ModuleIOSim extends Module {
   }
 
   @Override
-  protected void setPivotVolts(double volts) {
-    pivot.setControl(reqVolts.withOutput(volts));
+  protected void setPivotCurrent(double amps) {
+    pivot.setControl(reqTorque.withOutput(amps));
+  }
+
+  @Override
+  protected void setDriveCurrent(double amps, boolean focEnabled) {
+    drive.setControl(reqTorque.withOutput(amps));
   }
 
   @Override
@@ -134,15 +137,8 @@ public class ModuleIOSim extends Module {
   }
 
   @Override
-  protected void setDriveVolts(double volts, boolean focEnabled) {
-    drive.setControl(reqVolts.withOutput(volts).withEnableFOC(focEnabled));
-  }
-
-  @Override
   protected void setDriveVel(double velMPS) {
-    if (Math.abs(velMPS) < 0.2) setDriveVolts(0.0, false);
-    else
-      drive.setControl(reqVel.withVelocity(velMPS).withFeedForward(feedforward.calculate(velMPS)));
+    drive.setControl(reqVel.withVelocity(velMPS).withFeedForward(feedforward.calculate(velMPS)));
   }
 
   @Override

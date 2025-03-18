@@ -197,29 +197,29 @@ public abstract class Module extends LoggedSubsystemComponent {
    * Run drive motor voltage for characterization
    *
    * @param pivotPose Pivot angle
-   * @param driveVolts Drive motor input
+   * @param driveAmps Drive motor input
    */
-  public void runCharacterizationVolts(Rotation2d pivotPose, double driveVolts) {
+  public void runCharacterizationAmps(Rotation2d pivotPose, double driveAmps) {
     setPivotPose(pivotPose.getRotations());
-    setDriveVolts(driveVolts, true);
+    setDriveCurrent(driveAmps, true);
   }
 
   /**
    * Run drive & pivot motor voltage for characterization
    *
    * @param pivotPose Pivot motor input
-   * @param driveVolts Drive motor input
+   * @param driveAmps Drive motor input
    */
-  public void runCharacterizationVolts(double pivotVolts, double driveVolts) {
-    setPivotVolts(pivotVolts);
-    setDriveVolts(driveVolts, true);
+  public void runCharacterizationAmps(double pivotAmps, double driveAmps) {
+    setPivotCurrent(pivotAmps);
+    setDriveCurrent(driveAmps, true);
   }
 
-  protected abstract void setPivotVolts(double volts);
+  protected abstract void setPivotCurrent(double amps);
+
+  protected abstract void setDriveCurrent(double amps, boolean focEnabled);
 
   protected abstract void setPivotPose(double poseRevs);
-
-  protected abstract void setDriveVolts(double volts, boolean focEnabled);
 
   protected abstract void setDriveVel(double velMPS);
 

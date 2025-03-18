@@ -14,7 +14,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -29,7 +28,6 @@ public class ModuleIOComp extends Module {
   private final TalonFXConfiguration pivotConf, driveConf;
   private final CANcoderConfiguration cancoderConf;
 
-  private final VoltageOut reqVolts;
   private final TorqueCurrentFOC reqTorque;
   private final PositionTorqueCurrentFOC reqPose;
   private final VelocityTorqueCurrentFOC reqVel;
@@ -53,7 +51,6 @@ public class ModuleIOComp extends Module {
     drive.getConfigurator().apply(driveConf);
     cancoder.getConfigurator().apply(cancoderConf);
 
-    reqVolts = new VoltageOut(0.0).withEnableFOC(true);
     reqTorque = new TorqueCurrentFOC(0.0);
     reqPose = new PositionTorqueCurrentFOC(0.0);
     reqVel = new VelocityTorqueCurrentFOC(0.0);
@@ -110,18 +107,18 @@ public class ModuleIOComp extends Module {
   }
 
   @Override
-  protected void setPivotVolts(double volts) {
-    pivot.setControl(reqVolts.withOutput(volts));
+  protected void setPivotCurrent(double amps) {
+    pivot.setControl(reqTorque.withOutput(amps));
+  }
+
+  @Override
+  protected void setDriveCurrent(double amps, boolean focEnabled) {
+    drive.setControl(reqTorque.withOutput(amps));
   }
 
   @Override
   protected void setPivotPose(double poseRevs) {
     pivot.setControl(reqPose.withPosition(poseRevs));
-  }
-
-  @Override
-  protected void setDriveVolts(double volts, boolean focEnabled) {
-    drive.setControl(reqVolts.withOutput(volts).withEnableFOC(focEnabled));
   }
 
   @Override

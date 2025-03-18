@@ -126,13 +126,13 @@ public class Swerve implements LoggedSubsystem {
                 state -> SignalLogger.writeString("SysidAngularState", state.toString())),
             new Mechanism(
                 volts -> {
-                  modules[0].runCharacterizationVolts(
+                  modules[0].runCharacterizationAmps(
                       Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
-                  modules[1].runCharacterizationVolts(
+                  modules[1].runCharacterizationAmps(
                       Rotation2d.fromDegrees(-45), volts.baseUnitMagnitude());
-                  modules[2].runCharacterizationVolts(
+                  modules[2].runCharacterizationAmps(
                       Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
-                  modules[3].runCharacterizationVolts(
+                  modules[3].runCharacterizationAmps(
                       Rotation2d.fromDegrees(45), volts.baseUnitMagnitude());
                 },
                 null,
@@ -150,7 +150,7 @@ public class Swerve implements LoggedSubsystem {
                     Arrays.stream(modules)
                         .forEach(
                             m ->
-                                m.runCharacterizationVolts(
+                                m.runCharacterizationAmps(
                                     Rotation2d.fromDegrees(0), volts.baseUnitMagnitude())),
                 null,
                 this));
@@ -165,7 +165,7 @@ public class Swerve implements LoggedSubsystem {
             new Mechanism(
                 volts ->
                     Arrays.stream(modules)
-                        .forEach(m -> m.runCharacterizationVolts(volts.baseUnitMagnitude(), 0.0)),
+                        .forEach(m -> m.runCharacterizationAmps(volts.baseUnitMagnitude(), 0.0)),
                 null,
                 this));
 
