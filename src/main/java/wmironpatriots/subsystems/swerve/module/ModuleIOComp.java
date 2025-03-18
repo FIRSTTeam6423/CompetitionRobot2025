@@ -35,7 +35,7 @@ public class ModuleIOComp extends Module {
 
   private final SimpleMotorFeedforward feedforward;
 
-  private final BaseStatusSignal pivotPose, pivotVolts, pivotCurrent;
+  private final BaseStatusSignal pivotPose, cancoderPose, pivotVolts, pivotCurrent;
   private final BaseStatusSignal drivePose, driveVel, driveVolts, driveCurrent, driveTorque;
   private final Queue<Double> pivotPoseQueue, drivePoseQueue;
 
@@ -58,6 +58,7 @@ public class ModuleIOComp extends Module {
     reqVel = new VelocityTorqueCurrentFOC(0.0);
 
     pivotPose = pivot.getPosition();
+    cancoderPose = cancoder.getPosition();
     pivotVolts = pivot.getMotorVoltage();
     pivotCurrent = pivot.getStatorCurrent();
     drivePose = drive.getPosition();
@@ -91,6 +92,7 @@ public class ModuleIOComp extends Module {
         driveCurrent,
         driveTorque);
     pivotPoseRevs = pivotPose.getValueAsDouble();
+    cancoderPoserevs = cancoderPose.getValueAsDouble();
     pivotAppliedVolts = pivotVolts.getValueAsDouble();
     pivotCurrentAmps = pivotCurrent.getValueAsDouble();
 

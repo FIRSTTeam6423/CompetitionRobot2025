@@ -97,20 +97,26 @@ public class Swerve implements LoggedSubsystem {
             MATRIXID.BL_DRIVE,
             MATRIXID.BL_CANCODER,
             Units.radiansToRotations(2.780),
-            true),
+            true,
+            false,
+            false),
         new ModuleConfig(
             1,
             MATRIXID.FL_PIVOT,
             MATRIXID.FL_DRIVE,
             MATRIXID.FL_CANCODER,
             Units.radiansToRotations(6.452),
-            true),
+            true,
+            false,
+            false),
         new ModuleConfig(
             2,
             MATRIXID.FR_PIVOT,
             MATRIXID.FR_DRIVE,
             MATRIXID.FR_CANCODER,
             Units.radiansToRotations(3.042),
+            true,
+            false,
             false),
         new ModuleConfig(
             3,
@@ -118,6 +124,8 @@ public class Swerve implements LoggedSubsystem {
             MATRIXID.BR_DRIVE,
             MATRIXID.BR_CANCODER,
             Units.radiansToRotations(2.982),
+            true,
+            false,
             false)
       };
 

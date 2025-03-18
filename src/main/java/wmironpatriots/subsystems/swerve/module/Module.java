@@ -31,7 +31,9 @@ public abstract class Module extends LoggedSubsystemComponent {
       int driveID,
       int cancoderID,
       double cancoderOffsetRevs,
-      boolean pivotInverted) {}
+      boolean pivotInverted,
+      boolean driveInverted,
+      boolean encoderInverted) {}
 
   public static CANcoderConfiguration getCancoderConf(double cancoderOffsetRevs) {
     CANcoderConfiguration conf = new CANcoderConfiguration();
@@ -58,7 +60,6 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Feedback.FeedbackRemoteSensorID = cancoderID;
     conf.Feedback.SensorToMechanismRatio = PIVOT_REDUCTION;
     conf.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
-    // conf.Feedback.SensorToMechanismRatio = 1.0;
 
     conf.Slot0.kP = 430.0;
     conf.Slot0.kD = 50.0;
@@ -100,6 +101,7 @@ public abstract class Module extends LoggedSubsystemComponent {
 
   // * LOGGED VALUES
   @Log public double pivotPoseRevs;
+  @Log public double cancoderPoseRevs;
   @Log public double pivotAppliedVolts;
   @Log public double pivotCurrentAmps;
   @Log public double drivePoseMeters;
