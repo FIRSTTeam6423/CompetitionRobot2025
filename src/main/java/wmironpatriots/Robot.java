@@ -43,6 +43,8 @@ public class Robot extends TimedRobot implements Logged {
 
   private final Alert tuningEnabled, superstructureDisabled, browningOut;
 
+  private ScoreTargets target;
+
   public Robot() {
     // * SYSTEMS INIT
     // Shuts up driverstation
@@ -86,6 +88,8 @@ public class Robot extends TimedRobot implements Logged {
     // * INIT HARDWARE
     driver = new CommandXboxController(0);
     operator = new CommandXboxController(1);
+
+    SmartDashboard.putNumber("target", 0);
 
     if (Robot.isReal()) {
       swerve = new Swerve();
@@ -142,6 +146,8 @@ public class Robot extends TimedRobot implements Logged {
     SmartDashboard.putNumber("CPU Temps", RobotController.getCPUTemp());
     SmartDashboard.putBoolean("RSL status", RobotController.getRSLState());
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+
+    target = ScoreTargets.values()[(int) SmartDashboard.getNumber("target", 0)];
   }
 
   @Override
