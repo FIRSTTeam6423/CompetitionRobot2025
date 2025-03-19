@@ -405,6 +405,10 @@ public class Swerve implements LoggedSubsystem {
     return poses;
   }
 
+  public void showAlignTarget(AlignTargets target) {
+    f2d.getObject("target").setPose(target.pose);
+  }
+
   // ! This might be stupid as hell lol
   public static double allianceAddition(double value) {
     return DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red

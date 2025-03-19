@@ -97,7 +97,7 @@ public class SwerveConstants {
             // 0.0,
             -Units.degreesToRotations(21.01), // -0.016,
             false,
-            true,
+            false,
             true)
       };
 

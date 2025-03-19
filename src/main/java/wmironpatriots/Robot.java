@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
+import java.util.function.Supplier;
 import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
@@ -44,6 +45,8 @@ public class Robot extends TimedRobot implements Logged {
   private final Swerve swerve;
 
   private final Alert tuningEnabled, superstructureDisabled, browningOut;
+
+  private Supplier<AlignTargets> target;
 
   public Robot() {
     // * SYSTEMS INIT
@@ -85,6 +88,8 @@ public class Robot extends TimedRobot implements Logged {
     new Trigger(() -> RobotController.isBrownedOut())
         .onTrue(Commands.run(() -> browningOut.set(true)));
 
+    target = () -> AlignTargets.A;
+
     // * INIT HARDWARE
     driver = new CommandXboxController(0);
     operator = new CommandXboxController(1);
@@ -102,6 +107,7 @@ public class Robot extends TimedRobot implements Logged {
       vision = Optional.empty();
       superstructureDisabled.set(true);
     }
+    addPeriodic(() -> swerve.showAlignTarget(target.get()), 0.02);
 
     // * SETUP BINDS
     swerve.setDefaultCommand(
@@ -111,8 +117,7 @@ public class Robot extends TimedRobot implements Logged {
             () -> JoystickUtil.applyTeleopModifier(driver::getRightX),
             () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 0.0, 1.0)));
 
-    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(() -> AlignTargets.A));
-    driver.leftBumper().whileTrue(swerve.driveToPoseCmmd(() -> AlignTargets.B));
+    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(target));
 
     driver
         .a()
@@ -122,12 +127,45 @@ public class Robot extends TimedRobot implements Logged {
                     swerve.resetOdo(
                         new Pose2d(swerve.getPose().getTranslation(), new Rotation2d()))));
 
+    operator.povDown().whileTrue(getSelectedTarget(0));
+
+    operator.povDown().and(operator.rightBumper()).whileTrue(getSelectedTarget(1));
+
+    operator.povDownRight().whileTrue(getSelectedTarget(2));
+
+    operator.povDownRight().and(operator.rightBumper()).whileTrue(getSelectedTarget(3));
+
+    operator.povUpRight().whileTrue(getSelectedTarget(4));
+
+    operator.povUpRight().and(operator.rightBumper()).whileTrue(getSelectedTarget(5));
+
+    operator.povUp().whileTrue(getSelectedTarget(6));
+
+    operator.povUp().and(operator.rightBumper()).whileTrue(getSelectedTarget(7));
+
+    operator.povUpLeft().whileTrue(getSelectedTarget(8));
+
+    operator.povUpLeft().and(operator.rightBumper()).whileTrue(getSelectedTarget(9));
+
+    operator.povDownLeft().whileTrue(getSelectedTarget(10));
+
+    operator.povDownLeft().and(operator.rightBumper()).whileTrue(getSelectedTarget(11));
+
     // configures bindings only if superstructure is enabled
     superstructure.ifPresent(
         s -> {
           s.robotInIntakingZone.whileTrue(rumbleDriver(0.2));
 
           driver.a().whileTrue(s.scoreCoralCmmd(ReefLevel.L4));
+        });
+  }
+
+  private Command getSelectedTarget(int side) {
+    return Commands.runOnce(
+        () -> {
+          int index = side;
+          System.out.println(index);
+          target = () -> AlignTargets.values()[index];
         });
   }
 
