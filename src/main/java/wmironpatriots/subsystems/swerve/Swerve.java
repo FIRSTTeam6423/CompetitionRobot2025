@@ -430,8 +430,8 @@ public class Swerve implements LoggedSubsystem {
       b = 0;
     }
 
-    double x = ((50.49 * Math.cos((a * Math.PI) / 3) + (0.137 * b)) + 177.25) / 39.37;
-    double y = ((50.49 * Math.sin((a * Math.PI) / 3) + (0.137 * b)) + 177.25) / 39.37;
+    double x = ((50.49 * Math.cos(((a * Math.PI) / 3) + (0.137 * b))) + 177.25) / 39.37;
+    double y = ((50.49 * Math.sin(((a * Math.PI) / 3) + (0.137 * b))) + 158.50) / 39.37;
     double theta = (a * Math.PI) / 3;
 
     return new Pose2d(x, y, Rotation2d.fromRadians(theta));

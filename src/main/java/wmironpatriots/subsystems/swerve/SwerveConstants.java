@@ -54,7 +54,7 @@ public class SwerveConstants {
   public static final double LINEAR_I = 0.0;
   public static final double LINEAR_D = 0.0;
 
-  public static final double ANGULAR_P = 0.0;
+  public static final double ANGULAR_P = 0.1;
   public static final double ANGULAR_I = 0.0;
   public static final double ANGULAR_D = 0.0;
 

@@ -35,13 +35,14 @@ public abstract class Vision implements LoggedSubsystem {
             0,
             0,
             new Transform3d(
-                new Translation3d(Inches.of(-11.738802), Inches.of(-9.979009), Inches.of(18.617208)),
+                new Translation3d(
+                    Inches.of(-11.738802), Inches.of(-9.979009), Inches.of(18.617208)),
                 new Rotation3d(0.0, 0.506146, 2.734756))),
         new CameraConfig(
-          "camsan", 
-          0, 
-          0, 
-          0, 
+            "camsan",
+            0,
+            0,
+            0,
             new Transform3d(
                 new Translation3d(Inches.of(-11.738802), Inches.of(9.979009), Inches.of(18.617208)),
                 new Rotation3d(0.0, -0.506146, 2.734756))),
