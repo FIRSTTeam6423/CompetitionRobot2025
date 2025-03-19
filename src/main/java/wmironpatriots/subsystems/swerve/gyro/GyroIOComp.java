@@ -28,6 +28,6 @@ public class GyroIOComp extends Gyro {
 
   @Override
   public Rotation2d getRotation2d() {
-    return pigeon.getRotation2d();
+    return pigeon.getRotation2d().plus(Rotation2d.fromDegrees(180));
   }
 }

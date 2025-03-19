@@ -108,7 +108,15 @@ public class Swerve implements LoggedSubsystem {
     kinematics = new SwerveDriveKinematics(MODULE_LOCS);
     odo =
         new SwerveDrivePoseEstimator(
-            kinematics, gyro.getRotation2d(), getSwerveModulePoses(), new Pose2d());
+            kinematics,
+            new Rotation2d(),
+            new SwerveModulePosition[] {
+              new SwerveModulePosition(),
+              new SwerveModulePosition(),
+              new SwerveModulePosition(),
+              new SwerveModulePosition()
+            },
+            new Pose2d());
 
     f2d = new Field2d();
     SmartDashboard.putData(f2d);
@@ -256,11 +264,11 @@ public class Swerve implements LoggedSubsystem {
     return this.run(
         () ->
             runVelocities(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
+                ChassisSpeeds.fromRobotRelativeSpeeds(
                     xVelocity.getAsDouble() * MAX_LINEAR_SPEED * speedSupplier.getAsDouble(),
                     yVelocity.getAsDouble() * MAX_LINEAR_SPEED * speedSupplier.getAsDouble(),
                     omegaVelocity.getAsDouble() * MAX_ANGULAR_SPEED,
-                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
                         ? getHeading()
                         : getHeading().minus(Rotation2d.fromDegrees(180)))));
   }
@@ -321,7 +329,7 @@ public class Swerve implements LoggedSubsystem {
           poses[i].pose().estimatedPose.toPose2d(),
           poses[i].pose().timestampSeconds,
           poses[i].stdevs());
-      f2d.getObject("estimated pose " + i).setPose(poses[i].pose().estimatedPose.toPose2d());
+      // f2d.getObject("estimated pose " + i).setPose(poses[i].pose().estimatedPose.toPose2d());
     }
   }
 

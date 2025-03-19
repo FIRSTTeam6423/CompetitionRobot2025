@@ -9,8 +9,11 @@ package wmironpatriots.subsystems.vision;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import java.util.ArrayList;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
@@ -23,6 +26,9 @@ public class VisionIOComp extends Vision {
   private final PhotonCamera[] cams;
   private final PhotonPoseEstimator[] estimators;
 
+  StructPublisher<Transform3d> bah =
+      NetworkTableInstance.getDefault().getStructTopic("bashdfhsadf", Transform3d.struct).publish();
+
   public VisionIOComp() {
     cams = new PhotonCamera[CAM_CONFIGS.length];
     estimators = new PhotonPoseEstimator[CAM_CONFIGS.length];
@@ -33,6 +39,7 @@ public class VisionIOComp extends Vision {
       estimators[i] =
           new PhotonPoseEstimator(
               LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, conf.robotToCam());
+      bah.set(conf.robotToCam());
     }
   }
 

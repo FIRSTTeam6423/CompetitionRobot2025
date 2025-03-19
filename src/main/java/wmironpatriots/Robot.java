@@ -8,6 +8,8 @@ package wmironpatriots;
 
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -42,8 +44,6 @@ public class Robot extends TimedRobot implements Logged {
   private final Swerve swerve;
 
   private final Alert tuningEnabled, superstructureDisabled, browningOut;
-
-  private AlignTargets target;
 
   public Robot() {
     // * SYSTEMS INIT
@@ -89,8 +89,6 @@ public class Robot extends TimedRobot implements Logged {
     driver = new CommandXboxController(0);
     operator = new CommandXboxController(1);
 
-    SmartDashboard.putNumber("target", 0);
-
     if (Robot.isReal()) {
       swerve = new Swerve();
       vision = Optional.of(new VisionIOComp());
@@ -109,11 +107,20 @@ public class Robot extends TimedRobot implements Logged {
     swerve.setDefaultCommand(
         swerve.drive(
             () -> JoystickUtil.applyTeleopModifier(driver::getLeftY),
-            () -> JoystickUtil.applyTeleopModifier(driver::getLeftX),
+            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
             () -> JoystickUtil.applyTeleopModifier(driver::getRightX),
             () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 0.0, 1.0)));
 
-    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(() -> AlignTargets.D));
+    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(() -> AlignTargets.A));
+    driver.leftBumper().whileTrue(swerve.driveToPoseCmmd(() -> AlignTargets.B));
+
+    driver
+        .a()
+        .whileTrue(
+            Commands.run(
+                () ->
+                    swerve.resetOdo(
+                        new Pose2d(swerve.getPose().getTranslation(), new Rotation2d()))));
 
     // configures bindings only if superstructure is enabled
     superstructure.ifPresent(
@@ -146,8 +153,6 @@ public class Robot extends TimedRobot implements Logged {
     SmartDashboard.putNumber("CPU Temps", RobotController.getCPUTemp());
     SmartDashboard.putBoolean("RSL status", RobotController.getRSLState());
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-
-    target = AlignTargets.values()[(int) SmartDashboard.getNumber("target", 0)];
   }
 
   @Override

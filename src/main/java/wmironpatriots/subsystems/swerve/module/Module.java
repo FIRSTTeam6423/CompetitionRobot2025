@@ -61,7 +61,7 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.TorqueCurrent.PeakReverseTorqueCurrent = 40.0;
     conf.TorqueCurrent.TorqueNeutralDeadband = 0.0;
 
-    conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+    conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     conf.Feedback.FeedbackRemoteSensorID = cancoderID;
     conf.Feedback.SensorToMechanismRatio = PIVOT_REDUCTION;
     conf.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
@@ -72,7 +72,6 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Slot0.kV = 10;
     conf.Slot0.kS = 0.014;
 
-    conf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     conf.ClosedLoopGeneral.ContinuousWrap = true;
 
     return conf;
