@@ -15,7 +15,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Timer;
 import monologue.Annotations.Log;
 import wmironpatriots.utils.mechanismUtils.LoggedSubsystemComponent;
 
@@ -116,12 +115,6 @@ public abstract class Module extends LoggedSubsystemComponent {
   @Log public double driveCurrentAmps;
   @Log public double driveTorqueAmps;
 
-  @Log public double[] odoPivotPoseRevsQueue = new double[] {};
-  @Log public double[] odoDrivePoseMetersQueue = new double[] {};
-
-  private SwerveModuleState prevState = new SwerveModuleState();
-  private double prevTime;
-
   /**
    * Optimizes and runs desired swerve module state
    *
@@ -135,9 +128,6 @@ public abstract class Module extends LoggedSubsystemComponent {
 
     setPivotPose(setpoint.angle.getRotations());
     setDriveVel(setpoint.speedMetersPerSecond);
-
-    prevState = getModuleState();
-    prevTime = Timer.getFPGATimestamp();
 
     return setpoint;
   }
@@ -163,23 +153,6 @@ public abstract class Module extends LoggedSubsystemComponent {
    */
   public SwerveModulePosition getModulePose() {
     return new SwerveModulePosition(drivePoseMeters, getRotation2d());
-  }
-
-  /**
-   * Get all module poses since last tick
-   *
-   * @return {@link SwerveModulePosition} array of all module poses since last tick
-   */
-  public SwerveModulePosition[] getModulePoses() {
-    int minOdometryPositions =
-        Math.min(odoDrivePoseMetersQueue.length, odoPivotPoseRevsQueue.length);
-    SwerveModulePosition[] positions = new SwerveModulePosition[minOdometryPositions];
-    for (int i = 0; i < minOdometryPositions; i++) {
-      positions[i] =
-          new SwerveModulePosition(
-              odoDrivePoseMetersQueue[i], Rotation2d.fromRotations(odoPivotPoseRevsQueue[i]));
-    }
-    return positions;
   }
 
   /**

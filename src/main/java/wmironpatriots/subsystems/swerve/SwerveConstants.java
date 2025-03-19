@@ -7,6 +7,7 @@
 package wmironpatriots.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -20,6 +21,9 @@ import java.util.Optional;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+
+import com.pathplanner.lib.config.RobotConfig;
+
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.module.Module;
@@ -37,10 +41,10 @@ public class SwerveConstants {
 
   public static final Translation2d[] MODULE_LOCS =
       new Translation2d[] {
-        new Translation2d(-0.381, 0.381),
-        new Translation2d(0.381, 0.381),
-        new Translation2d(-0.381, -0.381),
-        new Translation2d(0.381, -0.381)
+        new Translation2d(-0.288661, 0.288661),
+        new Translation2d(0.288661, 0.288661),
+        new Translation2d(-0.288661, -0.288661),
+        new Translation2d(0.28866, -0.288661)
       };
 
   public static final Rotation2d ALLIANCE_ROTATION =
@@ -129,4 +133,12 @@ public class SwerveConstants {
                   // .withRobotMass(Kilograms.of(Swerve.MASS_KG))
                   .withCustomModuleTranslations(MODULE_LOCS))
           : Optional.empty();
+    
+    // Used for pathplanner lib swerve setpoint generator
+    public static final RobotConfig PP_CONFIG =
+      new RobotConfig(
+        Kilograms.of(MASS_KG), 
+        KilogramSquareMeters.of(5.053), 
+        new com.pathplanner.lib.config.ModuleConfig(Module.WHEEL_RADIUS_METERS, MAX_LINEAR_SPEED, 1.2, DCMotor.getKrakenX60Foc(1), 120, 1), 
+        MODULE_LOCS);
 }

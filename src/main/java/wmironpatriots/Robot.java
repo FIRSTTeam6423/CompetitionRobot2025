@@ -117,7 +117,7 @@ public class Robot extends TimedRobot implements Logged {
             () -> JoystickUtil.applyTeleopModifier(driver::getRightX),
             () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 0.0, 1.0)));
 
-    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(target));
+    driver.rightBumper().whileTrue(swerve.driveToPoseCmmd(target.get()));
 
     driver
         .a()

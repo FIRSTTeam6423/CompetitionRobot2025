@@ -114,8 +114,6 @@ public class ModuleIOSim extends Module {
     driveCurrentAmps = driveCurrent.getValueAsDouble();
     driveTorqueAmps = driveTorque.getValueAsDouble();
 
-    odoPivotPoseRevsQueue = pivotPoseQueue.stream().mapToDouble(sigValue -> sigValue).toArray();
-    odoDrivePoseMetersQueue = drivePoseQueue.stream().mapToDouble(sigValue -> sigValue).toArray();
     pivotPoseQueue.clear();
     drivePoseQueue.clear();
   }
