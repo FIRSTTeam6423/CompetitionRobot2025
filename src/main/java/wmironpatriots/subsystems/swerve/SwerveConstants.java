@@ -10,18 +10,16 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.Optional;
-
-import org.ironmaple.simulation.drivesims.GyroSimulation;
-import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
-import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import java.util.Optional;
+import org.ironmaple.simulation.drivesims.GyroSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import wmironpatriots.Constants.MATRIXID;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.module.Module;
@@ -37,18 +35,18 @@ public class SwerveConstants {
   public static final double RADIUS_METERS =
       Math.hypot(TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0);
   public static final Translation2d[] MODULE_LOCS =
-            new Translation2d[] {
-              new Translation2d(TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0),
-              new Translation2d(TRACK_WIDTH_METERS / 2.0, -TRACK_WIDTH_METERS / 2.0),
-              new Translation2d(-TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0),
-              new Translation2d(-TRACK_WIDTH_METERS / 2.0, -TRACK_WIDTH_METERS / 2.0),
-        };
-    //   new Translation2d[] {
-    //     new Translation2d(-0.381, 0.381),
-    //     new Translation2d(0.381, 0.381),
-    //     new Translation2d(-0.381, -0.381),
-    //     new Translation2d(0.381, -0.381)
-    //   };
+      new Translation2d[] {
+        new Translation2d(TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0),
+        new Translation2d(TRACK_WIDTH_METERS / 2.0, -TRACK_WIDTH_METERS / 2.0),
+        new Translation2d(-TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0),
+        new Translation2d(-TRACK_WIDTH_METERS / 2.0, -TRACK_WIDTH_METERS / 2.0),
+      };
+  //   new Translation2d[] {
+  //     new Translation2d(-0.381, 0.381),
+  //     new Translation2d(0.381, 0.381),
+  //     new Translation2d(-0.381, -0.381),
+  //     new Translation2d(0.381, -0.381)
+  //   };
 
   public static final Rotation2d ALLIANCE_ROTATION =
       Rotation2d.fromRotations(
@@ -57,13 +55,13 @@ public class SwerveConstants {
   public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
   public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / RADIUS_METERS;
 
-  public static final double LINEAR_P = 4.5;
+  public static final double LINEAR_P = 3.0; // 4.5;
   public static final double LINEAR_I = 0.0;
-  public static final double LINEAR_D = 0.2;
+  public static final double LINEAR_D = 0.05;
 
-  public static final double ANGULAR_P = 0.1;
+  public static final double ANGULAR_P = 4.5;
   public static final double ANGULAR_I = 0.0;
-  public static final double ANGULAR_D = 0.0;
+  public static final double ANGULAR_D = 0.05;
 
   public static final double ODO_FREQ = 250.0;
 
@@ -102,52 +100,51 @@ public class SwerveConstants {
             MATRIXID.BR_DRIVE,
             MATRIXID.BR_CANCODER,
             -0.07,
-            // 0.424, // -0.016,
             true,
             false,
             false),
       };
 
-// public static final ModuleConfig[] MODULE_CONFIGS =
-//       new ModuleConfig[] {
-//         new ModuleConfig(
-//             3,
-//             MATRIXID.BR_PIVOT,
-//             MATRIXID.BR_DRIVE,
-//             MATRIXID.BR_CANCODER,
-//             -0.07,
-//             // 0.424, // -0.016,
-//             false,
-//             true,
-//             true),
-//         new ModuleConfig(
-//             1,
-//             MATRIXID.FR_PIVOT,
-//             MATRIXID.FR_DRIVE,
-//             MATRIXID.FR_CANCODER,
-//             -0.01,
-//             false,
-//             true,
-//             true),
-//         new ModuleConfig(
-//             2,
-//             MATRIXID.BL_PIVOT,
-//             MATRIXID.BL_DRIVE,
-//             MATRIXID.BL_CANCODER,
-//             -0.36,
-//             false,
-//             true,
-//             true),
-//         new ModuleConfig(
-//             0,
-//             MATRIXID.FL_PIVOT,
-//             MATRIXID.FL_DRIVE,
-//             MATRIXID.FL_CANCODER,
-//             -0.29,
-//             false,
-//             true,
-//             true),
-//       };
+  // public static final ModuleConfig[] MODULE_CONFIGS =
+  //       new ModuleConfig[] {
+  //         new ModuleConfig(
+  //             3,
+  //             MATRIXID.BR_PIVOT,
+  //             MATRIXID.BR_DRIVE,
+  //             MATRIXID.BR_CANCODER,
+  //             -0.07,
+  //             // 0.424, // -0.016,
+  //             false,
+  //             true,
+  //             true),
+  //         new ModuleConfig(
+  //             1,
+  //             MATRIXID.FR_PIVOT,
+  //             MATRIXID.FR_DRIVE,
+  //             MATRIXID.FR_CANCODER,
+  //             -0.01,
+  //             false,
+  //             true,
+  //             true),
+  //         new ModuleConfig(
+  //             2,
+  //             MATRIXID.BL_PIVOT,
+  //             MATRIXID.BL_DRIVE,
+  //             MATRIXID.BL_CANCODER,
+  //             -0.36,
+  //             false,
+  //             true,
+  //             true),
+  //         new ModuleConfig(
+  //             0,
+  //             MATRIXID.FL_PIVOT,
+  //             MATRIXID.FL_DRIVE,
+  //             MATRIXID.FL_CANCODER,
+  //             -0.29,
+  //             false,
+  //             true,
+  //             true),
+  //       };
 
   public static final Optional<DriveTrainSimulationConfig> driveTrainSimulationConfig =
       Robot.isSimulation()

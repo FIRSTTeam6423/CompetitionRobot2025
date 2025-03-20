@@ -11,15 +11,15 @@ import static wmironpatriots.subsystems.swerve.SwerveConstants.*;
 
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
@@ -63,7 +63,8 @@ public class Swerve implements LoggedSubsystem {
   public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
   private final SwerveDrivePoseEstimator odo;
 
-  private final PIDController angularFeedback, linearFeedback, linearYFeedback;
+  private final PIDController angularFeedback;
+  private final ProfiledPIDController xLinearFeedback, yLinearFeedback;
   private final SysIdRoutine angularCharacterization, linearCharacterization, pivotCharacterization;
 
   private final Optional<SelfControlledSwerveDriveSimulation> simulation;
@@ -124,9 +125,16 @@ public class Swerve implements LoggedSubsystem {
     SmartDashboard.putData(f2d);
 
     angularFeedback = new PIDController(ANGULAR_P, ANGULAR_I, ANGULAR_D);
-    angularFeedback.enableContinuousInput(-Math.PI, Math.PI);
-    linearFeedback = new PIDController(LINEAR_P, LINEAR_I, LINEAR_D);
-    linearYFeedback = new PIDController(LINEAR_P, LINEAR_I, LINEAR_D);
+    angularFeedback.enableContinuousInput(0, 2 * Math.PI);
+    angularFeedback.setTolerance(0.0523599);
+    xLinearFeedback =
+        new ProfiledPIDController(
+            LINEAR_P, LINEAR_I, LINEAR_D, new TrapezoidProfile.Constraints(MAX_LINEAR_SPEED, 20));
+    xLinearFeedback.setTolerance(0.05);
+    yLinearFeedback =
+        new ProfiledPIDController(
+            LINEAR_P, LINEAR_I, LINEAR_D, new TrapezoidProfile.Constraints(MAX_LINEAR_SPEED, 20));
+    yLinearFeedback.setTolerance(0.05);
 
     angularCharacterization =
         new SysIdRoutine(
@@ -266,7 +274,7 @@ public class Swerve implements LoggedSubsystem {
     return this.run(
         () ->
             runVelocities(
-                ChassisSpeeds.fromRobotRelativeSpeeds(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
                     xVelocity.getAsDouble() * MAX_LINEAR_SPEED * speedSupplier.getAsDouble(),
                     yVelocity.getAsDouble() * MAX_LINEAR_SPEED * speedSupplier.getAsDouble(),
                     omegaVelocity.getAsDouble() * MAX_ANGULAR_SPEED,
@@ -295,8 +303,8 @@ public class Swerve implements LoggedSubsystem {
           Pose2d currentPose = getPose();
           var velocities =
               ChassisSpeeds.fromRobotRelativeSpeeds(
-                  linearFeedback.calculate(currentPose.getX(), desiredPose.getX()),
-                  linearYFeedback.calculate(currentPose.getY(), desiredPose.getY()),
+                  xLinearFeedback.calculate(currentPose.getX(), desiredPose.getX()),
+                  yLinearFeedback.calculate(currentPose.getY(), desiredPose.getY()),
                   angularFeedback.calculate(
                       currentPose.getRotation().getRadians(),
                       desiredPose.getRotation().getRadians()),
