@@ -27,8 +27,6 @@ import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import org.ironmaple.simulation.SimulatedArena;
-import wmironpatriots.subsystems.superstructure.Superstructure;
-import wmironpatriots.subsystems.superstructure.Superstructure.ReefLevel;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.vision.Vision;
 import wmironpatriots.subsystems.vision.VisionIOComp;
@@ -37,7 +35,7 @@ import wmironpatriots.utils.deviceUtils.JoystickUtil;
 public class Robot extends TimedRobot implements Logged {
   private final CommandXboxController driver, operator;
 
-  private final Superstructure superstructure;
+  // private final Superstructure superstructure;
   private final Optional<Vision> vision;
   private final Swerve swerve;
 
@@ -86,13 +84,13 @@ public class Robot extends TimedRobot implements Logged {
     // addPeriodic(() -> swerve.showAlignTarget(target.get()), 0.02);
     vision = Optional.of(new VisionIOComp());
     addPeriodic(() -> swerve.updateVisionEstimates(vision.get().getEstimatedPoses()), 0.02);
-    superstructure = new Superstructure(swerve);
+    // superstructure = new Superstructure(swerve);
 
     // * SETUP BINDS
     swerve.setDefaultCommand(
         swerve.drive(
-            () -> JoystickUtil.applyTeleopModifier(driver::getLeftY),
-            () -> JoystickUtil.applyTeleopModifier(driver::getLeftX),
+            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
+            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
             () -> JoystickUtil.applyTeleopModifier(driver::getRightX),
             () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 0.0, 1.0)));
 
@@ -105,7 +103,7 @@ public class Robot extends TimedRobot implements Logged {
                         new Pose2d(swerve.getPose().getTranslation(), new Rotation2d()))));
 
     // configures bindings only if superstructure is enabled
-    driver.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L4));
+    // driver.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L4));
   }
 
   /** Command for driver controller rumble */
