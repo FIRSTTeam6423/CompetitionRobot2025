@@ -59,50 +59,22 @@ public class SwerveConstants {
   public static final double LINEAR_I = 0.0;
   public static final double LINEAR_D = 0.05;
 
-  public static final double ANGULAR_P = 4.5;
+  public static final double ANGULAR_P = 0.0;
   public static final double ANGULAR_I = 0.0;
-  public static final double ANGULAR_D = 0.05;
+  public static final double ANGULAR_D = 0.0;
 
   public static final double ODO_FREQ = 250.0;
 
   public static final ModuleConfig[] MODULE_CONFIGS =
       new ModuleConfig[] {
         new ModuleConfig(
-            0,
-            MATRIXID.FL_PIVOT,
-            MATRIXID.FL_DRIVE,
-            MATRIXID.FL_CANCODER,
-            -0.29,
-            true,
-            true,
-            false),
+            0, MATRIXID.FL_PIVOT, MATRIXID.FL_DRIVE, MATRIXID.FL_CANCODER, 0.29, true, true, false),
         new ModuleConfig(
-            1,
-            MATRIXID.FR_PIVOT,
-            MATRIXID.FR_DRIVE,
-            MATRIXID.FR_CANCODER,
-            -0.01,
-            true,
-            false,
-            false),
+            1, MATRIXID.FR_PIVOT, MATRIXID.FR_DRIVE, MATRIXID.FR_CANCODER, 0.01, true, true, false),
         new ModuleConfig(
-            2,
-            MATRIXID.BL_PIVOT,
-            MATRIXID.BL_DRIVE,
-            MATRIXID.BL_CANCODER,
-            -0.36,
-            true,
-            true,
-            false),
+            2, MATRIXID.BL_PIVOT, MATRIXID.BL_DRIVE, MATRIXID.BL_CANCODER, 0.36, true, true, false),
         new ModuleConfig(
-            3,
-            MATRIXID.BR_PIVOT,
-            MATRIXID.BR_DRIVE,
-            MATRIXID.BR_CANCODER,
-            -0.07,
-            true,
-            false,
-            false),
+            3, MATRIXID.BR_PIVOT, MATRIXID.BR_DRIVE, MATRIXID.BR_CANCODER, 0.07, true, true, false),
       };
 
   // public static final ModuleConfig[] MODULE_CONFIGS =

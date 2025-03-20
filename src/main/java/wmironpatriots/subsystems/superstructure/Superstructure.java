@@ -7,8 +7,6 @@
 package wmironpatriots.subsystems.superstructure;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rectangle2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -27,11 +25,6 @@ import wmironpatriots.subsystems.swerve.Swerve;
 
 public class Superstructure {
   // * CONSTANTS
-  public static Rectangle2d LOWER_INTAKING_ZONE =
-      new Rectangle2d(new Translation2d(0.0, 0.0), new Translation2d(2.0, 1.5));
-  public static Rectangle2d HIGHER_INTAKING_ZONE =
-      new Rectangle2d(new Translation2d(0.0, 6.573), new Translation2d(2, 8.009));
-
   private final Swerve swerve;
   private final Elevator elevator;
   private final Tail tail;
@@ -39,7 +32,6 @@ public class Superstructure {
   private final Chute chute;
 
   public final Trigger disabledTrigger;
-  public final Trigger robotInIntakingZone;
 
   public Superstructure(Swerve swerve) {
     // * INIT SUBSYSTEMS
@@ -56,18 +48,10 @@ public class Superstructure {
 
     disabledTrigger = new Trigger(() -> DriverStation.isDisabled());
     Supplier<Pose2d> robotPoseSupplier = () -> swerve.getPose();
-    robotInIntakingZone =
-        new Trigger(
-            () ->
-                LOWER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation())
-                    || HIGHER_INTAKING_ZONE.contains(robotPoseSupplier.get().getTranslation()));
 
     // Turn off brake mode when disabled
     disabledTrigger.onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
     disabledTrigger.onFalse(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
-
-    // Auto intake; if robot is close to source intaking sequence should start
-    robotInIntakingZone.whileTrue(runIntakeRoutineCmmd());
   }
 
   // * DEFAULT COMMANDS

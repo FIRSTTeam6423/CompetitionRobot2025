@@ -13,8 +13,7 @@ public class Constants {
 
   /** Flags for runtime */
   public static class FLAGS {
-    public static final boolean TUNING_MODE = true;
-    public static final boolean SUPERSTRUCTURE_ENABLED = false;
+    public static final boolean TUNING_MODE = false;
   }
 
   /** static class containing all device ids */
