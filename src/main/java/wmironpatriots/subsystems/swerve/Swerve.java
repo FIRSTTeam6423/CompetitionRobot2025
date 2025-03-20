@@ -15,6 +15,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -112,14 +113,9 @@ public class Swerve implements LoggedSubsystem {
     odo =
         new SwerveDrivePoseEstimator(
             kinematics,
-            new Rotation2d(),
-            new SwerveModulePosition[] {
-              new SwerveModulePosition(),
-              new SwerveModulePosition(),
-              new SwerveModulePosition(),
-              new SwerveModulePosition()
-            },
-            new Pose2d());
+            gyro.getRotation2d(),
+            getSwerveModulePoses(),
+            new Pose2d(new Translation2d(), Rotation2d.fromRadians(0.0)));
 
     f2d = new Field2d();
     SmartDashboard.putData(f2d);
@@ -349,7 +345,7 @@ public class Swerve implements LoggedSubsystem {
    * @param pose odometry reset pose
    */
   public void resetOdo(Pose2d pose) {
-    odo.resetPose(pose);
+    odo.resetPosition(gyro.getRotation2d(), getSwerveModulePoses(), pose);
     simulation.ifPresent(
         s -> {
           s.setSimulationWorldPose(pose);
@@ -398,10 +394,6 @@ public class Swerve implements LoggedSubsystem {
    */
   public SwerveModuleState[] getSwerveModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[modules.length];
-    // states[0] = modules[3].getModuleState();
-    // states[1] = modules[1].getModuleState();
-    // states[2] = modules[2].getModuleState();
-    // states[3] = modules[0].getModuleState();
     for (int i = 0; i < 4; i++) {
       states[i] = modules[i].getModuleState();
     }
