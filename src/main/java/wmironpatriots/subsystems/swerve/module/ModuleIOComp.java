@@ -90,7 +90,7 @@ public class ModuleIOComp extends Module {
         driveCurrent,
         driveTorque);
     pivotPoseRevs = pivotPose.getValueAsDouble();
-    cancoderPoseRevs = cancoderPose.getValueAsDouble() * PIVOT_REDUCTION;
+    cancoderPoseRevs = cancoderPose.getValueAsDouble();
     pivotAppliedVolts = pivotVolts.getValueAsDouble();
     pivotCurrentAmps = pivotCurrent.getValueAsDouble();
 

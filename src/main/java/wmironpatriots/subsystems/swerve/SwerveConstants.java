@@ -34,8 +34,13 @@ public class SwerveConstants {
   public static final double TRACK_WIDTH_METERS = 0.596201754;
   public static final double RADIUS_METERS =
       Math.hypot(TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0);
-
   public static final Translation2d[] MODULE_LOCS =
+      //       new Translation2d[] {
+      //         new Translation2d(TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0),
+      //         new Translation2d(TRACK_WIDTH_METERS / 2.0, -TRACK_WIDTH_METERS / 2.0),
+      //         new Translation2d(-TRACK_WIDTH_METERS / 2.0, TRACK_WIDTH_METERS / 2.0),
+      //         new Translation2d(-TRACK_WIDTH_METERS / 2.0, -TRACK_WIDTH_METERS / 2.0),
+      //   };
       new Translation2d[] {
         new Translation2d(-0.381, 0.381),
         new Translation2d(0.381, 0.381),
@@ -52,7 +57,7 @@ public class SwerveConstants {
 
   public static final double LINEAR_P = 4.5;
   public static final double LINEAR_I = 0.0;
-  public static final double LINEAR_D = 0.0;
+  public static final double LINEAR_D = 0.2;
 
   public static final double ANGULAR_P = 0.1;
   public static final double ANGULAR_I = 0.0;
@@ -63,42 +68,42 @@ public class SwerveConstants {
   public static final ModuleConfig[] MODULE_CONFIGS =
       new ModuleConfig[] {
         new ModuleConfig(
-            0,
-            MATRIXID.FL_PIVOT,
-            MATRIXID.FL_DRIVE,
-            MATRIXID.FL_CANCODER,
-            -0.26,
-            false,
-            false,
-            true),
-        new ModuleConfig(
-            1,
-            MATRIXID.BL_PIVOT,
-            MATRIXID.BL_DRIVE,
-            MATRIXID.BL_CANCODER,
-            -0.35,
-            false,
-            false,
-            true),
-        new ModuleConfig(
-            2,
-            MATRIXID.FR_PIVOT,
-            MATRIXID.FR_DRIVE,
-            MATRIXID.FR_CANCODER,
-            -Units.degreesToRotations(6.5),
-            false,
-            false,
-            true),
-        new ModuleConfig(
             3,
             MATRIXID.BR_PIVOT,
             MATRIXID.BR_DRIVE,
             MATRIXID.BR_CANCODER,
-            // 0.0,
-            -Units.degreesToRotations(21.01), // -0.016,
+            -0.07,
+            // 0.424, // -0.016,
             false,
+            true,
+            true),
+        new ModuleConfig(
+            1,
+            MATRIXID.FR_PIVOT,
+            MATRIXID.FR_DRIVE,
+            MATRIXID.FR_CANCODER,
+            -0.01,
             false,
-            true)
+            true,
+            true),
+        new ModuleConfig(
+            2,
+            MATRIXID.BL_PIVOT,
+            MATRIXID.BL_DRIVE,
+            MATRIXID.BL_CANCODER,
+            -0.36,
+            false,
+            true,
+            true),
+        new ModuleConfig(
+            0,
+            MATRIXID.FL_PIVOT,
+            MATRIXID.FL_DRIVE,
+            MATRIXID.FL_CANCODER,
+            -0.29,
+            false,
+            true,
+            true),
       };
 
   public static final Optional<DriveTrainSimulationConfig> driveTrainSimulationConfig =

@@ -112,8 +112,8 @@ public class Robot extends TimedRobot implements Logged {
     // * SETUP BINDS
     swerve.setDefaultCommand(
         swerve.drive(
-            () -> JoystickUtil.applyTeleopModifier(driver::getLeftY),
-            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
+            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
+            () -> JoystickUtil.applyTeleopModifier(driver::getLeftX),
             () -> JoystickUtil.applyTeleopModifier(driver::getRightX),
             () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 0.0, 1.0)));
 

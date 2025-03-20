@@ -38,15 +38,16 @@ public abstract class Vision implements LoggedSubsystem {
                 new Translation3d(
                     Inches.of(-11.738802), Inches.of(-9.979009), Inches.of(18.617208)),
                 new Rotation3d(0.0, 0.506146, 2.734756))),
-        new CameraConfig(
-            "cam-san",
-            0,
-            0,
-            0,
-            new Transform3d(
-                new Translation3d(Inches.of(-11.738802), Inches.of(9.979009), Inches.of(18.617208)),
-                new Rotation3d(0.0, -0.506146, 2.734756))),
-        new CameraConfig("cam-senpai", 0, 0, 0, new Transform3d())
+        // new CameraConfig(
+        //     "cam-san",
+        //     0,
+        //     0,
+        //     0,
+        //     new Transform3d(
+        //         new Translation3d(Inches.of(-11.738802), Inches.of(9.979009),
+        // Inches.of(18.617208)),
+        //         new Rotation3d(0.0, -0.506146, 2.734756))),
+        // new CameraConfig("cam-senpai", 0, 0, 0, new Transform3d())
       };
 
   public AprilTagFieldLayout LAYOUT =

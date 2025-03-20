@@ -14,8 +14,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
@@ -292,7 +294,7 @@ public class Swerve implements LoggedSubsystem {
         () -> {
           Pose2d currentPose = getPose();
           var velocities =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
+              ChassisSpeeds.fromRobotRelativeSpeeds(
                   linearFeedback.calculate(currentPose.getX(), desiredPose.getX()),
                   linearYFeedback.calculate(currentPose.getY(), desiredPose.getY()),
                   angularFeedback.calculate(
@@ -388,7 +390,11 @@ public class Swerve implements LoggedSubsystem {
    */
   public SwerveModuleState[] getSwerveModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[modules.length];
-    for (int i = 0; i < modules.length; i++) {
+    // states[0] = modules[3].getModuleState();
+    // states[1] = modules[1].getModuleState();
+    // states[2] = modules[2].getModuleState();
+    // states[3] = modules[0].getModuleState();
+    for (int i = 0; i < 4; i++) {
       states[i] = modules[i].getModuleState();
     }
     return states;
