@@ -44,10 +44,6 @@ public class Superstructure {
 
     disabledTrigger = new Trigger(() -> DriverStation.isDisabled());
     Supplier<Pose2d> robotPoseSupplier = () -> swerve.getPose();
-
-    // Turn off brake mode when disabled
-    // disabledTrigger.onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
-    // disabledTrigger.onFalse(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
   }
 
   // * DEFAULT COMMANDS
@@ -78,13 +74,13 @@ public class Superstructure {
   }
 
   // * CORAL MANIPULATION
-  /** Automated intaking sequence; Will try to unjam if jammed */
-  public Command runIntakeRoutineCmmd() {
-    return Commands.sequence(
-            intakeCoralCmmd(),
-            outtakeCoralCmmd().andThen(intakeCoralCmmd()).onlyIf(() -> chute.isStuck()))
-        .onlyIf(() -> !tail.hasCoral());
-  }
+  // /** Automated intaking sequence; Will try to unjam if jammed */
+  // public Command runIntakeRoutineCmmd() {
+  //   return Commands.sequence(
+  //           intakeCoralCmmd(),
+  //           outtakeCoralCmmd().andThen(intakeCoralCmmd()).onlyIf(() -> chute.isStuck()))
+  //       .onlyIf(() -> !tail.hasCoral());
+  // }
 
   /** Intakes and then indexes coral if it isn't jammed in chute */
   public Command intakeCoralCmmd() {
@@ -92,7 +88,7 @@ public class Superstructure {
         .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
         .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_INTAKING))
         .until(() -> tail.hasCoral())
-        .andThen(roller.indexCoralCmmd().onlyIf(() -> tail.hasCoral()));
+        .andThen(roller.runRollerSpeedCmmd(0.2).withDeadline(new WaitUntilCommand(0.2)));
   }
 
   /** Unjams coral in intake */
@@ -104,11 +100,15 @@ public class Superstructure {
 
   /** Scores to input level */
   public Command scoreCoralCmmd(ReefLevel level) {
-    return Commands.parallel(
-        tail.runPoseCmmd(Tail.POSE_SAFTEY)
-            .until(() -> tail.nearSetpoint())
-            .andThen(tail.runPoseCmmd(level.tailPose)),
-        elevator.runPoseCmmd(level.elevatorPose).onlyWhile(() -> tail.nearSetpoint()));
+    return Commands.sequence(
+      tail.runPoseCmmd(Tail.POSE_SAFTEY).until(() -> tail.nearSetpoint()),
+      elevator.runPoseCmmd(level.elevatorPose).alongWith(tail.runPoseCmmd(level.tailPose))
+    );
+    // return Commands.parallel(
+    //     tail.runPoseCmmd(Tail.POSE_SAFTEY)
+    //         .until(() -> tail.nearSetpoint())
+    //         .andThen(tail.runPoseCmmd(level.tailPose)),
+    //     elevator.runPoseCmmd(level.elevatorPose).onlyWhile(() -> tail.nearSetpoint()));
   }
 
   // * ALGAE MANIPULATION

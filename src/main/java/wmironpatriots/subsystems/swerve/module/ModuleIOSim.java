@@ -20,10 +20,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.Angle;
-import java.util.Queue;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import wmironpatriots.Constants.MATRIXID;
-import wmironpatriots.subsystems.swerve.TalonOdoThread;
 import wmironpatriots.utils.simUtils.MaplePhoenixUtil;
 
 public class ModuleIOSim extends Module {
@@ -40,7 +38,6 @@ public class ModuleIOSim extends Module {
 
   private final BaseStatusSignal pivotPose, pivotVolts, pivotCurrent;
   private final BaseStatusSignal drivePose, driveVel, driveVolts, driveCurrent, driveTorque;
-  private final Queue<Double> pivotPoseQueue, drivePoseQueue;
 
   private final SwerveModuleSimulation simulation;
 
@@ -76,9 +73,6 @@ public class ModuleIOSim extends Module {
         100.0, pivotVolts, pivotCurrent, driveVel, driveVolts, driveCurrent, driveTorque);
     BaseStatusSignal.setUpdateFrequencyForAll(ODO_FREQ, pivotPose, drivePose);
 
-    pivotPoseQueue = TalonOdoThread.getInstance().registerSignal(pivot, pivotPose);
-    drivePoseQueue = TalonOdoThread.getInstance().registerSignal(drive, drivePose);
-
     pivot.optimizeBusUtilization(0, 0.1);
     drive.optimizeBusUtilization(0, 0.1);
 
@@ -113,11 +107,6 @@ public class ModuleIOSim extends Module {
     driveAppliedVolts = driveVolts.getValueAsDouble();
     driveCurrentAmps = driveCurrent.getValueAsDouble();
     driveTorqueAmps = driveTorque.getValueAsDouble();
-
-    odoPivotPoseRevsQueue = pivotPoseQueue.stream().mapToDouble(sigValue -> sigValue).toArray();
-    odoDrivePoseMetersQueue = drivePoseQueue.stream().mapToDouble(sigValue -> sigValue).toArray();
-    pivotPoseQueue.clear();
-    drivePoseQueue.clear();
   }
 
   @Override

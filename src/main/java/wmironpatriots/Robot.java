@@ -25,10 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
-import java.util.function.Supplier;
 import monologue.Logged;
-import monologue.Monologue;
-import org.ironmaple.simulation.SimulatedArena;
 import wmironpatriots.subsystems.climb.Climb;
 import wmironpatriots.subsystems.climb.ClimbIOComp;
 import wmironpatriots.subsystems.superstructure.Superstructure;
@@ -55,7 +52,6 @@ public class Robot extends TimedRobot implements Logged {
   private final Alert browningOut;
 
   private int side, branch;
-  private Supplier<AlignTargets> target;
 
   Timer gcTimer = new Timer();
 
@@ -103,10 +99,18 @@ public class Robot extends TimedRobot implements Logged {
     branch = 0;
 
     swerve = new Swerve();
-    addPeriodic(() -> swerve.showAlignTarget(() -> AlignTargets.L), 0.02);
     climb = new ClimbIOComp();
     vision = Optional.of(new VisionIOComp());
-    addPeriodic(() -> swerve.updateVisionEstimates(vision.get().getEstimatedPoses()), 0.02);
+    addPeriodic(
+        () -> {
+          swerve.updateVisionEstimates(vision.get().getEstimatedPoses());
+        },
+        0.02);
+    addPeriodic(
+        () -> {
+          swerve.setAlignTarget(getTarget());
+        },
+        0.1);
     superstructure =
         new Superstructure(
             swerve, new ElevatorIOComp(), new TailIOComp(), new RollerIOComp(), new ChuteIOComp());
@@ -130,9 +134,8 @@ public class Robot extends TimedRobot implements Logged {
 
     driver.leftTrigger(0.3).whileTrue(climb.runClimb(-8));
     driver.b().whileTrue(climb.runClimb(8));
+    driver.rightTrigger(0.3).whileTrue(swerve.driveToPoseCmmd());
     // driver.rightTrigger(0.3).whileTrue(swerve.driveToPoseCmmd(target));
-    driver.rightTrigger(0.3).whileTrue(swerve.driveToPoseCmmd(() -> AlignTargets.E));
-    driver.x().whileTrue(swerve.driveToPoseCmmd(() -> AlignTargets.F));
     driver.rightBumper().whileTrue(superstructure.score());
 
     // driver.y().whileTrue(swerve.driveToPoseCmmd(() -> Swerve.AlignTargets.A));
@@ -182,9 +185,6 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    if (Robot.isSimulation()) SimulatedArena.getInstance().simulationPeriodic();
-
-    Monologue.updateAll();
 
     SmartDashboard.putNumber("Battery Volts", RobotController.getBatteryVoltage());
     SmartDashboard.putBoolean("Brownout?", RobotController.isBrownedOut());

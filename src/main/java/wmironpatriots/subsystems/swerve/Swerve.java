@@ -34,12 +34,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -60,8 +55,6 @@ public class Swerve implements LoggedSubsystem {
 
   private final SwerveDriveKinematics kinematics;
 
-  public static final Lock odoLock = new ReentrantLock();
-  public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
   private final SwerveDrivePoseEstimator odo;
 
   private final PIDController angularFeedback;
@@ -79,6 +72,8 @@ public class Swerve implements LoggedSubsystem {
       NetworkTableInstance.getDefault()
           .getStructArrayTopic("setpoints", SwerveModuleState.struct)
           .publish();
+
+  private AlignTargets alignTarget = AlignTargets.A;
 
   public Swerve() {
     // * INIT HARDWARE
@@ -226,6 +221,7 @@ public class Swerve implements LoggedSubsystem {
     swervePublisher.set(getSwerveModuleStates());
 
     SmartDashboard.putNumber("Speed MPS", getSpeedMPS());
+    f2d.getObject("target").setPose(alignTarget.pose);
 
     for (Module module : modules) {
       module.periodic();
@@ -239,6 +235,10 @@ public class Swerve implements LoggedSubsystem {
   @Override
   public void simulationPeriodic() {
     simulation.get().periodic();
+  }
+
+  public Command setAlignTarget(AlignTargets target) {
+    return this.runOnce(() -> this.alignTarget = target);
   }
 
   /**
@@ -285,23 +285,15 @@ public class Swerve implements LoggedSubsystem {
   }
 
   /**
-   * Drives to scoring target
-   *
-   * @param targetSupplier scoring target supplier
-   */
-  public Command driveToPoseCmmd(Supplier<AlignTargets> targetSupplier) {
-    return driveToPoseCmmd(targetSupplier.get().pose);
-  }
-
-  /**
    * Drives to desired pose using feedback controllers
    *
    * @param desiredPose Desired pose
    */
-  public Command driveToPoseCmmd(Pose2d desiredPose) {
+  public Command driveToPoseCmmd() {
     return this.run(
         () -> {
           var currentPose = getPose();
+          var desiredPose = alignTarget.pose;
           var velocities =
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   xLinearFeedback.calculate(currentPose.getX(), desiredPose.getX()),
@@ -416,17 +408,6 @@ public class Swerve implements LoggedSubsystem {
     return poses;
   }
 
-  public void showAlignTarget(Supplier<AlignTargets> target) {
-    f2d.getObject("target").setPose(target.get().pose);
-  }
-
-  // ! This might be stupid as hell lol
-  public static double allianceAddition(double value) {
-    return DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red
-        ? Units.inchesToMeters(689.938458) - value
-        : value;
-  }
-
   /**
    * Calculates reef align pose based on two values
    *
@@ -485,56 +466,4 @@ public class Swerve implements LoggedSubsystem {
       this.pose = pose;
     }
   }
-
-  // /** A cursed static enum containing all score target poses */
-  // public static enum ScoreTargets {
-  //   A(
-  //       new Pose2d(
-  //           allianceAddition(3.23172676579), 4.20105441609,
-  // Rotation2d.fromRadians(3.14159265359))),
-  //   B(
-  //       new Pose2d(
-  //           allianceAddition(3.23172676579), 3.85076168754,
-  // Rotation2d.fromRadians(3.14159265359))),
-  //   C(
-  //       new Pose2d(
-  //           allianceAddition(3.71526168421), 3.0132546416,
-  // Rotation2d.fromRadians(4.18879020479))),
-  //   D(
-  //       new Pose2d(
-  //           allianceAddition(4.0186240859), 2.83810827733,
-  // Rotation2d.fromRadians(4.18879020479))),
-  //   E(
-  //       new Pose2d(
-  //           allianceAddition(4.98569392274), 2.83810827733,
-  // Rotation2d.fromRadians(5.23598775598))),
-  //   F(
-  //       new Pose2d(
-  //           allianceAddition(5.28905632442), 3.0132546416,
-  // Rotation2d.fromRadians(5.23598775598))),
-  //   G(new Pose2d(allianceAddition(5.77259124284), 3.85076168754, Rotation2d.fromRadians(0))),
-  //   H(new Pose2d(allianceAddition(5.77259124284), 4.20105441609, Rotation2d.fromRadians(0))),
-  //   I(
-  //       new Pose2d(
-  //           allianceAddition(5.28905632442), 5.03856146203,
-  // Rotation2d.fromRadians(1.0471975512))),
-  //   J(
-  //       new Pose2d(
-  //           allianceAddition(4.98569392274), 5.2137078263,
-  // Rotation2d.fromRadians(1.0471975512))),
-  //   K(
-  //       new Pose2d(
-  //           allianceAddition(4.0186240859), 5.2137078263,
-  // Rotation2d.fromRadians(2.09439510239))),
-  //   L(
-  //       new Pose2d(
-  //           allianceAddition(3.71526168421), 5.03856146203,
-  // Rotation2d.fromRadians(2.09439510239)));
-
-  //   private Pose2d pose;
-
-  //   private ScoreTargets(Pose2d pose) {
-  //     this.pose = pose;
-  //   }
-  // }
 }
