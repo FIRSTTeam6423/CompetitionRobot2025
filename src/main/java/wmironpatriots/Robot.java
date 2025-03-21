@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
 import monologue.Logged;
+import wmironpatriots.commands.Autonomous;
 import wmironpatriots.subsystems.climb.Climb;
 import wmironpatriots.subsystems.climb.ClimbIOComp;
 import wmironpatriots.subsystems.superstructure.Superstructure;
@@ -54,6 +56,8 @@ public class Robot extends TimedRobot implements Logged {
   private int side, branch;
 
   Timer gcTimer = new Timer();
+
+  private final SendableChooser<Command> autons;
 
   public Robot() {
     // * SYSTEMS INIT
@@ -117,6 +121,8 @@ public class Robot extends TimedRobot implements Logged {
 
     climb.setDefaultCommand(climb.runClimb(0));
 
+    autons = Autonomous.configureAutons(swerve, superstructure);
+
     // * SETUP BINDS
     swerve.setDefaultCommand(
         swerve.drive(
@@ -156,6 +162,9 @@ public class Robot extends TimedRobot implements Logged {
     operatorDos.L2().onTrue(setbah(side, 1));
 
     gcTimer.start();
+
+    var autonomous = new Trigger(DriverStation::isAutonomous);
+    autonomous.whileTrue(Commands.deferredProxy(autons::getSelected));
   }
 
   public Command setbah(int side, int other) {

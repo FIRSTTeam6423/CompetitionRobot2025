@@ -9,21 +9,25 @@ package wmironpatriots.commands;
 import static wmironpatriots.subsystems.swerve.SwerveConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import wmironpatriots.Constants;
+import wmironpatriots.subsystems.superstructure.Superstructure;
+import wmironpatriots.subsystems.superstructure.Superstructure.ReefLevel;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.swerve.module.Module;
 
 public class Autonomous {
-  public static SendableChooser<Command> configureAutons(Swerve swerve) {
+  public static SendableChooser<Command> configureAutons(Swerve swerve, Superstructure soup) {
     RobotConfig robotConfig =
         new RobotConfig(
             MASS_KG,
@@ -41,18 +45,16 @@ public class Autonomous {
         swerve::getPose,
         swerve::resetOdo,
         swerve::getCurrentVelocities,
-        swerve::runVelocities,
+        s -> swerve.runVelocities(s),
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0, 0), new PIDConstants(5.0, 0, 0), Constants.TICK_SPEED),
         robotConfig,
-        () -> {
-          var alliance = DriverStation.getAlliance();
-          if (alliance.isPresent()) {
-            return alliance.get() == DriverStation.Alliance.Red;
-          }
-          return false;
-        },
+        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         swerve);
+
+    NamedCommands.registerCommand("Intake", soup.intakeCoralCmmd());
+    NamedCommands.registerCommand(
+        "L4", soup.scoreCoralCmmd(ReefLevel.L4).withDeadline(soup.score().withTimeout(1)));
 
     SendableChooser<Command> choser = AutoBuilder.buildAutoChooser();
     choser.addOption("play dead", Commands.none());

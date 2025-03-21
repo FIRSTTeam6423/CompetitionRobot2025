@@ -59,7 +59,8 @@ public class Superstructure {
   public Command defaultTailCmmd() {
     return Commands.sequence(
         tail.runCurrentZeroingCmmd().onlyIf(() -> !tail.isZeroed),
-        new WaitUntilCommand(() -> elevator.poseRevs <= Elevator.POSE_COLLISION),
+        tail.runPoseCmmd(0.0)
+            .withDeadline(new WaitUntilCommand(() -> elevator.poseRevs <= Elevator.POSE_COLLISION)),
         tail.runPoseCmmd(Tail.POSE_STOWED).until(() -> tail.nearSetpoint()));
   }
 
@@ -101,9 +102,8 @@ public class Superstructure {
   /** Scores to input level */
   public Command scoreCoralCmmd(ReefLevel level) {
     return Commands.sequence(
-      tail.runPoseCmmd(Tail.POSE_SAFTEY).until(() -> tail.nearSetpoint()),
-      elevator.runPoseCmmd(level.elevatorPose).alongWith(tail.runPoseCmmd(level.tailPose))
-    );
+        tail.runPoseCmmd(Tail.POSE_SAFTEY).until(() -> tail.nearSetpoint()),
+        elevator.runPoseCmmd(level.elevatorPose).alongWith(tail.runPoseCmmd(level.tailPose)));
     // return Commands.parallel(
     //     tail.runPoseCmmd(Tail.POSE_SAFTEY)
     //         .until(() -> tail.nearSetpoint())
