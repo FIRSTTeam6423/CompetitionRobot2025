@@ -289,7 +289,7 @@ public class Swerve implements LoggedSubsystem {
    *
    * @param desiredPose Desired pose
    */
-  public Command driveToPoseCmmd() {
+  public Command driveToPoseCmmd(DoubleSupplier omegaVelocity) {
     return this.run(
         () -> {
           var currentPose = getPose();
@@ -298,9 +298,10 @@ public class Swerve implements LoggedSubsystem {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   xLinearFeedback.calculate(currentPose.getX(), desiredPose.getX()),
                   yLinearFeedback.calculate(currentPose.getY(), desiredPose.getY()),
-                  angularFeedback.calculate(
-                      currentPose.getRotation().getRadians(),
-                      desiredPose.getRotation().getRadians()),
+                  omegaVelocity.getAsDouble() * MAX_ANGULAR_SPEED,
+                  // angularFeedback.calculate(
+                  //     currentPose.getRotation().getRadians(),
+                  //     desiredPose.getRotation().getRadians()),
                   getHeading());
           runVelocities(velocities);
         });

@@ -139,7 +139,10 @@ public class Robot extends TimedRobot implements Logged {
                         new Pose2d(swerve.getPose().getTranslation(), new Rotation2d()))));
 
     driver.leftTrigger(0.3).whileTrue(climb.runClimb(-8));
-    driver.b().whileTrue(swerve.driveToPoseCmmd());
+    driver
+        .b()
+        .whileTrue(
+            swerve.driveToPoseCmmd(() -> -JoystickUtil.applyTeleopModifier(driver::getRightX)));
     driver.rightBumper().whileTrue(superstructure.score());
 
     // driver.y().whileTrue(swerve.driveToPoseCmmd(() -> Swerve.AlignTargets.A));
