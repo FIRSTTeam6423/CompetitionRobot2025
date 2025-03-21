@@ -133,9 +133,7 @@ public class Robot extends TimedRobot implements Logged {
                         new Pose2d(swerve.getPose().getTranslation(), new Rotation2d()))));
 
     driver.leftTrigger(0.3).whileTrue(climb.runClimb(-8));
-    driver.b().whileTrue(climb.runClimb(8));
-    driver.rightTrigger(0.3).whileTrue(swerve.driveToPoseCmmd());
-    // driver.rightTrigger(0.3).whileTrue(swerve.driveToPoseCmmd(target));
+    driver.b().whileTrue(swerve.driveToPoseCmmd());
     driver.rightBumper().whileTrue(superstructure.score());
 
     // driver.y().whileTrue(swerve.driveToPoseCmmd(() -> Swerve.AlignTargets.A));
