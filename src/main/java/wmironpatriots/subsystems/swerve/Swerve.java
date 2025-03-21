@@ -114,7 +114,12 @@ public class Swerve implements LoggedSubsystem {
         new SwerveDrivePoseEstimator(
             kinematics,
             gyro.getRotation2d(),
-            getSwerveModulePoses(),
+            new SwerveModulePosition[] {
+              new SwerveModulePosition(0.0, new Rotation2d()),
+              new SwerveModulePosition(0.0, new Rotation2d()),
+              new SwerveModulePosition(0.0, new Rotation2d()),
+              new SwerveModulePosition(0.0, new Rotation2d()),
+            },
             new Pose2d(new Translation2d(), Rotation2d.fromRadians(0.0)));
 
     f2d = new Field2d();
@@ -296,9 +301,9 @@ public class Swerve implements LoggedSubsystem {
   public Command driveToPoseCmmd(Pose2d desiredPose) {
     return this.run(
         () -> {
-          Pose2d currentPose = getPose();
+          var currentPose = getPose();
           var velocities =
-              ChassisSpeeds.fromRobotRelativeSpeeds(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
                   xLinearFeedback.calculate(currentPose.getX(), desiredPose.getX()),
                   yLinearFeedback.calculate(currentPose.getY(), desiredPose.getY()),
                   angularFeedback.calculate(
@@ -411,8 +416,8 @@ public class Swerve implements LoggedSubsystem {
     return poses;
   }
 
-  public void showAlignTarget(AlignTargets target) {
-    f2d.getObject("target").setPose(target.pose);
+  public void showAlignTarget(Supplier<AlignTargets> target) {
+    f2d.getObject("target").setPose(target.get().pose);
   }
 
   // ! This might be stupid as hell lol
@@ -436,13 +441,25 @@ public class Swerve implements LoggedSubsystem {
       a = 0;
     }
 
-    if (!(b >= -1 || b <= 1)) {
-      b = 0;
+    if (b != -1 && b != 1) {
+      b = 1;
     }
-
-    double x = ((50.49 * Math.cos(((a * Math.PI) / 3) + (0.137 * b))) + 177.25) / 39.37;
-    double y = ((50.49 * Math.sin(((a * Math.PI) / 3) + (0.137 * b))) + 158.50) / 39.37;
+    double angle = 0.137 - 1 * 0.0175;
+    // - 4 * 0.0175;
+    double x = ((50.49 * Math.cos(((a * Math.PI) / 3) + (angle * b))) + 177.25) / 39.37;
+    double y = ((50.49 * Math.sin(((a * Math.PI) / 3) + (angle * b))) + 158.50) / 39.37;
     double theta = (a * Math.PI) / 3;
+
+    x =
+        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+            ? (Units.inchesToMeters(689.751) - x)
+            : x;
+    y =
+        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+            ? (Units.inchesToMeters(317.5) - y)
+            : y;
+    theta =
+        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ? theta + Math.PI : theta;
 
     return new Pose2d(x, y, Rotation2d.fromRadians(theta));
   }

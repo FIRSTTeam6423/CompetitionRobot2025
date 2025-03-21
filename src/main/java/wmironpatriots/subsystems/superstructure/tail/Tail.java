@@ -7,10 +7,11 @@
 package wmironpatriots.subsystems.superstructure.tail;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Annotations.Log;
-import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
+import monologue.Logged;
 
-public abstract class Tail implements LoggedSubsystem {
+public abstract class Tail implements Logged, Subsystem {
   // * CONSTANTS
   // Mech constants
   public static final double MASS_KG = 0.0;
@@ -21,9 +22,9 @@ public abstract class Tail implements LoggedSubsystem {
   public static final double POSE_MAX = 10;
   public static final double POSE_MIN = 8.2;
   public static final double POSE_SAFTEY =
-      4.5; // The position where the tail is safe from the top of 1st stage
+      5.37; // The position where the tail is safe from the top of 1st stage
 
-  public static final double POSE_L1 = 5.56;
+  public static final double POSE_L1 = 10;
   public static final double POSE_L2 = (20 * 5 / 36); // 5;
   public static final double POSE_L3 = 3.95; // (20 * 5 / 36); // 5.56
   public static final double POSE_L4 = (30 * 5 / 36); // 4;
@@ -96,7 +97,7 @@ public abstract class Tail implements LoggedSubsystem {
    * @return true if in range false if not
    */
   public boolean nearSetpoint() {
-    return Math.abs(targetPoseRevs - poseRevs) > 0.6;
+    return Math.abs(targetPoseRevs - poseRevs) > 0.1;
   }
 
   /**

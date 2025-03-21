@@ -67,7 +67,7 @@ public abstract class Module extends LoggedSubsystemComponent {
     conf.Feedback.FeedbackRemoteSensorID = cancoderID;
     conf.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
 
-    conf.Slot0.kP = 430.0;
+    conf.Slot0.kP = 600.0;
     conf.Slot0.kD = 50.0;
     conf.Slot0.kA = 0.0;
     conf.Slot0.kV = 10;

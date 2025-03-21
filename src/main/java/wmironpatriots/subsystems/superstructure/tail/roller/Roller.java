@@ -7,13 +7,14 @@
 package wmironpatriots.subsystems.superstructure.tail.roller;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Annotations.Log;
-import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
+import monologue.Logged;
 
-public abstract class Roller implements LoggedSubsystem {
+public abstract class Roller implements Logged, Subsystem {
   // * CONSTANTS
-  public static final double SPEED_INTAKING = 2;
-  public static final double SPEED_OUTAKING = -1;
+  public static final double SPEED_INTAKING = 1.5;
+  public static final double SPEED_OUTAKING = -1.5;
   public static final double SPEED_SCORING = 2.5;
 
   // * LOGGED VALUES
@@ -37,7 +38,7 @@ public abstract class Roller implements LoggedSubsystem {
    * @return run roller speed command
    */
   public Command runRollerSpeedCmmd(double speed) {
-    return this.run(() -> setRollerSpeed(speed));
+    return this.run(() -> setRollerVolts(speed));
   }
 
   /**

@@ -14,13 +14,9 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.Supplier;
 import wmironpatriots.subsystems.superstructure.chute.Chute;
-import wmironpatriots.subsystems.superstructure.chute.ChuteIOComp;
 import wmironpatriots.subsystems.superstructure.elevator.Elevator;
-import wmironpatriots.subsystems.superstructure.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.superstructure.tail.Tail;
-import wmironpatriots.subsystems.superstructure.tail.TailIOComp;
 import wmironpatriots.subsystems.superstructure.tail.roller.Roller;
-import wmironpatriots.subsystems.superstructure.tail.roller.RollerIOComp;
 import wmironpatriots.subsystems.swerve.Swerve;
 
 public class Superstructure {
@@ -33,13 +29,13 @@ public class Superstructure {
 
   public final Trigger disabledTrigger;
 
-  public Superstructure(Swerve swerve) {
+  public Superstructure(Swerve swerve, Elevator elevator, Tail tail, Roller roller, Chute chute) {
     // * INIT SUBSYSTEMS
     this.swerve = swerve;
-    elevator = new ElevatorIOComp();
-    tail = new TailIOComp();
-    roller = new RollerIOComp();
-    chute = new ChuteIOComp();
+    this.elevator = elevator;
+    this.tail = tail;
+    this.roller = roller;
+    this.chute = chute;
 
     elevator.setDefaultCommand(defaultElevatorCmmd());
     tail.setDefaultCommand(defaultTailCmmd());
@@ -50,8 +46,8 @@ public class Superstructure {
     Supplier<Pose2d> robotPoseSupplier = () -> swerve.getPose();
 
     // Turn off brake mode when disabled
-    disabledTrigger.onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
-    disabledTrigger.onFalse(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
+    // disabledTrigger.onTrue(tail.setCoasting(true).alongWith(elevator.setCoasting(true)));
+    // disabledTrigger.onFalse(tail.setCoasting(false).alongWith(elevator.setCoasting(false)));
   }
 
   // * DEFAULT COMMANDS
@@ -59,7 +55,7 @@ public class Superstructure {
   public Command defaultElevatorCmmd() {
     return Commands.sequence(
         elevator.runCurrentZeroingCmmd().onlyIf(() -> !elevator.isZeroed),
-        elevator.runPoseCmmd(2).until(() -> elevator.poseRevs <= elevator.targetPoseRevs),
+        elevator.runPoseCmmd(2).until(() -> elevator.poseRevs - 0.2 <= elevator.targetPoseRevs),
         elevator.stopElevatorCmmd());
   }
 
@@ -95,7 +91,7 @@ public class Superstructure {
     return chute
         .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
         .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_INTAKING))
-        .until(() -> tail.hasCoral() || chute.isStuck())
+        .until(() -> tail.hasCoral())
         .andThen(roller.indexCoralCmmd().onlyIf(() -> tail.hasCoral()));
   }
 
@@ -103,21 +99,16 @@ public class Superstructure {
   public Command outtakeCoralCmmd() {
     return chute
         .runChuteSpeedCmmd(Chute.SPEED_OUTAKING)
-        .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING))
-        .onlyIf(() -> tail.hasCoral());
+        .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING));
   }
 
   /** Scores to input level */
   public Command scoreCoralCmmd(ReefLevel level) {
     return Commands.parallel(
-            tail.runPoseCmmd(Tail.POSE_MAX)
-                .until(() -> tailSafe())
-                .andThen(tail.runPoseCmmd(level.tailPose)),
-            roller
-                .runRollerSpeedCmmd(Roller.SPEED_SCORING)
-                .onlyWhile(() -> tail.nearSetpoint() && elevator.nearSetpoint()),
-            elevator.runPoseCmmd(level.elevatorPose).onlyWhile(() -> tailDeployed()))
-        .onlyIf(() -> tail.hasCoral());
+        tail.runPoseCmmd(Tail.POSE_SAFTEY)
+            .until(() -> tail.nearSetpoint())
+            .andThen(tail.runPoseCmmd(level.tailPose)),
+        elevator.runPoseCmmd(level.elevatorPose).onlyWhile(() -> tail.nearSetpoint()));
   }
 
   // * ALGAE MANIPULATION
@@ -131,6 +122,10 @@ public class Superstructure {
         .onlyIf(() -> !tail.hasCoral());
   }
 
+  public Command score() {
+    return roller.runRollerSpeedCmmd(Roller.SPEED_SCORING);
+  }
+
   /** Runs roller to score algae */
   public Command scoreAlgaeCmmd() {
     return roller.runRollerSpeedCmmd(Roller.SPEED_SCORING);
@@ -139,6 +134,7 @@ public class Superstructure {
   // * SAFETY CONSTRAINTS
   /** Checks if tail is safe from collision */
   private boolean tailSafe() {
+    if (elevator.targetPoseRevs < Elevator.POSE_COLLISION) return true;
     var displacement = tail.targetPoseRevs - tail.poseRevs;
     return displacement > 0
         ? elevator.poseRevs >= Elevator.POSE_COLLISION

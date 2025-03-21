@@ -7,10 +7,11 @@
 package wmironpatriots.subsystems.superstructure.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Annotations.Log;
-import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
+import monologue.Logged;
 
-public abstract class Elevator implements LoggedSubsystem {
+public abstract class Elevator implements Logged, Subsystem {
   // * CONSTANTS
   // Mech constants
   public static final double MASS_KG = 5.6 + 1.8;
@@ -19,7 +20,7 @@ public abstract class Elevator implements LoggedSubsystem {
   // Poses
   public static final double POSE_STOWED = 0.0;
   public static final double POSE_COLLISION =
-      8.2; // Position where top of tail will collide with top of first stage when stowed
+      4.18; // Position where top of tail will collide with top of first stage when stowed
   public static final double POSE_INTAKE = 0.0;
   public static final double POSE_ALGAE_L = 5.4;
   public static final double POSE_ALGAE_H = 9.7;

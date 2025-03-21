@@ -12,11 +12,13 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ChuteIOComp extends Chute {
   private final SparkMax roller;
   private final SparkMaxConfig rollerConfig;
+  private final Servo lock;
 
   public ChuteIOComp() {
     roller = new SparkMax(3, MotorType.kBrushless);
@@ -24,6 +26,9 @@ public class ChuteIOComp extends Chute {
     rollerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40);
 
     roller.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    lock = new Servo(1);
+    lock.setAngle(10);
   }
 
   @Override
@@ -38,6 +43,14 @@ public class ChuteIOComp extends Chute {
     return this.run(
         () -> {
           roller.set(speed);
+        });
+  }
+
+  @Override
+  public Command deployChute() {
+    return this.run(
+        () -> {
+          lock.set(0);
         });
   }
 }

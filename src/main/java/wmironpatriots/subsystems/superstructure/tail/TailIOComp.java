@@ -66,7 +66,7 @@ public class TailIOComp extends Tail {
     reqVolts = new VoltageOut(0.0).withEnableFOC(true);
     reqPose = new PositionVoltage(0.0).withEnableFOC(true);
 
-    beam = new DigitalInput(1);
+    beam = new DigitalInput(3);
   }
 
   @Override
@@ -79,6 +79,8 @@ public class TailIOComp extends Tail {
     currentAmps = current.getValueAsDouble();
 
     beamTriggered = !beam.get();
+
+    System.out.println(beam.get());
   }
 
   @Override

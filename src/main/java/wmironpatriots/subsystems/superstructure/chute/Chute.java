@@ -7,10 +7,11 @@
 package wmironpatriots.subsystems.superstructure.chute;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Annotations.Log;
-import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
+import monologue.Logged;
 
-public abstract class Chute implements LoggedSubsystem {
+public abstract class Chute implements Logged, Subsystem {
   @Log protected double appliedVolts;
   @Log protected double speedRPM;
   @Log protected double currentAmps;
@@ -19,8 +20,15 @@ public abstract class Chute implements LoggedSubsystem {
   public static final double SPEED_OUTAKING = 0.1;
   public static final double STUCK_CURRENT = 15.0;
 
+  @Override
+  public void periodic() {}
+
   /** Runs chute at specific speed */
   public Command runChuteSpeedCmmd(double speed) {
+    return this.run(() -> {});
+  }
+
+  public Command deployChute() {
     return this.run(() -> {});
   }
 

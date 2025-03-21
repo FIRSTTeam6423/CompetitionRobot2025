@@ -134,38 +134,10 @@
     {
       "name": "Tesla mode",
       "grid_layout": {
-        "layouts": [
-          {
-            "title": "PathPlanner",
-            "x": 900.0,
-            "y": 130.0,
-            "width": 270.0,
-            "height": 260.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "vel",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 130.0,
-                "height": 130.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/PathPlanner/vel",
-                  "period": 0.06,
-                  "data_type": "double[]",
-                  "show_submit_button": false
-                }
-              }
-            ]
-          }
-        ],
+        "layouts": [],
         "containers": [
           {
-            "title": "Field",
+            "title": "where's waldo?",
             "x": 0.0,
             "y": 0.0,
             "width": 900.0,
@@ -185,7 +157,7 @@
             }
           },
           {
-            "title": "SendableChooser[0]",
+            "title": "Pick me girl",
             "x": 900.0,
             "y": 0.0,
             "width": 270.0,
@@ -195,18 +167,6 @@
               "topic": "/SmartDashboard/SendableChooser[0]",
               "period": 0.06,
               "sort_options": false
-            }
-          },
-          {
-            "title": "PathPlanner",
-            "x": 1170.0,
-            "y": 0.0,
-            "width": 260.0,
-            "height": 390.0,
-            "type": "Alerts",
-            "properties": {
-              "topic": "/SmartDashboard/PathPlanner",
-              "period": 0.06
             }
           }
         ]
