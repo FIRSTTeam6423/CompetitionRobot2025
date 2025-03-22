@@ -52,7 +52,7 @@ public class SwerveConstants {
       Rotation2d.fromRotations(
           DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
 
-  public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.25);
+  public static final double MAX_LINEAR_SPEED = Units.feetToMeters(18);
   public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / RADIUS_METERS;
 
   public static final double LINEAR_P = 3.0; // 4.5;
@@ -68,13 +68,27 @@ public class SwerveConstants {
   public static final ModuleConfig[] MODULE_CONFIGS =
       new ModuleConfig[] {
         new ModuleConfig(
-            0, MATRIXID.FL_PIVOT, MATRIXID.FL_DRIVE, MATRIXID.FL_CANCODER, 0.29, true, true, false),
+            0,
+            MATRIXID.FL_PIVOT,
+            MATRIXID.FL_DRIVE,
+            MATRIXID.FL_CANCODER,
+            -0.16,
+            true,
+            false,
+            false),
         new ModuleConfig(
             1, MATRIXID.FR_PIVOT, MATRIXID.FR_DRIVE, MATRIXID.FR_CANCODER, 0.01, true, true, false),
         new ModuleConfig(
             2, MATRIXID.BL_PIVOT, MATRIXID.BL_DRIVE, MATRIXID.BL_CANCODER, 0.36, true, true, false),
         new ModuleConfig(
-            3, MATRIXID.BR_PIVOT, MATRIXID.BR_DRIVE, MATRIXID.BR_CANCODER, 0.07, true, true, false),
+            3,
+            MATRIXID.BR_PIVOT,
+            MATRIXID.BR_DRIVE,
+            MATRIXID.BR_CANCODER,
+            -0.26,
+            true,
+            true,
+            false),
       };
 
   // public static final ModuleConfig[] MODULE_CONFIGS =

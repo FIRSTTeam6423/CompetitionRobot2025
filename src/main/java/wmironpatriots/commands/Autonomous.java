@@ -34,6 +34,7 @@ public class Autonomous {
     //             120.0,
     //             1),
     //         MODULE_LOCS);
+
     RobotConfig config = null;
     try {
       config = RobotConfig.fromGUISettings();
