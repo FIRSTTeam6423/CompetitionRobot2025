@@ -23,7 +23,7 @@ public abstract class Tail implements Logged, Subsystem {
   public static final double POSE_MAX = 10;
   public static final double POSE_MIN = 8.2;
   public static final double POSE_SAFTEY =
-      6.8; // The position where the tail is safe from the top of 1st stage
+      7.2; // The position where the tail is safe from the top of 1st stage
 
   public static final double POSE_L1 = 10;
   public static final double POSE_L2 = (20 * 5 / 36); // 5;

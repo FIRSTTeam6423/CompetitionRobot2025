@@ -52,7 +52,7 @@ public class SwerveConstants {
       Rotation2d.fromRotations(
           DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 0 : 0.5);
 
-  public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
+  public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.25);
   public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / RADIUS_METERS;
 
   public static final double LINEAR_P = 3.0; // 4.5;

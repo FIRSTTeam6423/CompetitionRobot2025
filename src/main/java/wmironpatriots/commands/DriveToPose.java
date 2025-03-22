@@ -45,9 +45,9 @@ public class DriveToPose extends Command {
   // }
 
   public static final double LINEAR_P = 0.8;
-  public static final double LINEAR_D = 0.8;
-  public static final double ANGULAR_P = 0.8;
-  public static final double ANGULAR_D = 0.8;
+  public static final double LINEAR_D = 0.0;
+  public static final double ANGULAR_P = 0.3;
+  public static final double ANGULAR_D = 0.0;
 
   public static final double MAX_VEL = 3.8;
   public static final double MAX_ACCEL = 3.0;

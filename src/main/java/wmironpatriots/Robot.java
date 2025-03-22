@@ -7,7 +7,6 @@
 package wmironpatriots;
 
 import com.ctre.phoenix6.SignalLogger;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
@@ -28,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
 import monologue.Logged;
 import wmironpatriots.commands.Autonomous;
+import wmironpatriots.commands.DriveToPose;
 import wmironpatriots.subsystems.climb.Climb;
 import wmironpatriots.subsystems.climb.ClimbIOComp;
 import wmironpatriots.subsystems.superstructure.Superstructure;
@@ -60,6 +60,8 @@ public class Robot extends TimedRobot implements Logged {
   private final SendableChooser<Command> autons;
 
   Command auton;
+
+  private Command goTo;
 
   public Robot() {
     // * SYSTEMS INIT
@@ -116,6 +118,8 @@ public class Robot extends TimedRobot implements Logged {
         new Superstructure(
             swerve, new ElevatorIOComp(), new TailIOComp(), new RollerIOComp(), new ChuteIOComp());
 
+    goTo = new DriveToPose(swerve, swerve::getAlignPose);
+
     climb.setDefaultCommand(climb.runClimb(0));
 
     autons = Autonomous.configureAutons(swerve, superstructure);
@@ -126,7 +130,8 @@ public class Robot extends TimedRobot implements Logged {
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
             () -> -JoystickUtil.applyTeleopModifier(driver::getRightX),
-            () -> MathUtil.clamp(1.5 - driver.getRightTriggerAxis(), 0.0, 1.0)));
+            () -> 1.0));
+    // () -> MathUtil.clamp(1.5 - driver.getRightTriggerAxis(), 0.0, 1.0)));
     driver
         .a()
         .whileTrue(
@@ -135,6 +140,9 @@ public class Robot extends TimedRobot implements Logged {
                     swerve.resetOdo(
                         new Pose2d(swerve.getPose().getTranslation(), new Rotation2d()))));
     driver.rightBumper().whileTrue(superstructure.score());
+    driver.x().whileTrue(goTo);
+    driver.rightTrigger(0.3).onTrue(setbah(0.0));
+    driver.leftTrigger(0.3).onTrue(setbah(1.0));
 
     // driver.y().whileTrue(swerve.driveToPoseCmmd(() -> Swerve.AlignTargets.A));
     operator.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L1));

@@ -231,6 +231,10 @@ public class Swerve implements LoggedSubsystem {
     }
   }
 
+  public Pose2d getAlignPose() {
+    return alignTarget.pose;
+  }
+
   @Override
   public void simulationPeriodic() {
     simulation.get().periodic();
@@ -426,7 +430,14 @@ public class Swerve implements LoggedSubsystem {
     if (b != -1 && b != 1) {
       b = 1;
     }
-    double angle = 0.137 - 1 * 0.0175;
+    double angle;
+
+    if (b == 1) {
+      angle = 0.137 + 2 * 0.0175;
+    } else {
+      angle = 0.137 - 1 * 0.0175;
+    }
+
     // - 4 * 0.0175;
     double x = ((50.49 * Math.cos(((a * Math.PI) / 3) + (angle * b))) + 177.25) / 39.37;
     double y = ((50.49 * Math.sin(((a * Math.PI) / 3) + (angle * b))) + 158.50) / 39.37;
@@ -434,14 +445,6 @@ public class Swerve implements LoggedSubsystem {
 
     x = (Units.inchesToMeters(689.751) - x);
     y = (Units.inchesToMeters(317.5) - y);
-    // x =
-    //     true
-    //         ? (Units.inchesToMeters(689.751) - x)
-    //         : x;
-    // y =
-    //     true
-    //         ? (Units.inchesToMeters(317.5) - y)
-    //         : y;
     theta =
         DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ? theta + Math.PI : theta;
 
