@@ -23,12 +23,12 @@ public abstract class Tail implements Logged, Subsystem {
   public static final double POSE_MAX = 10;
   public static final double POSE_MIN = 8.2;
   public static final double POSE_SAFTEY =
-      5.37; // The position where the tail is safe from the top of 1st stage
+      6.8; // The position where the tail is safe from the top of 1st stage
 
   public static final double POSE_L1 = 10;
   public static final double POSE_L2 = (20 * 5 / 36); // 5;
   public static final double POSE_L3 = 3.95; // (20 * 5 / 36); // 5.56
-  public static final double POSE_L4 = (30 * 5 / 36); // 4;
+  public static final double POSE_L4 = 3.5; // 4;
 
   public static final double POSE_ALGAE_HIGH = (70 * 5 / 36); // uses formula
   public static final double POSE_ALGAE_LOW = (70 * 5 / 36); // uses formula
@@ -102,7 +102,7 @@ public abstract class Tail implements Logged, Subsystem {
   }
 
   public boolean nearSetpoint(double bah) {
-    return MathUtil.isNear(bah, poseRevs, 0.5);
+    return MathUtil.isNear(bah, poseRevs, 0.75);
   }
 
   /**

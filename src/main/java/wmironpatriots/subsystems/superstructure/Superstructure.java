@@ -89,7 +89,7 @@ public class Superstructure {
         .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
         .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_INTAKING))
         .until(() -> tail.hasCoral())
-        .andThen(roller.runRollerSpeedCmmd(0.2).withTimeout(0.2));
+        .andThen(roller.runRollerSpeedCmmd(0.2).withTimeout(0.1));
   }
 
   public Command intakeCoralCmmd() {
@@ -111,10 +111,18 @@ public class Superstructure {
         .until(() -> tail.nearSetpoint(Tail.POSE_SAFTEY))
         .andThen(
             elevator.runPoseCmmd(level.elevatorPose).alongWith(tail.runPoseCmmd(level.tailPose)));
-    // return Commands.sequence(
-    //         tail.runPoseCmmd(Tail.POSE_SAFTEY).until(() -> tail.nearSetpoint(Tail.POSE_MAX)),
-    //         elevator.runPoseCmmd(level.elevatorPose))
-    //     .alongWith(tail.runPoseCmmd(level.tailPose));
+  }
+
+  public Command HIGHdeAlgaeCommand() {
+    return tail.runPoseCmmd(Tail.POSE_ALGAE_HIGH)
+        .alongWith(elevator.runPoseCmmd(Elevator.POSE_ALGAE_H))
+        .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING));
+  }
+
+  public Command LOWdeAlgaeCommand() {
+    return tail.runPoseCmmd(Tail.POSE_ALGAE_LOW)
+        .alongWith(elevator.runPoseCmmd(Elevator.POSE_ALGAE_L))
+        .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING));
   }
 
   // * ALGAE MANIPULATION

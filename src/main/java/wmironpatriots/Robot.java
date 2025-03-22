@@ -146,6 +146,9 @@ public class Robot extends TimedRobot implements Logged {
     operator.leftTrigger(.03).whileTrue(superstructure.AutointakeCoralCmmd());
     operator.povLeft().whileTrue(climb.runClimb(8));
 
+    operator.povUp().whileTrue(superstructure.HIGHdeAlgaeCommand());
+    operator.povDown().whileTrue(superstructure.LOWdeAlgaeCommand());
+
     operatorJoystick.button(11).onTrue(setbah(1));
     operatorJoystick.button(9).onTrue(setbah(2));
     operatorJoystick.button(7).onTrue(setbah(3));
@@ -214,8 +217,10 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void autonomousInit() {
-    auton = swerve.drive(() -> 0.3, () -> 0.0, () -> 0.0, () -> 1.0);
-    auton.schedule();
+    auton = autons.getSelected();
+    if (auton != null) {
+      auton.schedule();
+    }
   }
 
   @Override
@@ -226,7 +231,9 @@ public class Robot extends TimedRobot implements Logged {
 
   @Override
   public void teleopInit() {
-    auton.cancel();
+    if (auton != null) {
+      auton.cancel();
+    }
   }
 
   @Override
