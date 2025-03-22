@@ -24,7 +24,7 @@ public abstract class Elevator implements Logged, Subsystem {
   public static final double POSE_INTAKE = 0.0;
   public static final double POSE_ALGAE_L = 5.4;
   public static final double POSE_ALGAE_H = 9.7;
-  public static final double POSE_L1 = 0.0;
+  public static final double POSE_L1 = 0;
   public static final double POSE_L2 = (5.5 / 0.87835 / 3.14159 / 2 * 3);
   public static final double POSE_L3 = 7.3; // (13.5 / 0.87835 / 3.14159 / 2 * 3);
   public static final double POSE_L4 = 12.75;

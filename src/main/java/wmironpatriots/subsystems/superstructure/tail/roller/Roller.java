@@ -13,9 +13,9 @@ import monologue.Logged;
 
 public abstract class Roller implements Logged, Subsystem {
   // * CONSTANTS
-  public static final double SPEED_INTAKING = 1.5;
-  public static final double SPEED_OUTAKING = -1.5;
-  public static final double SPEED_SCORING = 2.5;
+  public static final double SPEED_INTAKING = 2;
+  public static final double SPEED_OUTAKING = -2;
+  public static final double SPEED_SCORING = 3.5;
 
   // * LOGGED VALUES
   @Log public double poseRevs;

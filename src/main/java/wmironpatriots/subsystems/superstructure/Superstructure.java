@@ -84,12 +84,18 @@ public class Superstructure {
   // }
 
   /** Intakes and then indexes coral if it isn't jammed in chute */
-  public Command intakeCoralCmmd() {
+  public Command AutointakeCoralCmmd() {
     return chute
         .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
         .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_INTAKING))
         .until(() -> tail.hasCoral())
-        .andThen(roller.runRollerSpeedCmmd(0.2).withDeadline(new WaitUntilCommand(0.2)));
+        .andThen(roller.runRollerSpeedCmmd(0.2).withTimeout(0.2));
+  }
+
+  public Command intakeCoralCmmd() {
+    return chute
+        .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
+        .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_INTAKING));
   }
 
   /** Unjams coral in intake */
@@ -101,14 +107,14 @@ public class Superstructure {
 
   /** Scores to input level */
   public Command scoreCoralCmmd(ReefLevel level) {
-    return Commands.sequence(
-        tail.runPoseCmmd(Tail.POSE_SAFTEY).until(() -> tail.nearSetpoint()),
-        elevator.runPoseCmmd(level.elevatorPose).alongWith(tail.runPoseCmmd(level.tailPose)));
-    // return Commands.parallel(
-    //     tail.runPoseCmmd(Tail.POSE_SAFTEY)
-    //         .until(() -> tail.nearSetpoint())
-    //         .andThen(tail.runPoseCmmd(level.tailPose)),
-    //     elevator.runPoseCmmd(level.elevatorPose).onlyWhile(() -> tail.nearSetpoint()));
+    return tail.runPoseCmmd(Tail.POSE_SAFTEY)
+        .until(() -> tail.nearSetpoint(Tail.POSE_SAFTEY))
+        .andThen(
+            elevator.runPoseCmmd(level.elevatorPose).alongWith(tail.runPoseCmmd(level.tailPose)));
+    // return Commands.sequence(
+    //         tail.runPoseCmmd(Tail.POSE_SAFTEY).until(() -> tail.nearSetpoint(Tail.POSE_MAX)),
+    //         elevator.runPoseCmmd(level.elevatorPose))
+    //     .alongWith(tail.runPoseCmmd(level.tailPose));
   }
 
   // * ALGAE MANIPULATION

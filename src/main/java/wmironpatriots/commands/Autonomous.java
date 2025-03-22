@@ -45,9 +45,9 @@ public class Autonomous {
         swerve::getPose,
         swerve::resetOdo,
         swerve::getCurrentVelocities,
-        s -> swerve.runVelocities(s),
+        swerve::runVelocities,
         new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0, 0), new PIDConstants(5.0, 0, 0), Constants.TICK_SPEED),
+            new PIDConstants(10.0, 0, 0), new PIDConstants(10.0, 0, 0), Constants.TICK_SPEED),
         robotConfig,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         swerve);

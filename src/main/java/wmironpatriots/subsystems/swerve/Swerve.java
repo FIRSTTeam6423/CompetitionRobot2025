@@ -221,7 +221,6 @@ public class Swerve implements LoggedSubsystem {
     swervePublisher.set(getSwerveModuleStates());
 
     SmartDashboard.putNumber("Speed MPS", getSpeedMPS());
-    f2d.getObject("target").setPose(alignTarget.pose);
 
     for (Module module : modules) {
       module.periodic();
@@ -237,8 +236,9 @@ public class Swerve implements LoggedSubsystem {
     simulation.get().periodic();
   }
 
-  public Command setAlignTarget(AlignTargets target) {
-    return this.runOnce(() -> this.alignTarget = target);
+  public void setAlignTarget(AlignTargets target) {
+    this.alignTarget = target;
+    f2d.getObject("AlignTarget").setPose(target.pose);
   }
 
   /**
@@ -432,14 +432,16 @@ public class Swerve implements LoggedSubsystem {
     double y = ((50.49 * Math.sin(((a * Math.PI) / 3) + (angle * b))) + 158.50) / 39.37;
     double theta = (a * Math.PI) / 3;
 
-    x =
-        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
-            ? (Units.inchesToMeters(689.751) - x)
-            : x;
-    y =
-        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
-            ? (Units.inchesToMeters(317.5) - y)
-            : y;
+    x = (Units.inchesToMeters(689.751) - x);
+    y = (Units.inchesToMeters(317.5) - y);
+    // x =
+    //     true
+    //         ? (Units.inchesToMeters(689.751) - x)
+    //         : x;
+    // y =
+    //     true
+    //         ? (Units.inchesToMeters(317.5) - y)
+    //         : y;
     theta =
         DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ? theta + Math.PI : theta;
 

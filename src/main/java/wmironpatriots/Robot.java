@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
@@ -44,7 +44,7 @@ import wmironpatriots.utils.deviceUtils.JoystickUtil;
 
 public class Robot extends TimedRobot implements Logged {
   private final CommandXboxController driver, operator;
-  private final CommandPS5Controller operatorDos;
+  private final CommandJoystick operatorJoystick;
 
   private final Superstructure superstructure;
   private final Optional<Vision> vision;
@@ -58,6 +58,8 @@ public class Robot extends TimedRobot implements Logged {
   Timer gcTimer = new Timer();
 
   private final SendableChooser<Command> autons;
+
+  Command auton;
 
   public Robot() {
     // * SYSTEMS INIT
@@ -97,7 +99,7 @@ public class Robot extends TimedRobot implements Logged {
     // * INIT HARDWARE
     driver = new CommandXboxController(0);
     operator = new CommandXboxController(1);
-    operatorDos = new CommandPS5Controller(2);
+    operatorJoystick = new CommandJoystick(2);
 
     side = 1;
     branch = 0;
@@ -110,11 +112,6 @@ public class Robot extends TimedRobot implements Logged {
           swerve.updateVisionEstimates(vision.get().getEstimatedPoses());
         },
         0.02);
-    addPeriodic(
-        () -> {
-          swerve.setAlignTarget(getTarget());
-        },
-        0.1);
     superstructure =
         new Superstructure(
             swerve, new ElevatorIOComp(), new TailIOComp(), new RollerIOComp(), new ChuteIOComp());
@@ -129,7 +126,7 @@ public class Robot extends TimedRobot implements Logged {
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
             () -> -JoystickUtil.applyTeleopModifier(driver::getRightX),
-            () -> MathUtil.clamp(1.1 - driver.getRightTriggerAxis(), 0.0, 1.0)));
+            () -> MathUtil.clamp(1.5 - driver.getRightTriggerAxis(), 0.0, 1.0)));
     driver
         .a()
         .whileTrue(
@@ -137,12 +134,6 @@ public class Robot extends TimedRobot implements Logged {
                 () ->
                     swerve.resetOdo(
                         new Pose2d(swerve.getPose().getTranslation(), new Rotation2d()))));
-
-    driver.leftTrigger(0.3).whileTrue(climb.runClimb(-8));
-    driver
-        .b()
-        .whileTrue(
-            swerve.driveToPoseCmmd(() -> -JoystickUtil.applyTeleopModifier(driver::getRightX)));
     driver.rightBumper().whileTrue(superstructure.score());
 
     // driver.y().whileTrue(swerve.driveToPoseCmmd(() -> Swerve.AlignTargets.A));
@@ -152,29 +143,34 @@ public class Robot extends TimedRobot implements Logged {
     operator.b().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L4));
     operator.leftBumper().whileTrue(superstructure.intakeCoralCmmd());
     operator.rightBumper().whileTrue(superstructure.outtakeCoralCmmd());
+    operator.leftTrigger(.03).whileTrue(superstructure.AutointakeCoralCmmd());
     operator.povLeft().whileTrue(climb.runClimb(8));
 
-    operatorDos.povDown().onTrue(setbah(1, branch));
-    operatorDos.povLeft().onTrue(setbah(2, branch));
-    operatorDos.povUp().onTrue(setbah(3, branch));
-    operatorDos.povRight().onTrue(setbah(4, branch));
-    operatorDos.cross().onTrue(setbah(5, branch));
-    operatorDos.square().onTrue(setbah(6, branch));
-
-    operatorDos.R1().onTrue(setbah(side, 0));
-    operatorDos.L2().onTrue(setbah(side, 1));
+    operatorJoystick.button(11).onTrue(setbah(1));
+    operatorJoystick.button(9).onTrue(setbah(2));
+    operatorJoystick.button(7).onTrue(setbah(3));
+    operatorJoystick.button(8).onTrue(setbah(4));
+    operatorJoystick.button(10).onTrue(setbah(5));
+    operatorJoystick.button(12).onTrue(setbah(6));
 
     gcTimer.start();
 
-    var autonomous = new Trigger(DriverStation::isAutonomous);
-    autonomous.whileTrue(Commands.deferredProxy(autons::getSelected));
+    SmartDashboard.putData(autons);
   }
 
-  public Command setbah(int side, int other) {
+  public Command setbah(double other) {
+    return Commands.runOnce(
+        () -> {
+          this.branch = (int) other;
+          swerve.setAlignTarget(AlignTargets.values()[((side * 2) - branch) - 1]);
+        });
+  }
+
+  public Command setbah(int side) {
     return Commands.runOnce(
         () -> {
           this.side = side;
-          this.branch = other;
+          swerve.setAlignTarget(AlignTargets.values()[((side * 2) - branch) - 1]);
         });
   }
 
@@ -217,7 +213,10 @@ public class Robot extends TimedRobot implements Logged {
   public void disabledExit() {}
 
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    auton = swerve.drive(() -> 0.3, () -> 0.0, () -> 0.0, () -> 1.0);
+    auton.schedule();
+  }
 
   @Override
   public void autonomousPeriodic() {}
@@ -226,7 +225,9 @@ public class Robot extends TimedRobot implements Logged {
   public void autonomousExit() {}
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    auton.cancel();
+  }
 
   @Override
   public void teleopPeriodic() {}

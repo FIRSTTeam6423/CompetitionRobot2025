@@ -6,6 +6,7 @@
 
 package wmironpatriots.subsystems.superstructure.tail;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Annotations.Log;
@@ -98,6 +99,10 @@ public abstract class Tail implements Logged, Subsystem {
    */
   public boolean nearSetpoint() {
     return Math.abs(targetPoseRevs - poseRevs) > 0.1;
+  }
+
+  public boolean nearSetpoint(double bah) {
+    return MathUtil.isNear(bah, poseRevs, 0.5);
   }
 
   /**

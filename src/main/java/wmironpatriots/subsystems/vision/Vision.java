@@ -36,7 +36,7 @@ public abstract class Vision implements LoggedSubsystem {
             0,
             new Transform3d(
                 new Translation3d(
-                    Inches.of(-11.738802), Inches.of(-9.979009), Inches.of(18.617208)),
+                    Inches.of(-11.738802), Inches.of(-9.979009), Inches.of(18.617208 - .5)),
                 new Rotation3d(0.0, 0.506146, 2.734756))),
         new CameraConfig(
             "cam-san",
@@ -45,12 +45,12 @@ public abstract class Vision implements LoggedSubsystem {
             0,
             new Transform3d(
                 new Translation3d(Inches.of(-11.738802), Inches.of(9.979009), Inches.of(18.617208)),
-                new Rotation3d(0.0, -0.506146, 2.734756))),
+                new Rotation3d(0.0, 0.506146, -2.734756))),
         // new CameraConfig("cam-senpai", 0, 0, 0, new Transform3d())
       };
 
   public AprilTagFieldLayout LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
   public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(1.5, 1.5, 7);
   public static final Matrix<N3, N1> MULTIPLE_TAG_STD_DEVS = VecBuilder.fill(0.3, 0.3, 4);
