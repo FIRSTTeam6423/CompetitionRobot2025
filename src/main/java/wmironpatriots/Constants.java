@@ -9,6 +9,13 @@ package wmironpatriots;
 import com.ctre.phoenix6.CANBus;
 
 public class Constants {
+  public static double TICK_SPEED = 0.02;
+
+  /** Flags for runtime */
+  public static class FLAGS {
+    public static final boolean TUNING_MODE = false;
+  }
+
   /** static class containing all device ids */
   public static class MATRIXID {
     // * CANIVORE LOOP

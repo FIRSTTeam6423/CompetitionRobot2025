@@ -4,14 +4,15 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
 
-package wmironpatriots.subsystems.tail;
+package wmironpatriots.subsystems.superstructure.tail;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import monologue.Annotations.Log;
-import wmironpatriots.utils.LoggedSubsystem;
+import monologue.Logged;
 
-public abstract class Tail implements LoggedSubsystem {
+public abstract class Tail implements Logged, Subsystem {
   // * CONSTANTS
   // Mech constants
   public static final double MASS_KG = 0.0;
@@ -21,8 +22,10 @@ public abstract class Tail implements LoggedSubsystem {
   public static final double POSE_STOWED = 0;
   public static final double POSE_MAX = 10;
   public static final double POSE_MIN = 8.2;
+  public static final double POSE_SAFTEY =
+      5.37; // The position where the tail is safe from the top of 1st stage
 
-  public static final double POSE_L1 = 5.56;
+  public static final double POSE_L1 = 10;
   public static final double POSE_L2 = (20 * 5 / 36); // 5;
   public static final double POSE_L3 = 3.95; // (20 * 5 / 36); // 5.56
   public static final double POSE_L4 = (30 * 5 / 36); // 4;
@@ -30,19 +33,13 @@ public abstract class Tail implements LoggedSubsystem {
   public static final double POSE_ALGAE_HIGH = (70 * 5 / 36); // uses formula
   public static final double POSE_ALGAE_LOW = (70 * 5 / 36); // uses formula
 
-  // Roller speeds
-  public static final double SPEED_INTAKING = 2;
-  public static final double SPEED_OUTAKING = -1;
-  public static final double SPEED_SCORING = 2.5;
-
   // * LOGGED VALUES
-  @Log protected double poseRevs;
-  @Log protected double targetPoseRevs;
-  @Log protected double velRPM;
-  @Log protected double appliedVolts;
-  @Log protected double currentAmps;
-  @Log protected boolean beamITriggered;
-  @Log protected boolean beamIITriggered;
+  @Log public double poseRevs;
+  @Log public double targetPoseRevs;
+  @Log public double velRPM;
+  @Log public double appliedVolts;
+  @Log public double currentAmps;
+  @Log public boolean beamTriggered;
   @Log public boolean isZeroed = false;
 
   /**
@@ -77,25 +74,6 @@ public abstract class Tail implements LoggedSubsystem {
   }
 
   /**
-   * Runs tail rollers until coral is in scoring pose
-   *
-   * @return coral vectoring command
-   */
-  public Command indexCoral() {
-    return runRollerSpeed(1.0).withDeadline(new WaitCommand(0.2));
-  }
-
-  /**
-   * Runs tail rollers with specified speed
-   *
-   * @param speed setpoint speed
-   * @return Set roller speed command
-   */
-  public Command runRollerSpeed(double speed) {
-    return this.run(() -> setRollerVolts(speed));
-  }
-
-  /**
    * Sets all tail motor input to zero
    *
    * @return Stop elevator command
@@ -120,11 +98,11 @@ public abstract class Tail implements LoggedSubsystem {
    * @return true if in range false if not
    */
   public boolean nearSetpoint() {
-    return Math.abs(targetPoseRevs - poseRevs) > 0.6;
+    return Math.abs(targetPoseRevs - poseRevs) > 0.1;
   }
 
-  public double getPose() {
-    return poseRevs;
+  public boolean nearSetpoint(double bah) {
+    return MathUtil.isNear(bah, poseRevs, 0.5);
   }
 
   /**
@@ -133,7 +111,7 @@ public abstract class Tail implements LoggedSubsystem {
    * @return true if either beam is tripped
    */
   public boolean hasCoral() {
-    return beamITriggered || beamIITriggered;
+    return beamTriggered;
   }
 
   // * HARDWARE METHODS
@@ -146,14 +124,8 @@ public abstract class Tail implements LoggedSubsystem {
   /** Sets motor rotary encoder pose in revs */
   protected abstract void setEncoderPose(double poseRevs);
 
-  /** Runs roller motors with specified volts */
-  protected abstract void setRollerVolts(double volts);
-
   /** Sets pivot motor input to 0 */
   protected abstract void stopPivot();
-
-  /** Sets roller motor input to 0 */
-  protected abstract void stopRollers();
 
   /** Enable motor coasting for easier movement */
   protected abstract void motorCoasting(boolean enabled);

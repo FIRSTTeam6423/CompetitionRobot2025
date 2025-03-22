@@ -4,7 +4,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
 
-package wmironpatriots.subsystems.tail;
+package wmironpatriots.subsystems.superstructure.tail;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -15,32 +15,23 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.DigitalInput;
 import wmironpatriots.Constants.MATRIXID;
 
 public class TailIOComp extends Tail {
   private final TalonFX pivot;
-  private final SparkMax rollers;
 
   private final TalonFXConfiguration pivotConf;
-  private final SparkMaxConfig rollerConf;
 
   private final BaseStatusSignal pose, vel, volts, current;
 
   private final VoltageOut reqVolts;
   private final PositionVoltage reqPose;
 
-  private final DigitalInput beamI, beamII;
+  private final DigitalInput beam;
 
   public TailIOComp() {
     pivot = new TalonFX(MATRIXID.TAIL_PIVOT, MATRIXID.RIO);
-    rollers = new SparkMax(MATRIXID.TAIL_ROLLER, MotorType.kBrushless);
 
     pivotConf = new TalonFXConfiguration();
     pivotConf.Audio.AllowMusicDurDisable = true;
@@ -72,14 +63,10 @@ public class TailIOComp extends Tail {
     volts = pivot.getMotorVoltage();
     current = pivot.getStatorCurrent();
 
-    rollerConf = new SparkMaxConfig();
-    rollers.configure(rollerConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
     reqVolts = new VoltageOut(0.0).withEnableFOC(true);
     reqPose = new PositionVoltage(0.0).withEnableFOC(true);
 
-    beamI = new DigitalInput(1);
-    beamII = new DigitalInput(3);
+    beam = new DigitalInput(1);
   }
 
   @Override
@@ -91,8 +78,7 @@ public class TailIOComp extends Tail {
     appliedVolts = volts.getValueAsDouble();
     currentAmps = current.getValueAsDouble();
 
-    beamITriggered = !beamI.get();
-    beamIITriggered = !beamII.get();
+    beamTriggered = !beam.get();
   }
 
   @Override
@@ -111,26 +97,14 @@ public class TailIOComp extends Tail {
   }
 
   @Override
-  protected void setRollerVolts(double volts) {
-    rollers.setVoltage(volts);
-  }
-
-  @Override
   protected void stopPivot() {
     pivot.stopMotor();
   }
 
   @Override
-  protected void stopRollers() {
-    rollers.stopMotor();
-  }
-
-  @Override
   protected void motorCoasting(boolean enabled) {
     pivotConf.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Coast : NeutralModeValue.Brake;
-    rollerConf.idleMode(enabled ? IdleMode.kCoast : IdleMode.kBrake);
 
     pivot.getConfigurator().apply(pivotConf);
-    rollers.configure(rollerConf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 }
