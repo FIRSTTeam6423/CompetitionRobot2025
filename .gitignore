@@ -172,6 +172,7 @@ out/
 networktables.json
 simgui.json
 *-window.json
+simgui*
 
 # Simulation data log directory
 logs/
@@ -188,4 +189,3 @@ compile_commands.json
 
 # Build data
 src/main/java/wmironpatriots/BuildConstants.java
-simgui*
