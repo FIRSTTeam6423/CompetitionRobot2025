@@ -6,10 +6,13 @@
 
 package wmironpatriots;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.ctre.phoenix6.CANBus;
+import edu.wpi.first.units.measure.Time;
 
 public class Constants {
-  public static double TICK_SPEED = 0.02;
+  public static Time TICK_SPEED = Seconds.of(0.02);
 
   /** Flags for runtime */
   public static class FLAGS {
