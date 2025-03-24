@@ -1,6 +1,0 @@
-- Swerve odo thread
-- Swerve javadocs rewrite
-- Photonvision cleanup
-- Openloop drive
-- pathplanner
-- sysid routines
