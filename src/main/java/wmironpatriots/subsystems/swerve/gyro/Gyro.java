@@ -6,4 +6,12 @@
 
 package wmironpatriots.subsystems.swerve.gyro;
 
-public class Gyro {}
+import edu.wpi.first.math.geometry.Rotation2d;
+import lib.LoggedSubsystemComponent;
+import monologue.Annotations.Log;
+
+public abstract class Gyro extends LoggedSubsystemComponent{
+  @Log protected double headingDegrees;
+
+  public abstract Rotation2d getRotation2d();
+}

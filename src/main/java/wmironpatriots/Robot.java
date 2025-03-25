@@ -8,15 +8,12 @@ package wmironpatriots;
 
 import static edu.wpi.first.units.Units.Seconds;
 
-import com.ctre.phoenix6.SignalLogger;
-
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lib.LoggedCommandRobot;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
@@ -61,16 +58,14 @@ public class Robot extends LoggedCommandRobot {
     // ! Uncomment next line if you expirence massive lag/loop-overuns while connected to fms
     // SignalLogger.stop(); SignalLogger.enableAutoLogging(false);
 
-    // Setup alerts
-    brownout = new Alert("Brownout detected!", AlertType.kWarning);
-    Trigger isBrowningOut =
-        new Trigger(RobotController::isBrownedOut)
-            .onTrue(Commands.runOnce(() -> brownout.set(true)));
-
     // * INITALIZE SUBSYSTEMS
     swerve = new Swerve();
 
     // * CONFIGURE GAME BEHAVIOR
+
+    // Setup alerts
+    brownout = new Alert("Brownout detected", AlertType.kWarning);
+    addPeriodic(() -> brownout.set(RobotController.isBrownedOut()), 0.06);
   }
 
   @Override

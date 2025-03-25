@@ -14,15 +14,15 @@ import monologue.Annotations.Log;
 
 public abstract class Module extends LoggedSubsystemComponent {
   // * LOGGED VALUES
-  @Log public double pivotPoseRevs;
-  @Log public double cancoderPoseRevs;
-  @Log public double pivotAppliedVolts;
-  @Log public double pivotCurrentAmps;
-  @Log public double drivePoseMeters;
-  @Log public double driveVelMPS;
-  @Log public double driveAppliedVolts;
-  @Log public double driveCurrentAmps;
-  @Log public double driveTorqueAmps;
+  @Log protected double pivotPoseRevs;
+  @Log protected double cancoderPoseRevs;
+  @Log protected double pivotAppliedVolts;
+  @Log protected double pivotCurrentAmps;
+  @Log protected double drivePoseMeters;
+  @Log protected double driveVelMPS;
+  @Log protected double driveAppliedVolts;
+  @Log protected double driveCurrentAmps;
+  @Log protected double driveTorqueAmps;
 
   /**
    * Runs module to {@link SwerveModuleState} setpoint
