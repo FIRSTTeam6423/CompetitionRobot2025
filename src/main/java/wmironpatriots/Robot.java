@@ -30,6 +30,8 @@ public class Robot extends LoggedCommandRobot {
   public Robot() {
     // * INITALIZE SYSTEMS
     super(Constants.TICK_SPEED.in(Seconds));
+
+    // Monologue setup
     Monologue.setupMonologue(
         this,
         "/Logged",

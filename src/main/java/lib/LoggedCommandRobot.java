@@ -7,12 +7,16 @@
 package lib;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Tracer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Logged;
+import monologue.Monologue;
 
 /** Logged command based robot; To actuall enable monologue for logging, call the Monologue::setupMonologue method */
 public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
+  private final CommandScheduler scheduler;
+
   private final Command auton;
 
   public LoggedCommandRobot() {
@@ -21,31 +25,39 @@ public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
 
   public LoggedCommandRobot(double tickSpeed) {
     super(tickSpeed);
+    scheduler = CommandScheduler.getInstance();
+
     auton = getAuton();
   }
 
   @Override
   public void robotPeriodic() {
-    CommandScheduler.getInstance().run();
+    scheduler.run();
+    Monologue.updateAll();
   }
 
   @Override
   public void simulationPeriodic() {}
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    scheduler.cancelAll();
+    System.gc();
+  }
 
   @Override
   public void disabledPeriodic() {}
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() {
+    scheduler.cancelAll();
+    System.gc();
+  }
 
   @Override
   public void autonomousInit() {
     if (auton != null) {
       getAuton().schedule();
-      ;
     }
   }
 
@@ -53,7 +65,10 @@ public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
   public void autonomousPeriodic() {}
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+    scheduler.cancelAll();
+    System.gc();
+  }
 
   @Override
   public void teleopInit() {
