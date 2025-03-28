@@ -7,13 +7,15 @@
 package lib;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Tracer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Logged;
 import monologue.Monologue;
 
-/** Logged command based robot; To actuall enable monologue for logging, call the Monologue::setupMonologue method */
+/**
+ * Logged command based robot; To actuall enable monologue for logging, call the
+ * Monologue::setupMonologue method
+ */
 public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
   private final CommandScheduler scheduler;
 
