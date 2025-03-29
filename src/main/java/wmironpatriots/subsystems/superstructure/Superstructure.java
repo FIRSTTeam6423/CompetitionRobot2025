@@ -29,7 +29,12 @@ public class Superstructure {
 
   // * SUBSYSTEM DEFAULT CMDS
   private Command elevatorDefaultCmd() {
-    return Commands.run(() -> {}, elevator);
+    return Commands.sequence(
+        elevator.runCurrentZeroingCmd().onlyIf(elevator::isInitalized),
+        elevator
+            .runPoseCmd(1)
+            .until(elevator::nearSetpoint)
+            .finallyDo(() -> elevator.stopMotors()));
   }
 
   private Command armDefaultCmd() {

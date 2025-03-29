@@ -1,3 +1,9 @@
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
 package wmironpatriots.subsystems.superstructure.elevator;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -10,7 +16,6 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import wmironpatriots.Constants.MATRIXID;
 
 public class ElevatorIOComp extends Elevator {
@@ -69,17 +74,25 @@ public class ElevatorIOComp extends Elevator {
     parentCurrent = parent.getStatorCurrent();
     parentTorque = parent.getTorqueCurrent();
     parentVolts = parent.getMotorVoltage();
-    parentTemp = parent.getDeviceTemp(); 
+    parentTemp = parent.getDeviceTemp();
 
     childCurrent = child.getStatorCurrent();
     childTorque = child.getTorqueCurrent();
     childVolts = child.getMotorVoltage();
-    childTemp = child.getDeviceTemp(); 
+    childTemp = child.getDeviceTemp();
   }
 
   @Override
   public void periodic() {
-    BaseStatusSignal.refreshAll(parentCurrent, parentTorque, parentVolts, parentTemp, childCurrent, childTorque, childVolts, childTemp);
+    BaseStatusSignal.refreshAll(
+        parentCurrent,
+        parentTorque,
+        parentVolts,
+        parentTemp,
+        childCurrent,
+        childTorque,
+        childVolts,
+        childTemp);
 
     poseRevs = pose.getValueAsDouble();
     parentCurrentAmps = parentCurrent.getValueAsDouble();
@@ -109,7 +122,7 @@ public class ElevatorIOComp extends Elevator {
   }
 
   @Override
-  public void setEncoderPose(double poseRevs)  {
+  public void setEncoderPose(double poseRevs) {
     parent.setPosition(poseRevs);
   }
 

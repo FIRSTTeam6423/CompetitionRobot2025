@@ -1,3 +1,9 @@
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
 package wmironpatriots.subsystems.superstructure.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,48 +27,55 @@ public abstract class Elevator implements LoggedSubsystem {
   private boolean isZeroed = false;
 
   public static Elevator createElevator() {
-    return Robot.isReal() 
-      ? new ElevatorIOComp() 
-      : new ElevatorIOComp(); // ! SIMULATION PLACEHOLDER
+    return Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOComp(); // ! SIMULATION PLACEHOLDER
   }
 
   /** Runs elevator down until current spikes above threshold */
   public Command runCurrentZeroingCmd() {
     if (isZeroed) return this.runOnce(() -> {});
     return this.run(() -> setMotorCurrent(-1.0))
-      .until(() -> parentCurrentAmps > 20.0)
-      .finallyDo((i) -> {
-        stopMotors();
-        setEncoderPose(0.0);
-        System.out.println("Elevator zeroed");
-        isZeroed = true;
-      });
+        .until(() -> parentCurrentAmps > 20.0)
+        .finallyDo(
+            (i) -> {
+              stopMotors();
+              setEncoderPose(0.0);
+              System.out.println("Elevator zeroed");
+              isZeroed = true;
+            });
   }
 
   /**
    * Runs elevator to specified pose
-   * 
+   *
    * @param poseRevs desired pose in revs
    */
   public Command runPoseCmd(double poseRevs) {
-    return this.run(() -> {
-      setpointPose = poseRevs;
-      setMotorPose(poseRevs);
-    });
+    return this.run(
+        () -> {
+          setpointPose = poseRevs;
+          setMotorPose(poseRevs);
+        });
   }
 
   /**
    * Checks if elevator pose is around setpoint pose
-   * 
+   *
    * @return true if pose is ±0.5 from setpoint
    */
   public boolean nearSetpoint() {
     return Math.abs(setpointPose - poseRevs) > 0.5;
   }
 
+  /**
+   * @return true if elevator is zeroed properly
+   */
+  public boolean isInitalized() {
+    return isZeroed;
+  }
+
   // * HARDWARE METHODS
   protected abstract void setMotorCurrent(double amps);
-  
+
   protected abstract void setMotorPose(double poseRevs);
 
   /** Stops all elevator motor output */
