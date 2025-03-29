@@ -38,6 +38,7 @@ public class ModuleIOComp extends Module {
   private final BaseStatusSignal drivePose, driveVel, driveVolts, driveCurrent, driveTorque;
 
   public ModuleIOComp(ModuleConfig config) {
+    super(config.index());
     pivot = new TalonFX(config.pivotID(), MATRIXID.CANCHAN);
     drive = new TalonFX(config.driveID(), MATRIXID.CANCHAN);
     cancoder = new CANcoder(config.cancoderID(), MATRIXID.CANCHAN);

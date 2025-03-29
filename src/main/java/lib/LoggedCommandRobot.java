@@ -51,8 +51,8 @@ public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
 
   @Override
   public void robotPeriodic() {
-    scheduler.run();
-    Monologue.updateAll();
+    Tracer.traceFunc("CommandScheduler", scheduler::run);
+    Tracer.traceFunc("MonologueUpdate", Monologue::updateAll);
 
     // I love our rio 1.0
     if (gcTimer.hasElapsed(5)) {

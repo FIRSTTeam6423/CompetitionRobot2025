@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.DoubleSupplier;
 import lib.LoggedSubsystem;
+import lib.Tracer;
 import wmironpatriots.Constants;
 import wmironpatriots.subsystems.swerve.SwerveConstants.ModuleConfig;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
@@ -82,8 +83,9 @@ public class Swerve implements LoggedSubsystem {
     odometry.update(gyro.getRotation2d(), getModulePoses());
 
     for (Module module : modules) {
-      module.periodic();
+      Tracer.traceFunc("module" + module.index + "Periodic", module::periodic);
     }
+    Tracer.traceFunc("gyroPeriodic", gyro::periodic);
     if (DriverStation.isDisabled()) stop();
 
     f2d.setRobotPose(getPose());

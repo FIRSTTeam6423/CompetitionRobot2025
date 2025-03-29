@@ -24,6 +24,12 @@ public abstract class Module extends LoggedSubsystemComponent {
   @Log protected double driveCurrentAmps;
   @Log protected double driveTorqueAmps;
 
+  public final int index;
+
+  public Module(int index) {
+    this.index = index;
+  }
+
   /**
    * Runs module to {@link SwerveModuleState} setpoint
    *
