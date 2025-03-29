@@ -22,8 +22,8 @@ public class DriveToPose extends Command {
    *
    * @param poseSupplier desired position supplier
    */
-  public DriveToPose(Supplier<Pose2d> poseSupplier) {
-    swerve = Swerve.getInstance();
+  public DriveToPose(Swerve swerve, Supplier<Pose2d> poseSupplier) {
+    this.swerve = swerve;
     this.poseSupplier = poseSupplier;
   }
 

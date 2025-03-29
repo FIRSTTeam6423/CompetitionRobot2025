@@ -13,28 +13,14 @@ import wmironpatriots.subsystems.superstructure.climber.Climber;
 import wmironpatriots.subsystems.superstructure.elevator.Elevator;
 
 public class Superstructure {
-  // Subsystem pointers (init in constructor)
   private final Elevator elevator;
   private final Arm arm;
   private final Climber climber;
 
-  private static Superstructure instance;
-
-  /**
-   * @return superstructure instance (creates instance if null)
-   */
-  public static Superstructure getInstance() {
-    if (instance == null) {
-      instance = new Superstructure();
-    }
-
-    return instance;
-  }
-
-  private Superstructure() {
-    elevator = Elevator.getInstance();
-    arm = Arm.getInstance();
-    climber = Climber.getInstance();
+  public Superstructure() {
+    elevator = new Elevator();
+    arm = new Arm();
+    climber = new Climber();
 
     elevator.setDefaultCommand(elevatorDefaultCmd());
     arm.setDefaultCommand(armDefaultCmd());

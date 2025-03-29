@@ -45,20 +45,7 @@ public class Swerve implements LoggedSubsystem {
 
   private final StructArrayPublisher<SwerveModuleState> swervePublisher, swerveSetpointPublisher;
 
-  private static Swerve instance;
-
-  /**
-   * @return swerve subsystem instance (creates instance if null)
-   */
-  public static Swerve getInstance() {
-    if (instance == null) {
-      instance = new Swerve();
-    }
-
-    return instance;
-  }
-
-  private Swerve() {
+  public Swerve() {
     // Setup hardware
     gyro = new GyroIOComp();
     ModuleConfig[] moduleConfigs = SwerveConstants.MODULE_CONFIGS;

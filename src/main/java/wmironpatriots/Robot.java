@@ -69,8 +69,8 @@ public class Robot extends LoggedCommandRobot {
     operator = new XboxController(1);
 
     // Init subsystem singletons
-    swerve = Swerve.getInstance();
-    superstructure = Superstructure.getInstance();
+    swerve = new Swerve();
+    superstructure = new Superstructure();
 
     // * CONFIGURE GAME BEHAVIOR
     swerve.setDefaultCommand(
