@@ -12,14 +12,18 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import lib.LoggedCommandRobot;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import wmironpatriots.subsystems.swerve.Swerve;
+import wmironpatriots.util.deviceUtil.JoystickUtil;
 
 public class Robot extends LoggedCommandRobot {
+  private final XboxController driver, operator;
+
   private final Swerve swerve;
 
   private final Alert brownout;
@@ -58,10 +62,18 @@ public class Robot extends LoggedCommandRobot {
     // ! Uncomment next line if you expirence massive lag/loop-overuns while connected to fms
     // SignalLogger.stop(); SignalLogger.enableAutoLogging(false);
 
-    // * INITALIZE SUBSYSTEMS
+    // * INITALIZE SUBSYSTEMS AND DEVICES
+    driver = new XboxController(0);
+    operator = new XboxController(1);
+
     swerve = Swerve.getInstance();
 
     // * CONFIGURE GAME BEHAVIOR
+    swerve.setDefaultCommand(
+      swerve.drive(
+        () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
+        () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
+        () -> -JoystickUtil.applyTeleopModifier(driver::getRightX)));
 
     // Setup alerts
     brownout = new Alert("Brownout detected", AlertType.kWarning);
