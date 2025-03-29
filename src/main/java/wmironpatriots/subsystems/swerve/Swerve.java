@@ -58,11 +58,6 @@ public class Swerve implements LoggedSubsystem {
     return instance;
   }
 
-  /**
-   * @return false if superstructure singleton hasn't been initalized
-   */
-  public static boolean hasInstance() { return instance == null; }
-
   private Swerve() {
     // Setup hardware
     gyro = new GyroIOComp();

@@ -31,11 +31,6 @@ public class Superstructure {
     return instance;
   }
 
-  /**
-   * @return false if superstructure singleton hasn't been initalized
-   */
-  public static boolean hasInstance() { return instance == null; }
-
   private Superstructure() {
     elevator = Elevator.getInstance();
     arm = Arm.getInstance();
