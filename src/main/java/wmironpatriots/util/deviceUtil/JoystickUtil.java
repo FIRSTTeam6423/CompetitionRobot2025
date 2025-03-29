@@ -6,19 +6,15 @@
 
 package wmironpatriots.util.deviceUtil;
 
+import edu.wpi.first.math.MathUtil;
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.MathUtil;
-
-/**
- * Class for handling joystick modifications
- */
+/** Class for handling joystick modifications */
 public class JoystickUtil {
   /**
-   * Takes joystick axis input and modifies it with teleop modifiers 
-   * 
-   * - Deadbands by specified value
-   * - Raises output to 2
+   * Takes joystick axis input and modifies it with teleop modifiers
+   *
+   * <p>- Deadbands by specified value - Raises output to 2
    *
    * @param value axis input
    * @param deadband joystick deadband
@@ -30,10 +26,9 @@ public class JoystickUtil {
   }
 
   /**
-   * Takes joystick axis input and modifies it with teleop modifiers 
-   * 
-   * - Deadbands by 0.05 
-   * - Raises output to 2
+   * Takes joystick axis input and modifies it with teleop modifiers
+   *
+   * <p>- Deadbands by 0.05 - Raises output to 2
    *
    * @param value axis input
    * @return modified inputs

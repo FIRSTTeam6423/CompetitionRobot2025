@@ -74,10 +74,10 @@ public class Robot extends LoggedCommandRobot {
 
     // * CONFIGURE GAME BEHAVIOR
     swerve.setDefaultCommand(
-      swerve.drive(
-        () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
-        () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
-        () -> -JoystickUtil.applyTeleopModifier(driver::getRightX)));
+        swerve.drive(
+            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
+            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
+            () -> -JoystickUtil.applyTeleopModifier(driver::getRightX)));
 
     // Setup alerts
     brownout = new Alert("Brownout detected", AlertType.kWarning);
