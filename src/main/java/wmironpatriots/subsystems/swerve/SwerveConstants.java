@@ -13,7 +13,6 @@ import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -22,19 +21,13 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
-import java.util.Optional;
-import org.ironmaple.simulation.drivesims.GyroSimulation;
-import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
-import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import wmironpatriots.Constants.MATRIXID;
-import wmironpatriots.Robot;
 
 public class SwerveConstants {
   // * CAN Constants
@@ -182,26 +175,4 @@ public class SwerveConstants {
 
     return conf;
   }
-
-  // * Simulation Constants
-  public static final Optional<DriveTrainSimulationConfig> driveTrainSimulationConfig =
-      Robot.isSimulation()
-          ? Optional.of(
-              DriveTrainSimulationConfig.Default()
-                  .withGyro(() -> new GyroSimulation(0.0, 0.0))
-                  .withSwerveModule(
-                      new SwerveModuleSimulationConfig(
-                          DCMotor.getKrakenX60Foc(1),
-                          DCMotor.getKrakenX60Foc(1),
-                          DRIVE_REDUCTION,
-                          PIVOT_REDUCTION,
-                          Volts.of(0.1),
-                          Volts.of(0.2),
-                          WHEEL_RADIUS_METERS,
-                          KilogramSquareMeters.of(0.03),
-                          1.2))
-                  .withTrackLengthTrackWidth(TRACK_WIDTH, TRACK_WIDTH)
-                  .withRobotMass(MASS)
-                  .withCustomModuleTranslations(MODULE_LOCS))
-          : Optional.empty();
 }

@@ -59,7 +59,7 @@ public class Robot extends LoggedCommandRobot {
     // SignalLogger.stop(); SignalLogger.enableAutoLogging(false);
 
     // * INITALIZE SUBSYSTEMS
-    swerve = new Swerve();
+    swerve = Swerve.getInstance();
 
     // * CONFIGURE GAME BEHAVIOR
 

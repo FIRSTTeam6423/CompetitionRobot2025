@@ -8,7 +8,6 @@ package wmironpatriots.subsystems.swerve.gyro;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import edu.wpi.first.math.geometry.Rotation2d;
 import wmironpatriots.Constants.MATRIXID;
 
 public class GyroIOComp extends Gyro {
@@ -23,10 +22,5 @@ public class GyroIOComp extends Gyro {
   @Override
   public void periodic() {
     headingDegrees = yaw.getValueAsDouble();
-  }
-
-  @Override
-  public Rotation2d getRotation2d() {
-    return pigeon.getRotation2d();
   }
 }

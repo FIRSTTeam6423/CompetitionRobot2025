@@ -13,5 +13,7 @@ import monologue.Annotations.Log;
 public abstract class Gyro extends LoggedSubsystemComponent {
   @Log protected double headingDegrees;
 
-  public abstract Rotation2d getRotation2d();
+  public Rotation2d getRotation2d() {
+    return Rotation2d.fromDegrees(headingDegrees);
+  }
 }
