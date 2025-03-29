@@ -6,6 +6,13 @@
 
 package wmironpatriots.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.swerve.SwerveModule;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -19,9 +26,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import lib.LoggedSubsystem;
+import wmironpatriots.Constants;
 import wmironpatriots.subsystems.swerve.SwerveConstants.ModuleConfig;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
@@ -94,6 +104,66 @@ public class Swerve implements LoggedSubsystem {
     f2d.setRobotPose(getPose());
     swervePublisher.set(getModuleStates());
     SmartDashboard.putNumber("Speed MPS", getSpeedMPS());
+  }
+
+  /**
+   * Drive based on input streams
+   * 
+   * @param xVelocitySupplier X velocity stream
+   * @param yVelocitySupplier Y velocity stream
+   * @param omegaVelocitySupplier Omega velocity stream
+   */
+  public Command drive(
+    DoubleSupplier xVelocitySupplier,
+    DoubleSupplier yVelocitySupplier,
+    DoubleSupplier omegaVelocitySupplier) {
+      return drive(xVelocitySupplier, yVelocitySupplier, omegaVelocitySupplier, () -> 1.0);
+    }
+
+  /**
+   * Drive based on input streams
+   * 
+   * @param xVelocitySupplier X velocity stream
+   * @param yVelocitySupplier Y velocity stream
+   * @param omegaVelocitySupplier Omega velocity stream
+   * @param speedSupplier Speed modifier
+   */
+  public Command drive(
+    DoubleSupplier xVelocitySupplier,
+    DoubleSupplier yVelocitySupplier,
+    DoubleSupplier omegaVelocitySupplier,
+    DoubleSupplier speedSupplier) {
+    var maxLinearSpeed = SwerveConstants.MAX_LINEAR_VELOCITY.in(MetersPerSecond);
+    var maxAngularSpeed = SwerveConstants.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
+    return this.run(
+      () -> runVelocities(
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+          xVelocitySupplier.getAsDouble() * maxLinearSpeed * speedSupplier.getAsDouble(),
+          yVelocitySupplier.getAsDouble() * maxLinearSpeed * speedSupplier.getAsDouble(),
+          omegaVelocitySupplier.getAsDouble() * maxAngularSpeed, 
+          DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+            ? getHeading()
+            : getHeading().minus(Rotation2d.fromDegrees(180)))));
+  }
+
+  /**
+   * Run desired chassis velocities
+   * 
+   * @param velocities Desired velocities as {@link ChassisSpeeds}
+   */
+  public void runVelocities(ChassisSpeeds velocities) {
+    velocities = ChassisSpeeds.discretize(velocities, Constants.TICK_SPEED.in(Seconds));
+
+    // Convert to clamped SwerveModuleStates
+    SwerveModuleState[] desiredStates = kinematics.toSwerveModuleStates(velocities);
+    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConstants.MAX_LINEAR_VELOCITY);
+
+    // Request modules to run states and get optimized states
+    for (int i = 0; i < desiredStates.length; i++) {
+      desiredStates[i] = modules[i].runModuleSetpoint(desiredStates[i]);
+    }
+    // Update setpoint publisher
+    swerveSetpointPublisher.set(desiredStates);
   }
 
   public void stop() {
