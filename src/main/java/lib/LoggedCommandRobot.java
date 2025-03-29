@@ -6,11 +6,14 @@
 
 package lib;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import monologue.Logged;
 import monologue.Monologue;
+import monologue.Monologue.MonologueConfig;
 
 /**
  * Logged command based robot; To actuall enable monologue for logging, call the
@@ -21,21 +24,40 @@ public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
 
   private final Command auton;
 
+  private final Timer gcTimer;
+
   public LoggedCommandRobot() {
     this(0.02);
   }
 
   public LoggedCommandRobot(double tickSpeed) {
     super(tickSpeed);
+    // Monologue setup
+    Monologue.setupMonologue(
+        this,
+        "/Logged",
+        new MonologueConfig()
+            .withDatalogPrefix("")
+            .withOptimizeBandwidth(DriverStation::isFMSAttached)
+            .withLazyLogging(true));
+
     scheduler = CommandScheduler.getInstance();
 
     auton = getAuton();
+
+    gcTimer = new Timer();
+    gcTimer.start();
   }
 
   @Override
   public void robotPeriodic() {
     scheduler.run();
     Monologue.updateAll();
+
+    // I love our rio 1.0
+    if (gcTimer.hasElapsed(5)) {
+      System.gc();
+    }
   }
 
   @Override

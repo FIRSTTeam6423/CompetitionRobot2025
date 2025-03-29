@@ -3,21 +3,18 @@
 // 
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
-
 package wmironpatriots;
 
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import lib.LoggedCommandRobot;
 import monologue.Monologue;
-import monologue.Monologue.MonologueConfig;
 import wmironpatriots.subsystems.superstructure.Superstructure;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.util.deviceUtil.JoystickUtil;
@@ -33,15 +30,6 @@ public class Robot extends LoggedCommandRobot {
   public Robot() {
     // * INITALIZE SYSTEMS
     super(Constants.TICK_SPEED.in(Seconds));
-
-    // Monologue setup
-    Monologue.setupMonologue(
-        this,
-        "/Logged",
-        new MonologueConfig()
-            .withDatalogPrefix("")
-            .withOptimizeBandwidth(DriverStation::isFMSAttached)
-            .withLazyLogging(true));
     // logs build data to the datalog
     final String meta = "/BuildData/";
     Monologue.log(meta + "RuntimeType", getRuntimeType().toString());
