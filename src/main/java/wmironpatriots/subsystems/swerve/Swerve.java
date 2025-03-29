@@ -58,6 +58,11 @@ public class Swerve implements LoggedSubsystem {
     return instance;
   }
 
+  /**
+   * @return false if superstructure singleton hasn't been initalized
+   */
+  public static boolean hasInstance() { return instance == null; }
+
   private Swerve() {
     // Setup hardware
     gyro = new GyroIOComp();
@@ -111,11 +116,11 @@ public class Swerve implements LoggedSubsystem {
    * @param yVelocitySupplier Y velocity stream
    * @param omegaVelocitySupplier Omega velocity stream
    */
-  public Command drive(
+  public Command driveCmd(
       DoubleSupplier xVelocitySupplier,
       DoubleSupplier yVelocitySupplier,
       DoubleSupplier omegaVelocitySupplier) {
-    return drive(xVelocitySupplier, yVelocitySupplier, omegaVelocitySupplier, () -> 1.0);
+    return driveCmd(xVelocitySupplier, yVelocitySupplier, omegaVelocitySupplier, () -> 1.0);
   }
 
   /**
@@ -126,7 +131,7 @@ public class Swerve implements LoggedSubsystem {
    * @param omegaVelocitySupplier Omega velocity stream
    * @param speedSupplier Speed modifier
    */
-  public Command drive(
+  public Command driveCmd(
       DoubleSupplier xVelocitySupplier,
       DoubleSupplier yVelocitySupplier,
       DoubleSupplier omegaVelocitySupplier,

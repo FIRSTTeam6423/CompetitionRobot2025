@@ -74,7 +74,7 @@ public class Robot extends LoggedCommandRobot {
 
     // * CONFIGURE GAME BEHAVIOR
     swerve.setDefaultCommand(
-        swerve.drive(
+        swerve.driveCmd(
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
             () -> -JoystickUtil.applyTeleopModifier(driver::getRightX)));
