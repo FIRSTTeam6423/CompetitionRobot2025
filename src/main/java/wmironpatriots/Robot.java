@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import lib.LoggedCommandRobot;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
+import wmironpatriots.subsystems.superstructure.Superstructure;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.util.deviceUtil.JoystickUtil;
 
@@ -25,6 +26,7 @@ public class Robot extends LoggedCommandRobot {
   private final XboxController driver, operator;
 
   private final Swerve swerve;
+  private final Superstructure superstructure;
 
   private final Alert brownout;
 
@@ -66,7 +68,9 @@ public class Robot extends LoggedCommandRobot {
     driver = new XboxController(0);
     operator = new XboxController(1);
 
+    // Init subsystem singletons
     swerve = Swerve.getInstance();
+    superstructure = Superstructure.getInstance();
 
     // * CONFIGURE GAME BEHAVIOR
     swerve.setDefaultCommand(
