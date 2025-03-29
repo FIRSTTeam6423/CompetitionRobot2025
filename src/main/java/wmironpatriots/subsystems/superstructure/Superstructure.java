@@ -18,7 +18,7 @@ public class Superstructure {
   private final Climber climber;
 
   public Superstructure() {
-    elevator = new Elevator();
+    elevator = Elevator.createElevator();
     arm = new Arm();
     climber = new Climber();
 
