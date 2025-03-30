@@ -14,6 +14,8 @@ import org.littletonrobotics.junction.AutoLog;
 public abstract class Module {
   public final int index;
 
+  protected final ModuleIOInputsAutoLogged inputs;
+
   public Module(int index) {
     this.index = index;
 
@@ -113,6 +115,4 @@ public abstract class Module {
       double driveAppliedVolts,
       double driveCurrentAmps,
       double driveTorqueAmps) {}
-
-  protected final ModuleIOInputsAutoLogged inputs;
 }

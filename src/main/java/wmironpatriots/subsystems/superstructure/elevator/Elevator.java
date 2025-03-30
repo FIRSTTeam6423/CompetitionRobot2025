@@ -9,32 +9,31 @@ package wmironpatriots.subsystems.superstructure.elevator;
 import edu.wpi.first.wpilibj2.command.Command;
 import lib.LoggedSubsystem;
 import monologue.Annotations.Log;
+import org.littletonrobotics.junction.AutoLog;
 import wmironpatriots.Robot;
 
 public abstract class Elevator implements LoggedSubsystem {
-  // * LOGGED VALUES
-  @Log protected double poseRevs;
-  @Log protected double setpointPose;
-  @Log protected double parentCurrentAmps;
-  @Log protected double parentTorqueAmps;
-  @Log protected double parentAppliedVolts;
-  @Log protected double parentTempCelsius;
-  @Log protected double childCurrentAmps;
-  @Log protected double childTorqueAmps;
-  @Log protected double childAppliedVolts;
-  @Log protected double childTempCelsius;
+  private boolean isZeroed;
+  private double setpointPose;
 
-  private boolean isZeroed = false;
+  protected final ElevatorIOInputsAutoLogged inputs;
 
   public static Elevator createElevator() {
     return Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOComp(); // ! SIMULATION PLACEHOLDER
+  }
+
+  public Elevator() {
+    isZeroed = false;
+    setpointPose = 0.0;
+
+    inputs = new ElevatorIOInputsAutoLogged();
   }
 
   /** Runs elevator down until current spikes above threshold */
   public Command runCurrentZeroingCmd() {
     if (isZeroed) return this.runOnce(() -> {});
     return this.run(() -> setMotorCurrent(-1.0))
-        .until(() -> parentCurrentAmps > 20.0)
+        .until(() -> inputs.data.parentCurrentAmps > 20.0)
         .finallyDo(
             (i) -> {
               stopMotors();
@@ -63,7 +62,7 @@ public abstract class Elevator implements LoggedSubsystem {
    * @return true if pose is ±0.5 from setpoint
    */
   public boolean nearSetpoint() {
-    return Math.abs(setpointPose - poseRevs) > 0.5;
+    return Math.abs(setpointPose - inputs.data.poseRevs) > 0.5;
   }
 
   /**
@@ -84,4 +83,21 @@ public abstract class Elevator implements LoggedSubsystem {
   protected abstract void setEncoderPose(double poseRevs);
 
   protected abstract void enableCoastMode(boolean enabled);
+
+  // * LOGGING
+  @AutoLog
+  public static class ElevatorIOInputs {
+    public ElevatorIOData data = new ElevatorIOData(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  }
+
+  public record ElevatorIOData(
+      double poseRevs,
+      double parentCurrentAmps,
+      double parentTorqueAmps,
+      double parentAppliedVolts,
+      double parentTempCelsius,
+      double childCurrentAmps,
+      double childTorqueAmps,
+      double childAppliedVolts,
+      double childTempCelsius) {}
 }
