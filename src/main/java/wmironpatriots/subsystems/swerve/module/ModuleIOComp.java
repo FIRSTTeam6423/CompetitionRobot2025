@@ -87,16 +87,17 @@ public class ModuleIOComp extends Module {
         driveVolts,
         driveCurrent,
         driveTorque);
-    pivotPoseRevs = pivotPose.getValueAsDouble();
-    cancoderPoseRevs = cancoderPose.getValueAsDouble();
-    pivotAppliedVolts = pivotVolts.getValueAsDouble();
-    pivotCurrentAmps = pivotCurrent.getValueAsDouble();
 
-    drivePoseMeters = drivePose.getValueAsDouble();
-    driveVelMPS = driveVel.getValueAsDouble();
-    driveAppliedVolts = driveVolts.getValueAsDouble();
-    driveCurrentAmps = driveCurrent.getValueAsDouble();
-    driveTorqueAmps = driveTorque.getValueAsDouble();
+    inputs.data = new ModuleData(
+      pivotPose.getValueAsDouble(), 
+      cancoderPose.getValueAsDouble(), 
+      pivotVolts.getValueAsDouble(), 
+      pivotCurrent.getValueAsDouble(), 
+      drivePose.getValueAsDouble(),
+      driveVel.getValueAsDouble(), 
+      driveVolts.getValueAsDouble(),
+      driveCurrent.getValueAsDouble(),
+      driveTorque.getValueAsDouble()); 
   }
 
   @Override

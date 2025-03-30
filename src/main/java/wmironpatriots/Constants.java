@@ -16,6 +16,7 @@ public class Constants {
 
   /** Flags for runtime */
   public static class FLAGS {
+    public static final boolean REPLAY_MODE = false;
     public static final boolean TUNING_MODE = false;
   }
 

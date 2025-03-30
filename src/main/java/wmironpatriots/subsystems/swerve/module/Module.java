@@ -9,26 +9,18 @@ package wmironpatriots.subsystems.swerve.module;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import lib.LoggedSubsystemComponent;
-import monologue.Annotations.Log;
+import org.littletonrobotics.junction.AutoLog;
 
-public abstract class Module extends LoggedSubsystemComponent {
-  // * LOGGED VALUES
-  @Log protected double pivotPoseRevs;
-  @Log protected double cancoderPoseRevs;
-  @Log protected double pivotAppliedVolts;
-  @Log protected double pivotCurrentAmps;
-  @Log protected double drivePoseMeters;
-  @Log protected double driveVelMPS;
-  @Log protected double driveAppliedVolts;
-  @Log protected double driveCurrentAmps;
-  @Log protected double driveTorqueAmps;
-
+public abstract class Module {
   public final int index;
 
   public Module(int index) {
     this.index = index;
+
+    inputs = new ModuleIOInputsAutoLogged();
   }
+
+  public abstract void periodic();
 
   /**
    * Runs module to {@link SwerveModuleState} setpoint
@@ -51,21 +43,21 @@ public abstract class Module extends LoggedSubsystemComponent {
    * @return module angle as {@link Rotation2d}
    */
   public Rotation2d getRotation2d() {
-    return Rotation2d.fromRotations(pivotPoseRevs);
+    return Rotation2d.fromRotations(inputs.data.pivotPoseRevs);
   }
 
   /**
    * @return current {@link SwerveModuleState}
    */
   public SwerveModuleState getModuleState() {
-    return new SwerveModuleState(driveVelMPS, getRotation2d());
+    return new SwerveModuleState(inputs.data.driveVelMPS, getRotation2d());
   }
 
   /**
    * @return current {@link SwerveModulePosition}
    */
   public SwerveModulePosition getModulePose() {
-    return new SwerveModulePosition(drivePoseMeters, getRotation2d());
+    return new SwerveModulePosition(inputs.data.drivePoseMeters, getRotation2d());
   }
 
   // * HARDWARE METHODS
@@ -103,4 +95,24 @@ public abstract class Module extends LoggedSubsystemComponent {
   public abstract void stopMotors();
 
   protected abstract void enableCoastMode(boolean enabled);
+
+  // * LOGGING
+  @AutoLog
+  public static class ModuleIOInputs {
+    public ModuleData data = new ModuleData(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  }
+
+  /** Record for storing module data */
+  public record ModuleData(
+      double pivotPoseRevs,
+      double cancoderPoseRevs,
+      double pivotAppliedVolts,
+      double pivotCurrentAmps,
+      double drivePoseMeters,
+      double driveVelMPS,
+      double driveAppliedVolts,
+      double driveCurrentAmps,
+      double driveTorqueAmps) {}
+
+  protected final ModuleIOInputsAutoLogged inputs;
 }

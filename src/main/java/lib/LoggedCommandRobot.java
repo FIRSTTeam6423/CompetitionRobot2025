@@ -6,20 +6,17 @@
 
 package lib;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import monologue.Logged;
-import monologue.Monologue;
-import monologue.Monologue.MonologueConfig;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Logged command based robot; To actuall enable monologue for logging, call the
  * Monologue::setupMonologue method
  */
-public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
+public abstract class LoggedCommandRobot extends TimedRobot {
   private final CommandScheduler scheduler;
 
   private final Command auton;
@@ -32,27 +29,23 @@ public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
 
   public LoggedCommandRobot(double tickSpeed) {
     super(tickSpeed);
-    // Monologue setup
-    Monologue.setupMonologue(
-        this,
-        "/Logged",
-        new MonologueConfig()
-            .withDatalogPrefix("")
-            .withOptimizeBandwidth(DriverStation::isFMSAttached)
-            .withLazyLogging(true));
+
+    setupMetadata();
+    Logger.start();
 
     scheduler = CommandScheduler.getInstance();
-
     auton = getAuton();
 
+    // Init garbage collector timer
     gcTimer = new Timer();
     gcTimer.start();
   }
 
+  public abstract void setupMetadata();
+
   @Override
   public void robotPeriodic() {
     Tracer.traceFunc("CommandScheduler", scheduler::run);
-    Tracer.traceFunc("MonologueUpdate", Monologue::updateAll);
 
     // I love our rio 1.0
     if (gcTimer.hasElapsed(5)) {
