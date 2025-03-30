@@ -9,6 +9,9 @@ package wmironpatriots.subsystems.swerve.module;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import wmironpatriots.Robot;
+import wmironpatriots.subsystems.swerve.SwerveConstants.ModuleConfig;
+
 import org.littletonrobotics.junction.AutoLog;
 
 public abstract class Module {
@@ -16,7 +19,17 @@ public abstract class Module {
 
   protected final ModuleIOInputsAutoLogged inputs;
 
-  public Module(int index) {
+  /**
+   * Module factory method
+   * 
+   * @param config Module config to use
+   * @return module IO based on robot
+   */
+  public static Module createModule(ModuleConfig config) {
+    return Robot.isReal() ? new ModuleIOComp(config) : new ModuleIOComp(config); // ! SIMULATION PLACEHOLDER
+  }
+
+  protected Module(int index) {
     this.index = index;
 
     inputs = new ModuleIOInputsAutoLogged();

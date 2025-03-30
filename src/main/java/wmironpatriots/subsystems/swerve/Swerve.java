@@ -52,7 +52,7 @@ public class Swerve implements LoggedSubsystem {
     ModuleConfig[] moduleConfigs = SwerveConstants.MODULE_CONFIGS;
     modules = new ModuleIOComp[moduleConfigs.length];
     for (int i = 0; i < modules.length; i++) {
-      modules[i] = new ModuleIOComp(moduleConfigs[i]);
+      modules[i] = Module.createModule(moduleConfigs[i]);
     }
 
     // Init helpers

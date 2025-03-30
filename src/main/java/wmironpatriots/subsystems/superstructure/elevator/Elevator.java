@@ -8,7 +8,6 @@ package wmironpatriots.subsystems.superstructure.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import lib.LoggedSubsystem;
-import monologue.Annotations.Log;
 import org.littletonrobotics.junction.AutoLog;
 import wmironpatriots.Robot;
 
@@ -18,11 +17,16 @@ public abstract class Elevator implements LoggedSubsystem {
 
   protected final ElevatorIOInputsAutoLogged inputs;
 
+  /**
+   * Elevator factory method
+   * 
+   * @return Elevator IO based on robot
+   */
   public static Elevator createElevator() {
     return Robot.isReal() ? new ElevatorIOComp() : new ElevatorIOComp(); // ! SIMULATION PLACEHOLDER
   }
 
-  public Elevator() {
+  protected Elevator() {
     isZeroed = false;
     setpointPose = 0.0;
 
