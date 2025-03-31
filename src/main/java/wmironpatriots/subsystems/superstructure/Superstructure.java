@@ -10,7 +10,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.superstructure.arm.Arm;
+import wmironpatriots.subsystems.superstructure.arm.ArmIOComp;
 import wmironpatriots.subsystems.superstructure.climber.Climber;
+import wmironpatriots.subsystems.superstructure.climber.ClimberIOComp;
 import wmironpatriots.subsystems.superstructure.elevator.Elevator;
 import wmironpatriots.subsystems.superstructure.elevator.ElevatorIOComp;
 
