@@ -8,6 +8,8 @@ package wmironpatriots;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import java.util.Optional;
+
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -35,7 +37,7 @@ public class Robot extends LoggedRobot {
 
   // Subsystems
   private final Swerve swerve;
-  private final Superstructure superstructure;
+  private final Optional<Superstructure> superstructure;
 
   // Command scheduler pointer
   private final CommandScheduler scheduler;
@@ -88,7 +90,6 @@ public class Robot extends LoggedRobot {
     } else {
       if (FLAGS.REPLAY_MODE) {
         new Alert("Replay mode enabled", AlertType.kInfo).set(true);
-        ;
 
         // Run as fast as possible
         setUseTiming(false);
@@ -111,7 +112,11 @@ public class Robot extends LoggedRobot {
 
     // Init subsystem singletons
     swerve = Swerve.create();
-    superstructure = Superstructure.create();
+    if (FLAGS.SUPERSTRUCTURE_DISABLED) {
+      superstructure = Optional.empty();
+
+      new Alert("Superstructure disabled", AlertType.kInfo).set(true);;
+    } else superstructure = Optional.of(Superstructure.create());
 
     // * CONFIGURE GAME BEHAVIOR
     swerve.setDefaultCommand(

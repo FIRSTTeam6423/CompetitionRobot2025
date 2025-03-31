@@ -18,6 +18,8 @@ public class Constants {
   public static class FLAGS {
     public static final boolean REPLAY_MODE = false;
     public static final boolean TUNING_MODE = false;
+
+    public static final boolean SUPERSTRUCTURE_DISABLED = true;
   }
 
   /** static class containing all device ids */
