@@ -12,6 +12,14 @@ import org.littletonrobotics.junction.AutoLog;
 import wmironpatriots.Robot;
 
 public abstract class Elevator implements LoggedSubsystem {
+  // * CONSTANTS
+  public static final double POSE_L1_REVS = 0.0;
+  public static final double POSE_L2_REVS = 0.0;
+  public static final double POSE_L3_REVS = 0.0;
+  public static final double POSE_L4_REVS = 0.0;
+  public static final double POSE_ALGAE_H_REVS = 0.0;
+  public static final double POSE_ALGAE_L_REVS = 0.0;
+
   private boolean isZeroed;
   private double setpointPose;
 
@@ -19,7 +27,7 @@ public abstract class Elevator implements LoggedSubsystem {
 
   /**
    * Elevator factory method
-   * 
+   *
    * @return Elevator IO based on robot
    */
   public static Elevator createElevator() {
@@ -42,7 +50,7 @@ public abstract class Elevator implements LoggedSubsystem {
             (i) -> {
               stopMotors();
               setEncoderPose(0.0);
-              System.out.println("Elevator zeroed");
+              System.out.println("ELEVATOR ZEROED");
               isZeroed = true;
             });
   }
@@ -91,10 +99,10 @@ public abstract class Elevator implements LoggedSubsystem {
   // * LOGGING
   @AutoLog
   public static class ElevatorIOInputs {
-    public ElevatorIOData data = new ElevatorIOData(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public ElevatorData data = new ElevatorData(0, 0, 0, 0, 0, 0, 0, 0, 0);
   }
 
-  public record ElevatorIOData(
+  public record ElevatorData(
       double poseRevs,
       double parentCurrentAmps,
       double parentTorqueAmps,

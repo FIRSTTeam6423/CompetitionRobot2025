@@ -94,16 +94,17 @@ public class ElevatorIOComp extends Elevator {
         childVolts,
         childTemp);
 
-    inputs.data = new ElevatorIOData(
-      pose.getValueAsDouble(), 
-      parentCurrent.getValueAsDouble(), 
-      parentTorque.getValueAsDouble(), 
-      parentVolts.getValueAsDouble(), 
-      parentTemp.getValueAsDouble(), 
-      childCurrent.getValueAsDouble(), 
-      childTorque.getValueAsDouble(), 
-      childVolts.getValueAsDouble(), 
-      childTemp.getValueAsDouble());
+    inputs.data =
+        new ElevatorData(
+            pose.getValueAsDouble(),
+            parentCurrent.getValueAsDouble(),
+            parentTorque.getValueAsDouble(),
+            parentVolts.getValueAsDouble(),
+            parentTemp.getValueAsDouble(),
+            childCurrent.getValueAsDouble(),
+            childTorque.getValueAsDouble(),
+            childVolts.getValueAsDouble(),
+            childTemp.getValueAsDouble());
   }
 
   @Override

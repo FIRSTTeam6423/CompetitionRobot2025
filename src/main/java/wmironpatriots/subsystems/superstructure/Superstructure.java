@@ -19,7 +19,7 @@ public class Superstructure {
 
   public Superstructure() {
     elevator = Elevator.createElevator();
-    arm = new Arm();
+    arm = Arm.createArm();
     climber = new Climber();
 
     elevator.setDefaultCommand(elevatorDefaultCmd());
