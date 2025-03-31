@@ -26,7 +26,6 @@ public abstract class Elevator extends SubsystemBase {
 
   protected Elevator() {
     isZeroed = false;
-    setpointPose = 0.0;
 
     inputs = new ElevatorIOInputsAutoLogged();
   }

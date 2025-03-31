@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.AutoLog;
 
 public abstract class Arm extends SubsystemBase {
   private boolean isZeroed;
+  private double setpointPose;
 
   protected final ArmIOInputsAutoLogged inputs;
 
@@ -34,6 +35,35 @@ public abstract class Arm extends SubsystemBase {
               System.out.println("ARM ZEROED");
               isZeroed = true;
             });
+  }
+
+  /**
+   * Runs arm to specified pose
+   *
+   * @param poseRevs desired pose in revs
+   */
+  public Command runPoseCmd(double poseRevs) {
+    return this.run(
+        () -> {
+          setpointPose = poseRevs;
+          setMotorPose(poseRevs);
+        });
+  }
+
+  /**
+   * Checks if arm pose is around setpoint pose
+   *
+   * @return true if pose is ±0.5 from setpoint
+   */
+  public boolean nearSetpoint() {
+    return Math.abs(setpointPose - inputs.data.poseRevs) > 0.5;
+  }
+
+  /**
+   * @return true if arm is zeroed properly
+   */
+  public boolean isInitalized() {
+    return isZeroed;
   }
 
   // * HARDWARE METHODS
