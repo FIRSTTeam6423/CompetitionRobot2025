@@ -34,8 +34,8 @@ public class ModuleIOComp extends Module {
 
   private final SimpleMotorFeedforward feedforward;
 
-  private final BaseStatusSignal pivotPose, cancoderPose, pivotVolts, pivotCurrent;
-  private final BaseStatusSignal drivePose, driveVel, driveVolts, driveCurrent, driveTorque;
+  private final BaseStatusSignal pivotPoseSig, cancoderPoseSig, pivotVoltsSig, pivotCurrentSig;
+  private final BaseStatusSignal drivePoseSig, driveVelSig, driveVoltsSig, driveCurrentSig, driveTorqueSig;
 
   public ModuleIOComp(ModuleConfig config) {
     super(config.index());
@@ -56,21 +56,21 @@ public class ModuleIOComp extends Module {
     reqPose = new PositionTorqueCurrentFOC(0.0);
     reqVel = new VelocityTorqueCurrentFOC(0.0);
 
-    pivotPose = pivot.getPosition();
-    cancoderPose = cancoder.getPosition();
-    pivotVolts = pivot.getMotorVoltage();
-    pivotCurrent = pivot.getStatorCurrent();
-    drivePose = drive.getPosition();
-    driveVel = drive.getVelocity();
-    driveVolts = drive.getMotorVoltage();
-    driveCurrent = drive.getStatorCurrent();
-    driveTorque = drive.getTorqueCurrent();
+    pivotPoseSig = pivot.getPosition();
+    cancoderPoseSig = cancoder.getPosition();
+    pivotVoltsSig = pivot.getMotorVoltage();
+    pivotCurrentSig = pivot.getStatorCurrent();
+    drivePoseSig = drive.getPosition();
+    driveVelSig = drive.getVelocity();
+    driveVoltsSig = drive.getMotorVoltage();
+    driveCurrentSig = drive.getStatorCurrent();
+    driveTorqueSig = drive.getTorqueCurrent();
 
     feedforward = new SimpleMotorFeedforward(5.0, 0.0);
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        100.0, pivotVolts, pivotCurrent, driveVel, driveVolts, driveCurrent, driveTorque);
-    BaseStatusSignal.setUpdateFrequencyForAll(ODO_FREQ, pivotPose, drivePose);
+        100.0, pivotVoltsSig, pivotCurrentSig, driveVelSig, driveVoltsSig, driveCurrentSig, driveTorqueSig);
+    BaseStatusSignal.setUpdateFrequencyForAll(ODO_FREQ, pivotPoseSig, drivePoseSig);
 
     pivot.optimizeBusUtilization(0, 0.1);
     drive.optimizeBusUtilization(0, 0.1);
@@ -79,26 +79,26 @@ public class ModuleIOComp extends Module {
   @Override
   public void periodic() {
     BaseStatusSignal.refreshAll(
-        pivotPose,
-        pivotVolts,
-        pivotCurrent,
-        drivePose,
-        driveVel,
-        driveVolts,
-        driveCurrent,
-        driveTorque);
+        pivotPoseSig,
+        pivotVoltsSig,
+        pivotCurrentSig,
+        drivePoseSig,
+        driveVelSig,
+        driveVoltsSig,
+        driveCurrentSig,
+        driveTorqueSig);
 
     inputs.data =
         new ModuleData(
-            pivotPose.getValueAsDouble(),
-            cancoderPose.getValueAsDouble(),
-            pivotVolts.getValueAsDouble(),
-            pivotCurrent.getValueAsDouble(),
-            drivePose.getValueAsDouble(),
-            driveVel.getValueAsDouble(),
-            driveVolts.getValueAsDouble(),
-            driveCurrent.getValueAsDouble(),
-            driveTorque.getValueAsDouble());
+            pivotPoseSig.getValueAsDouble(),
+            cancoderPoseSig.getValueAsDouble(),
+            pivotVoltsSig.getValueAsDouble(),
+            pivotCurrentSig.getValueAsDouble(),
+            drivePoseSig.getValueAsDouble(),
+            driveVelSig.getValueAsDouble(),
+            driveVoltsSig.getValueAsDouble(),
+            driveCurrentSig.getValueAsDouble(),
+            driveTorqueSig.getValueAsDouble());
   }
 
   @Override

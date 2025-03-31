@@ -6,8 +6,8 @@
 
 package wmironpatriots.subsystems.superstructure.climber;
 
-import lib.LoggedSubsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Climber implements LoggedSubsystem {
+public class Climber extends SubsystemBase {
   public Climber() {}
 }

@@ -8,19 +8,35 @@ package wmironpatriots.subsystems.superstructure;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import wmironpatriots.Robot;
 import wmironpatriots.subsystems.superstructure.arm.Arm;
 import wmironpatriots.subsystems.superstructure.climber.Climber;
 import wmironpatriots.subsystems.superstructure.elevator.Elevator;
+import wmironpatriots.subsystems.superstructure.elevator.ElevatorIOComp;
 
 public class Superstructure {
   private final Elevator elevator;
   private final Arm arm;
   private final Climber climber;
 
-  public Superstructure() {
-    elevator = Elevator.createElevator();
-    arm = Arm.createArm();
-    climber = new Climber();
+  public static Superstructure create() {
+    if (Robot.isReal()) {
+      return new Superstructure(
+        new ElevatorIOComp(), 
+        new ArmIOComp(), 
+        new ClimberIOComp());
+    } else {
+      return new Superstructure(
+        new ElevatorIOComp(), 
+        new ArmIOComp(), 
+        new ClimberIOComp());
+    }
+  }
+
+  protected Superstructure(Elevator elevatorIO, Arm armIO, Climber climberIO) {
+    elevator = elevatorIO;
+    arm = armIO;
+    climber = climberIO;
 
     elevator.setDefaultCommand(elevatorDefaultCmd());
     arm.setDefaultCommand(armDefaultCmd());

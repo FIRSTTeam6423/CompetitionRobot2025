@@ -7,13 +7,10 @@
 package wmironpatriots.subsystems.swerve.gyro;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import lib.LoggedSubsystemComponent;
-import monologue.Annotations.Log;
 
-public abstract class Gyro extends LoggedSubsystemComponent {
-  @Log protected double headingDegrees;
-
-  public Rotation2d getRotation2d() {
-    return Rotation2d.fromDegrees(headingDegrees);
-  }
+public abstract class Gyro {
+  /**
+   * @return get gyro yaw as {@link Rotation2d}
+   */
+  public abstract Rotation2d getRotation2d();
 }

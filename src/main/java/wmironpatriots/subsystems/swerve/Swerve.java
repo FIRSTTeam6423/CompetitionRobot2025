@@ -25,17 +25,19 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import java.util.function.DoubleSupplier;
-import lib.LoggedSubsystem;
 import lib.Tracer;
 import wmironpatriots.Constants;
+import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.SwerveConstants.ModuleConfig;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
 
-public class Swerve implements LoggedSubsystem {
+public class Swerve extends SubsystemBase {
   private final Gyro gyro;
   private final Module[] modules;
 
@@ -45,15 +47,34 @@ public class Swerve implements LoggedSubsystem {
   private final Field2d f2d;
 
   private final StructArrayPublisher<SwerveModuleState> swervePublisher, swerveSetpointPublisher;
-
-  public Swerve() {
-    // Setup hardware
-    gyro = new GyroIOComp();
+  
+  /**
+   * @return new swerve drive based on robot type (simulated or real)
+   */
+  public static Swerve create() {
     ModuleConfig[] moduleConfigs = SwerveConstants.MODULE_CONFIGS;
-    modules = new ModuleIOComp[moduleConfigs.length];
-    for (int i = 0; i < modules.length; i++) {
-      modules[i] = Module.createModule(moduleConfigs[i]);
+
+    if (Robot.isReal()) {
+      return new Swerve(
+        new GyroIOComp(), 
+        new ModuleIOComp(moduleConfigs[0]),
+        new ModuleIOComp(moduleConfigs[1]),
+        new ModuleIOComp(moduleConfigs[2]),
+        new ModuleIOComp(moduleConfigs[3]));
+    } else {
+      return new Swerve(
+        new GyroIOComp(), 
+        new ModuleIOComp(moduleConfigs[0]),
+        new ModuleIOComp(moduleConfigs[1]),
+        new ModuleIOComp(moduleConfigs[2]),
+        new ModuleIOComp(moduleConfigs[3])); // ! SIMULATION PLACEHOLDER
     }
+  }
+
+  protected Swerve(Gyro gyro, Module... modules) {
+    // Setup hardware
+    this.gyro = gyro;
+    this.modules = modules;
 
     // Init helpers
     kinematics = new SwerveDriveKinematics(SwerveConstants.MODULE_LOCS);
@@ -85,7 +106,6 @@ public class Swerve implements LoggedSubsystem {
     for (Module module : modules) {
       Tracer.traceFunc("module" + module.index + "Periodic", module::periodic);
     }
-    Tracer.traceFunc("gyroPeriodic", gyro::periodic);
     if (DriverStation.isDisabled()) stop();
 
     f2d.setRobotPose(getPose());

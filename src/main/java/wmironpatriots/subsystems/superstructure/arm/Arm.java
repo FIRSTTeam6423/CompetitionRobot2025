@@ -6,22 +6,15 @@
 
 package wmironpatriots.subsystems.superstructure.arm;
 
-import lib.LoggedSubsystem;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import org.littletonrobotics.junction.AutoLog;
 
-import edu.wpi.first.wpilibj2.command.Command;
-
-public abstract class Arm implements LoggedSubsystem {
+public abstract class Arm extends SubsystemBase {
   private boolean isZeroed;
 
   protected final ArmIOInputsAutoLogged inputs;
-
-  /**
-   * Arm factory method
-   *
-   * @return Arm IO based on robot
-   */
-  public static Arm createArm() {}
 
   protected Arm() {
     isZeroed = false;
@@ -33,13 +26,14 @@ public abstract class Arm implements LoggedSubsystem {
   public Command runCurrentZeroingCmd() {
     if (isZeroed) return this.runOnce(() -> {});
     return this.run(() -> setMotorCurrent(-1.0))
-        .until(() -> inputs.data.pivotCurrentAmps > 20.0)
-        .finallyDo((i) -> {
-          stopMotors();
-          setEncoderPose(0.0);
-          System.out.println("ARM ZEROED");
-          isZeroed = true;
-        });
+        .until(() -> inputs.data.currentAmps > 20.0)
+        .finallyDo(
+            (i) -> {
+              stopMotors();
+              setEncoderPose(0.0);
+              System.out.println("ARM ZEROED");
+              isZeroed = true;
+            });
   }
 
   // * HARDWARE METHODS
@@ -56,7 +50,9 @@ public abstract class Arm implements LoggedSubsystem {
 
   // * LOGGING
   @AutoLog
-  public static class ArmIOInputs {}
+  public static class ArmIOInputs {
+    public ArmData data = new ArmData(0, 0, 0, 0, 0, false);
+  }
 
-  public record ArmData() {}
+  public record ArmData(double poseRevs, double currentAmps, double torqueAmps, double appliedVolts, double tempCelsius, boolean beamTriggered) {}
 }
