@@ -60,6 +60,13 @@ public abstract class Arm extends SubsystemBase {
   }
 
   /**
+   * @return true if arm has coral
+   */
+  public boolean hasCoral() {
+    return inputs.data.beamTriggered;
+  }
+
+  /**
    * @return true if arm is zeroed properly
    */
   public boolean isInitalized() {

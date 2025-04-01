@@ -15,10 +15,13 @@ import wmironpatriots.subsystems.superstructure.climber.Climber;
 import wmironpatriots.subsystems.superstructure.climber.ClimberIOComp;
 import wmironpatriots.subsystems.superstructure.elevator.Elevator;
 import wmironpatriots.subsystems.superstructure.elevator.ElevatorIOComp;
+import wmironpatriots.subsystems.superstructure.rollers.Rollers;
+import wmironpatriots.subsystems.superstructure.rollers.RollersIOComp;
 
 public class Superstructure {
   private final Elevator elevator;
   private final Arm arm;
+  private final Rollers rollers;
   private final Climber climber;
 
   public static Superstructure create() {
@@ -26,18 +29,21 @@ public class Superstructure {
       return new Superstructure(
         new ElevatorIOComp(), 
         new ArmIOComp(), 
+        new RollersIOComp(),
         new ClimberIOComp());
     } else {
       return new Superstructure(
         new ElevatorIOComp(), 
         new ArmIOComp(), 
+        new RollersIOComp(),
         new ClimberIOComp());
     }
   }
 
-  protected Superstructure(Elevator elevatorIO, Arm armIO, Climber climberIO) {
+  protected Superstructure(Elevator elevatorIO, Arm armIO, Rollers rollersIO, Climber climberIO) {
     elevator = elevatorIO;
     arm = armIO;
+    rollers = rollersIO;
     climber = climberIO;
 
     elevator.setDefaultCommand(elevatorDefaultCmd());
@@ -48,7 +54,7 @@ public class Superstructure {
   // * SUBSYSTEM DEFAULT CMDS
   private Command elevatorDefaultCmd() {
     return Commands.sequence(
-        elevator.runCurrentZeroingCmd().onlyIf(elevator::isInitalized),
+        elevator.runCurrentZeroingCmd().onlyIf(() -> !elevator.isInitalized()),
         elevator
             .runPoseCmd(1)
             .until(elevator::nearSetpoint)
@@ -56,10 +62,44 @@ public class Superstructure {
   }
 
   private Command armDefaultCmd() {
-    return Commands.run(() -> {}, arm);
+    return Commands.sequence(
+      arm.runCurrentZeroingCmd().onlyIf(() -> !elevator.isInitalized()),
+      arm.runPoseCmd(0.0)
+          .until(arm::nearSetpoint)
+          .finallyDo(() -> arm.stopMotors())
+    );
   }
 
   private Command climberDefaultCmd() {
     return Commands.run(() -> {}, climber);
+  }
+
+  /**
+   * Scores coral to specified level
+   * 
+   * @param level desired scoring level
+   */
+  public Command scoreCoralCmd(ReefLevel level) {
+    return Commands.parallel(
+      arm.runPoseCmd(level.armPose),
+      Commands.waitUntil(arm::nearSetpoint)
+        .andThen(elevator.runPoseCmd(level.elevatorPose)),
+      Commands.waitUntil(() -> arm.nearSetpoint() && elevator.nearSetpoint())
+        .andThen(rollers.runRollerSpeed(Rollers.SPEED_SCORING).until(arm::hasCoral)));
+  }
+
+  public static enum ReefLevel {
+    L1(Elevator.POSE_L1_REVS, 0.0),
+    L2(Elevator.POSE_L2_REVS, 0.0),
+    L3(Elevator.POSE_L3_REVS, 0.0),
+    L4(Elevator.POSE_L4_REVS, 0.0);
+
+    double elevatorPose;
+    double armPose;
+
+    private ReefLevel(double elevatorPose, double armPose) {
+      this.elevatorPose = elevatorPose;
+      this.armPose = armPose;
+    }
   }
 }
