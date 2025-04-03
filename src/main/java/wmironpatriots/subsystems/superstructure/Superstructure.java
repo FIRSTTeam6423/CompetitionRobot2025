@@ -8,6 +8,7 @@ package wmironpatriots.subsystems.superstructure;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import java.util.function.BooleanSupplier;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.superstructure.arm.Arm;
 import wmironpatriots.subsystems.superstructure.arm.ArmIOComp;
@@ -27,16 +28,10 @@ public class Superstructure {
   public static Superstructure create() {
     if (Robot.isReal()) {
       return new Superstructure(
-        new ElevatorIOComp(), 
-        new ArmIOComp(), 
-        new RollersIOComp(),
-        new ClimberIOComp());
+          new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp(), new ClimberIOComp());
     } else {
       return new Superstructure(
-        new ElevatorIOComp(), 
-        new ArmIOComp(), 
-        new RollersIOComp(),
-        new ClimberIOComp());
+          new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp(), new ClimberIOComp());
     }
   }
 
@@ -63,11 +58,8 @@ public class Superstructure {
 
   private Command armDefaultCmd() {
     return Commands.sequence(
-      arm.runCurrentZeroingCmd().onlyIf(() -> !elevator.isInitalized()),
-      arm.runPoseCmd(0.0)
-          .until(arm::nearSetpoint)
-          .finallyDo(() -> arm.stopMotors())
-    );
+        arm.runCurrentZeroingCmd().onlyIf(() -> !elevator.isInitalized()),
+        arm.runPoseCmd(0.0).until(arm::nearSetpoint).finallyDo(() -> arm.stopMotors()));
   }
 
   private Command climberDefaultCmd() {
@@ -75,17 +67,31 @@ public class Superstructure {
   }
 
   /**
-   * Scores coral to specified level
+   * Scores coral to desired reef level
    * 
-   * @param level desired scoring level
+   * @param level desired reef level as {@link ReefLevel}
+   * @return
    */
   public Command scoreCoralCmd(ReefLevel level) {
+    return prepAndScoreCoralCmd(level, () -> true);
+  }
+
+  /**
+   * Sets up superstructure in scoring position, 
+   * then waits until {@link BooleanSupplier} returns true
+   * before scoring
+   * 
+   * @param level desired reef level as {@link ReefLevel}
+   * @param scoreCondition {@link BooleanSupplier} that triggers scoring
+   */
+  public Command prepAndScoreCoralCmd(ReefLevel level, BooleanSupplier scoreCondition) {
     return Commands.parallel(
-      arm.runPoseCmd(level.armPose),
-      Commands.waitUntil(arm::nearSetpoint)
-        .andThen(elevator.runPoseCmd(level.elevatorPose)),
-      Commands.waitUntil(() -> arm.nearSetpoint() && elevator.nearSetpoint())
-        .andThen(rollers.runRollerSpeed(Rollers.SPEED_SCORING).until(arm::hasCoral)));
+        arm.runPoseCmd(level.armPose),
+        Commands.waitUntil(arm::nearSetpoint).andThen(elevator.runPoseCmd(level.elevatorPose)),
+        Commands.sequence(
+            Commands.waitUntil(() -> arm.nearSetpoint() && elevator.nearSetpoint()),
+            Commands.waitUntil(scoreCondition),
+            rollers.runRollerSpeed(Rollers.SPEED_SCORING).until(() -> !arm.hasCoral())));
   }
 
   public static enum ReefLevel {

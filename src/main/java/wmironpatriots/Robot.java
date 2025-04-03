@@ -8,8 +8,6 @@ package wmironpatriots;
 
 import static edu.wpi.first.units.Units.Seconds;
 
-import java.util.Optional;
-
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -18,6 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import java.util.Optional;
 import lib.Tracer;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -115,7 +114,8 @@ public class Robot extends LoggedRobot {
     if (FLAGS.SUPERSTRUCTURE_DISABLED) {
       superstructure = Optional.empty();
 
-      new Alert("Superstructure disabled", AlertType.kInfo).set(true);;
+      new Alert("Superstructure disabled", AlertType.kInfo).set(true);
+      ;
     } else superstructure = Optional.of(Superstructure.create());
 
     // * CONFIGURE GAME BEHAVIOR

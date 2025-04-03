@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import java.util.function.DoubleSupplier;
 import lib.Tracer;
 import wmironpatriots.Constants;
@@ -47,7 +46,7 @@ public class Swerve extends SubsystemBase {
   private final Field2d f2d;
 
   private final StructArrayPublisher<SwerveModuleState> swervePublisher, swerveSetpointPublisher;
-  
+
   /**
    * @return new swerve drive based on robot type (simulated or real)
    */
@@ -56,18 +55,18 @@ public class Swerve extends SubsystemBase {
 
     if (Robot.isReal()) {
       return new Swerve(
-        new GyroIOComp(), 
-        new ModuleIOComp(moduleConfigs[0]),
-        new ModuleIOComp(moduleConfigs[1]),
-        new ModuleIOComp(moduleConfigs[2]),
-        new ModuleIOComp(moduleConfigs[3]));
+          new GyroIOComp(),
+          new ModuleIOComp(moduleConfigs[0]),
+          new ModuleIOComp(moduleConfigs[1]),
+          new ModuleIOComp(moduleConfigs[2]),
+          new ModuleIOComp(moduleConfigs[3]));
     } else {
       return new Swerve(
-        new GyroIOComp(), 
-        new ModuleIOComp(moduleConfigs[0]),
-        new ModuleIOComp(moduleConfigs[1]),
-        new ModuleIOComp(moduleConfigs[2]),
-        new ModuleIOComp(moduleConfigs[3])); // ! SIMULATION PLACEHOLDER
+          new GyroIOComp(),
+          new ModuleIOComp(moduleConfigs[0]),
+          new ModuleIOComp(moduleConfigs[1]),
+          new ModuleIOComp(moduleConfigs[2]),
+          new ModuleIOComp(moduleConfigs[3])); // ! SIMULATION PLACEHOLDER
     }
   }
 

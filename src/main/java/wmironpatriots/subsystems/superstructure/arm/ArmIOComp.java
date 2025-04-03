@@ -15,7 +15,6 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import wmironpatriots.Constants.MATRIXID;
 
@@ -74,7 +73,14 @@ public class ArmIOComp extends Arm {
   @Override
   public void periodic() {
     BaseStatusSignal.refreshAll(poseSig, currentSig, torqueSig, voltsSig, tempSig);
-    inputs.data = new ArmData(poseSig.getValueAsDouble(), currentSig.getValueAsDouble(), torqueSig.getValueAsDouble(), voltsSig.getValueAsDouble(), tempSig.getValueAsDouble(), !beam.get());
+    inputs.data =
+        new ArmData(
+            poseSig.getValueAsDouble(),
+            currentSig.getValueAsDouble(),
+            torqueSig.getValueAsDouble(),
+            voltsSig.getValueAsDouble(),
+            tempSig.getValueAsDouble(),
+            !beam.get());
   }
 
   @Override

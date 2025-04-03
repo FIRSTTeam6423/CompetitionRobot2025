@@ -8,7 +8,6 @@ package wmironpatriots.subsystems.superstructure.arm;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import org.littletonrobotics.junction.AutoLog;
 
 public abstract class Arm extends SubsystemBase {
@@ -91,5 +90,11 @@ public abstract class Arm extends SubsystemBase {
     public ArmData data = new ArmData(0, 0, 0, 0, 0, false);
   }
 
-  public record ArmData(double poseRevs, double currentAmps, double torqueAmps, double appliedVolts, double tempCelsius, boolean beamTriggered) {}
+  public record ArmData(
+      double poseRevs,
+      double currentAmps,
+      double torqueAmps,
+      double appliedVolts,
+      double tempCelsius,
+      boolean beamTriggered) {}
 }

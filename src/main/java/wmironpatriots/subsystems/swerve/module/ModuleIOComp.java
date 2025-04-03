@@ -35,7 +35,11 @@ public class ModuleIOComp extends Module {
   private final SimpleMotorFeedforward feedforward;
 
   private final BaseStatusSignal pivotPoseSig, cancoderPoseSig, pivotVoltsSig, pivotCurrentSig;
-  private final BaseStatusSignal drivePoseSig, driveVelSig, driveVoltsSig, driveCurrentSig, driveTorqueSig;
+  private final BaseStatusSignal drivePoseSig,
+      driveVelSig,
+      driveVoltsSig,
+      driveCurrentSig,
+      driveTorqueSig;
 
   public ModuleIOComp(ModuleConfig config) {
     super(config.index());
@@ -69,7 +73,13 @@ public class ModuleIOComp extends Module {
     feedforward = new SimpleMotorFeedforward(5.0, 0.0);
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        100.0, pivotVoltsSig, pivotCurrentSig, driveVelSig, driveVoltsSig, driveCurrentSig, driveTorqueSig);
+        100.0,
+        pivotVoltsSig,
+        pivotCurrentSig,
+        driveVelSig,
+        driveVoltsSig,
+        driveCurrentSig,
+        driveTorqueSig);
     BaseStatusSignal.setUpdateFrequencyForAll(ODO_FREQ, pivotPoseSig, drivePoseSig);
 
     pivot.optimizeBusUtilization(0, 0.1);

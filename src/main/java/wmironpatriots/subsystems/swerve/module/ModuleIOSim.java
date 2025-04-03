@@ -1,3 +1,9 @@
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
 package wmironpatriots.subsystems.swerve.module;
 
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -9,9 +15,7 @@ public class ModuleIOSim extends Module {
 
   private final DCMotorSim pivotSim, driveSim;
 
-  public ModuleIOSim() {
-    
-  }
+  public ModuleIOSim() {}
 
   @Override
   public void periodic() {
@@ -54,5 +58,4 @@ public class ModuleIOSim extends Module {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'enableCoastMode'");
   }
-  
 }
