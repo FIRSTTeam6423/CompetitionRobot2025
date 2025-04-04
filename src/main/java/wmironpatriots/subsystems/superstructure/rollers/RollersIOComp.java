@@ -15,7 +15,4 @@ public class RollersIOComp extends Rollers {
 
   @Override
   protected void stopMotors() {}
-  
-  @Override
-  public void close() {}
 }

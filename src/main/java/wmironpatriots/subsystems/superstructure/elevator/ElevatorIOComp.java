@@ -133,10 +133,4 @@ public class ElevatorIOComp extends Elevator {
     parent.getConfigurator().apply(conf);
     child.getConfigurator().apply(conf);
   }
-
-  @Override
-  public void close() {
-    parent.close();
-    child.close();
-  }
 }

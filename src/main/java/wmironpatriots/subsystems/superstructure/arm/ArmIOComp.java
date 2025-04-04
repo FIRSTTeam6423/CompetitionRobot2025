@@ -109,9 +109,4 @@ public class ArmIOComp extends Arm {
 
     motor.getConfigurator().apply(conf);
   }
-
-  @Override
-  public void close() {
-    motor.close();
-  }
 }

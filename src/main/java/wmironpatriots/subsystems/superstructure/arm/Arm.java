@@ -84,8 +84,6 @@ public abstract class Arm extends SubsystemBase {
 
   protected abstract void enableCoastMode(boolean enabled);
 
-  public abstract void close();
-
   // * LOGGING
   @AutoLog
   public static class ArmIOInputs {
