@@ -33,8 +33,7 @@ import wmironpatriots.util.deviceUtil.JoystickUtil;
 
 public class Robot extends LoggedRobot {
   // Controllers
-  private final XboxController driverController = new XboxController(0);
-  private final XboxController operatorController = new XboxController(1);
+  private final XboxController driver, operator;
 
   // Subsystems
   private final Swerve swerve = Swerve.create();
@@ -42,7 +41,7 @@ public class Robot extends LoggedRobot {
       FLAGS.SUPERSTRUCTURE_DISABLED ? Optional.empty() : Optional.of(Superstructure.create());
 
   // Command scheduler pointer
-  private final CommandScheduler scheduler = CommandScheduler.getInstance();
+  private final CommandScheduler scheduler;
 
   // Commands
   private Command auton;
@@ -58,6 +57,7 @@ public class Robot extends LoggedRobot {
     super(Constants.TICK_SPEED.in(Seconds));
 
     // Garbage collector timer
+    gcTimer = new Timer();
     gcTimer.start();
 
     // Record Akit metadata
@@ -108,16 +108,31 @@ public class Robot extends LoggedRobot {
     // ! Uncomment next line if you expirence massive lag/loop-overuns while connected to fms
     // SignalLogger.stop(); SignalLogger.enableAutoLogging(false);
 
+    // * INITALIZE SUBSYSTEMS AND DEVICES
+    driver = new XboxController(0);
+    operator = new XboxController(1);
+
+    // Init subsystem singletons
+    swerve = Swerve.create();
     if (FLAGS.SUPERSTRUCTURE_DISABLED) {
-      new Alert("Superstructure is disabled", AlertType.kInfo);
-    }
+      superstructure = Optional.empty();
+
+      new Alert("Superstructure disabled", AlertType.kInfo).set(true);
+      ;
+    } else superstructure = Optional.of(Superstructure.create());
 
     // * CONFIGURE GAME BEHAVIOR
     swerve.setDefaultCommand(
         swerve.driveCmd(
-            () -> -JoystickUtil.applyTeleopModifier(driverController::getLeftY),
-            () -> -JoystickUtil.applyTeleopModifier(driverController::getLeftX),
-            () -> -JoystickUtil.applyTeleopModifier(driverController::getRightX)));
+            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
+            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
+            () -> -JoystickUtil.applyTeleopModifier(driver::getRightX)));
+
+    // Setup alerts
+    brownout = new Alert("Brownout detected", AlertType.kWarning);
+
+    // Setup commands and command scheduler
+    scheduler = CommandScheduler.getInstance();
   }
 
   @Override
