@@ -17,7 +17,13 @@ public class GyroIOComp extends Gyro {
     pigeon = new Pigeon2(MATRIXID.PIGEON, MATRIXID.CANCHAN);
   }
 
+  @Override
   public Rotation2d getRotation2d() {
     return pigeon.getRotation2d();
+  }
+
+  @Override
+  public void close() {
+    pigeon.close();
   }
 }

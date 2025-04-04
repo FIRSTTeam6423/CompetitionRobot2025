@@ -13,4 +13,6 @@ public abstract class Gyro {
    * @return get gyro yaw as {@link Rotation2d}
    */
   public abstract Rotation2d getRotation2d();
+
+  public abstract void close();
 }

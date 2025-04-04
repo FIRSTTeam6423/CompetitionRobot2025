@@ -98,6 +98,8 @@ public abstract class Module {
 
   protected abstract void enableCoastMode(boolean enabled);
 
+  public abstract void close();
+
   // * LOGGING
   @AutoLog
   public static class ModuleIOInputs {

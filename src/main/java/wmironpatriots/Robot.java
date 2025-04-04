@@ -38,7 +38,8 @@ public class Robot extends LoggedRobot {
 
   // Subsystems
   private final Swerve swerve = Swerve.create();
-  private final Optional<Superstructure> superstructure = FLAGS.SUPERSTRUCTURE_DISABLED ? Optional.empty() : Optional.of(Superstructure.create());
+  private final Optional<Superstructure> superstructure =
+      FLAGS.SUPERSTRUCTURE_DISABLED ? Optional.empty() : Optional.of(Superstructure.create());
 
   // Command scheduler pointer
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
@@ -46,10 +47,11 @@ public class Robot extends LoggedRobot {
   // Commands
   private Command auton;
 
+  // Java Garbage Collector timer
+  private final Timer gcTimer = new Timer();
+
   // Alerts
   private final Alert brownout = new Alert("Brownout detected", AlertType.kWarning);
-
-  private final Timer gcTimer = new Timer();
 
   public Robot() {
     // * INITALIZE SYSTEMS
@@ -121,7 +123,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     Threads.setCurrentThreadPriority(true, 99);
-    
+
     Tracer.traceFunc("CommandScheduler", scheduler::run);
 
     Threads.setCurrentThreadPriority(false, 10);
@@ -180,7 +182,10 @@ public class Robot extends LoggedRobot {
   public void teleopPeriodic() {}
 
   @Override
-  public void teleopExit() {}
+  public void teleopExit() {
+    scheduler.cancelAll();
+    System.gc();
+  }
 
   @Override
   public void testInit() {
@@ -191,5 +196,8 @@ public class Robot extends LoggedRobot {
   public void testPeriodic() {}
 
   @Override
-  public void testExit() {}
+  public void testExit() {
+    scheduler.cancelAll();
+    System.gc();
+  }
 }

@@ -36,7 +36,7 @@ import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
 
-public class Swerve extends SubsystemBase {
+public class Swerve extends SubsystemBase implements AutoCloseable {
   private final Gyro gyro;
   private final Module[] modules;
 
@@ -230,5 +230,14 @@ public class Swerve extends SubsystemBase {
    */
   public Rotation2d getHeading() {
     return getPose().getRotation();
+  }
+
+  @Override
+  public void close() throws Exception {
+    for (Module module : modules) {
+      module.close();
+    }
+
+    gyro.close();
   }
 }
