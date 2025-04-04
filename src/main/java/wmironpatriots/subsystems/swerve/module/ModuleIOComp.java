@@ -143,10 +143,4 @@ public class ModuleIOComp extends Module {
     pivotConf.MotorOutput.NeutralMode = idleMode;
     driveConf.MotorOutput.NeutralMode = idleMode;
   }
-
-  @Override
-  public void close() {
-    pivot.close();
-    drive.close();
-  }
 }
