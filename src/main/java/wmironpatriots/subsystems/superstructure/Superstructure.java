@@ -19,7 +19,7 @@ import wmironpatriots.subsystems.superstructure.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.superstructure.rollers.Rollers;
 import wmironpatriots.subsystems.superstructure.rollers.RollersIOComp;
 
-public class Superstructure {
+public class Superstructure implements AutoCloseable {
   private final Elevator elevator;
   private final Arm arm;
   private final Rollers rollers;
@@ -92,6 +92,13 @@ public class Superstructure {
             Commands.waitUntil(() -> arm.nearSetpoint() && elevator.nearSetpoint()),
             Commands.waitUntil(scoreCondition),
             rollers.runRollerSpeed(Rollers.SPEED_SCORING).until(() -> !arm.hasCoral())));
+  }
+
+  @Override
+  public void close() throws Exception {
+    elevator.close();
+    arm.close();
+    rollers.close();
   }
 
   public static enum ReefLevel {

@@ -30,4 +30,6 @@ public abstract class Rollers extends SubsystemBase {
   protected abstract void setMotorSpeed(double speed);
 
   protected abstract void stopMotors();
+
+  public abstract void close();
 }

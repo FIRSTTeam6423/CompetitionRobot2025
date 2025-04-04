@@ -85,6 +85,8 @@ public abstract class Elevator extends SubsystemBase {
 
   protected abstract void enableCoastMode(boolean enabled);
 
+  public abstract void close();
+
   // * LOGGING
   @AutoLog
   public static class ElevatorIOInputs {
