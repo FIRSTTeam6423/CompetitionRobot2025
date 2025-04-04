@@ -33,29 +33,29 @@ import wmironpatriots.util.deviceUtil.JoystickUtil;
 
 public class Robot extends LoggedRobot {
   // Controllers
-  private final XboxController driver, operator;
+  private final XboxController driverController = new XboxController(0);
+  private final XboxController operatorController = new XboxController(1);
 
   // Subsystems
-  private final Swerve swerve;
-  private final Optional<Superstructure> superstructure;
+  private final Swerve swerve = Swerve.create();
+  private final Optional<Superstructure> superstructure = FLAGS.SUPERSTRUCTURE_DISABLED ? Optional.empty() : Optional.of(Superstructure.create());
 
   // Command scheduler pointer
-  private final CommandScheduler scheduler;
+  private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
   // Commands
   private Command auton;
 
   // Alerts
-  private final Alert brownout;
+  private final Alert brownout = new Alert("Brownout detected", AlertType.kWarning);
 
-  private final Timer gcTimer;
+  private final Timer gcTimer = new Timer();
 
   public Robot() {
     // * INITALIZE SYSTEMS
     super(Constants.TICK_SPEED.in(Seconds));
 
     // Garbage collector timer
-    gcTimer = new Timer();
     gcTimer.start();
 
     // Record Akit metadata
@@ -106,31 +106,16 @@ public class Robot extends LoggedRobot {
     // ! Uncomment next line if you expirence massive lag/loop-overuns while connected to fms
     // SignalLogger.stop(); SignalLogger.enableAutoLogging(false);
 
-    // * INITALIZE SUBSYSTEMS AND DEVICES
-    driver = new XboxController(0);
-    operator = new XboxController(1);
-
-    // Init subsystem singletons
-    swerve = Swerve.create();
     if (FLAGS.SUPERSTRUCTURE_DISABLED) {
-      superstructure = Optional.empty();
-
-      new Alert("Superstructure disabled", AlertType.kInfo).set(true);
-      ;
-    } else superstructure = Optional.of(Superstructure.create());
+      new Alert("Superstructure is disabled", AlertType.kInfo);
+    }
 
     // * CONFIGURE GAME BEHAVIOR
     swerve.setDefaultCommand(
         swerve.driveCmd(
-            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
-            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
-            () -> -JoystickUtil.applyTeleopModifier(driver::getRightX)));
-
-    // Setup alerts
-    brownout = new Alert("Brownout detected", AlertType.kWarning);
-
-    // Setup commands and command scheduler
-    scheduler = CommandScheduler.getInstance();
+            () -> -JoystickUtil.applyTeleopModifier(driverController::getLeftY),
+            () -> -JoystickUtil.applyTeleopModifier(driverController::getLeftX),
+            () -> -JoystickUtil.applyTeleopModifier(driverController::getRightX)));
   }
 
   @Override
