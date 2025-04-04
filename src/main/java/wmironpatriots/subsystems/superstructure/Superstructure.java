@@ -24,7 +24,7 @@ public class Superstructure {
   private final Arm arm;
   private final Rollers rollers;
   private final Climber climber;
-
+  
   public static Superstructure create() {
     if (Robot.isReal()) {
       return new Superstructure(
@@ -69,10 +69,10 @@ public class Superstructure {
   /**
    * Scores coral to desired reef level
    * 
-   * @param level desired reef level as {@link ReefLevel}
+   * @param level desired reef level as {@link ScoreTarget}
    * @return
    */
-  public Command scoreCoralCmd(ReefLevel level) {
+  public Command scoreCoralCmd(ScoreTarget level) {
     return prepAndScoreCoralCmd(level, () -> true);
   }
 
@@ -81,10 +81,10 @@ public class Superstructure {
    * then waits until {@link BooleanSupplier} returns true
    * before scoring
    * 
-   * @param level desired reef level as {@link ReefLevel}
+   * @param level desired reef level as {@link ScoreTarget}
    * @param scoreCondition {@link BooleanSupplier} that triggers scoring
    */
-  public Command prepAndScoreCoralCmd(ReefLevel level, BooleanSupplier scoreCondition) {
+  public Command prepAndScoreCoralCmd(ScoreTarget level, BooleanSupplier scoreCondition) {
     return Commands.parallel(
         arm.runPoseCmd(level.armPose),
         Commands.waitUntil(arm::nearSetpoint).andThen(elevator.runPoseCmd(level.elevatorPose)),
@@ -94,7 +94,7 @@ public class Superstructure {
             rollers.runRollerSpeed(Rollers.SPEED_SCORING).until(() -> !arm.hasCoral())));
   }
 
-  public static enum ReefLevel {
+  public static enum ScoreTarget {
     L1(Elevator.POSE_L1_REVS, 0.0),
     L2(Elevator.POSE_L2_REVS, 0.0),
     L3(Elevator.POSE_L3_REVS, 0.0),
@@ -103,7 +103,7 @@ public class Superstructure {
     double elevatorPose;
     double armPose;
 
-    private ReefLevel(double elevatorPose, double armPose) {
+    private ScoreTarget(double elevatorPose, double armPose) {
       this.elevatorPose = elevatorPose;
       this.armPose = armPose;
     }

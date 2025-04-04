@@ -8,6 +8,7 @@ package wmironpatriots;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -17,6 +18,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
 import java.util.Optional;
 import lib.Tracer;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -27,14 +30,16 @@ import org.littletonrobotics.junction.rlog.RLOGServer;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import wmironpatriots.Constants.FLAGS;
+import wmironpatriots.commands.swerve.AlignAndScore;
 import wmironpatriots.subsystems.superstructure.Superstructure;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.util.deviceUtil.JoystickUtil;
+import wmironpatriots.util.deviceUtil.OperatorDashboard;
 
 public class Robot extends LoggedRobot {
   // Controllers
-  private final XboxController driverController = new XboxController(0);
-  private final XboxController operatorController = new XboxController(1);
+  private final CommandXboxController driverController = new CommandXboxController(0);
+  private final OperatorDashboard operatorDashboard = new OperatorDashboard();
 
   // Subsystems
   private final Swerve swerve = Swerve.create();
@@ -45,6 +50,7 @@ public class Robot extends LoggedRobot {
 
   // Commands
   private Command auton;
+  private AlignAndScore alignAndScoreCmd;
 
   // Alerts
   private final Alert brownout = new Alert("Brownout detected", AlertType.kWarning);
@@ -111,11 +117,22 @@ public class Robot extends LoggedRobot {
     }
 
     // * CONFIGURE GAME BEHAVIOR
+    alignAndScoreCmd = new AlignAndScore(
+      swerve, 
+      superstructure.get(), 
+      operatorDashboard::getScoreTarget, 
+      operatorDashboard::getAlignTarget, 
+      () -> driverController.a().getAsBoolean());
+
     swerve.setDefaultCommand(
         swerve.driveCmd(
             () -> -JoystickUtil.applyTeleopModifier(driverController::getLeftY),
             () -> -JoystickUtil.applyTeleopModifier(driverController::getLeftX),
-            () -> -JoystickUtil.applyTeleopModifier(driverController::getRightX)));
+            () -> -JoystickUtil.applyTeleopModifier(driverController::getRightX),
+            () -> MathUtil.clamp(1.5 - driverController.getRightTriggerAxis(), 0.0, 1.0)));
+
+    driverController.leftTrigger(0.25)
+      .whileTrue(alignAndScoreCmd);
   }
 
   @Override
@@ -128,6 +145,9 @@ public class Robot extends LoggedRobot {
 
     // Update Alerts
     brownout.set(RobotController.isBrownedOut());
+
+    // Poll operator dashboard inputs
+    operatorDashboard.poll();
 
     // I love our rio 1.0
     if (gcTimer.hasElapsed(5)) {
