@@ -12,8 +12,6 @@ import java.util.function.BooleanSupplier;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.superstructure.arm.Arm;
 import wmironpatriots.subsystems.superstructure.arm.ArmIOComp;
-import wmironpatriots.subsystems.superstructure.climber.Climber;
-import wmironpatriots.subsystems.superstructure.climber.ClimberIOComp;
 import wmironpatriots.subsystems.superstructure.elevator.Elevator;
 import wmironpatriots.subsystems.superstructure.elevator.ElevatorIOComp;
 import wmironpatriots.subsystems.superstructure.rollers.Rollers;
@@ -23,27 +21,24 @@ public class Superstructure {
   private final Elevator elevator;
   private final Arm arm;
   private final Rollers rollers;
-  private final Climber climber;
   
   public static Superstructure create() {
     if (Robot.isReal()) {
       return new Superstructure(
-          new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp(), new ClimberIOComp());
+          new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp());
     } else {
       return new Superstructure(
-          new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp(), new ClimberIOComp());
+          new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp());
     }
   }
 
-  protected Superstructure(Elevator elevatorIO, Arm armIO, Rollers rollersIO, Climber climberIO) {
+  protected Superstructure(Elevator elevatorIO, Arm armIO, Rollers rollersIO) {
     elevator = elevatorIO;
     arm = armIO;
     rollers = rollersIO;
-    climber = climberIO;
 
     elevator.setDefaultCommand(elevatorDefaultCmd());
     arm.setDefaultCommand(armDefaultCmd());
-    climber.setDefaultCommand(climberDefaultCmd());
   }
 
   // * SUBSYSTEM DEFAULT CMDS
@@ -60,10 +55,6 @@ public class Superstructure {
     return Commands.sequence(
         arm.runCurrentZeroingCmd().onlyIf(() -> !elevator.isInitalized()),
         arm.runPoseCmd(0.0).until(arm::nearSetpoint).finallyDo(() -> arm.stopMotors()));
-  }
-
-  private Command climberDefaultCmd() {
-    return Commands.run(() -> {}, climber);
   }
 
   /**
