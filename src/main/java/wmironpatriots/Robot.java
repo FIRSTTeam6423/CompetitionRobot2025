@@ -15,11 +15,9 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-
 import java.util.Optional;
 import lib.Tracer;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -43,7 +41,8 @@ public class Robot extends LoggedRobot {
 
   // Subsystems
   private final Swerve swerve = Swerve.create();
-  private final Optional<Superstructure> superstructure = FLAGS.SUPERSTRUCTURE_DISABLED ? Optional.empty() : Optional.of(Superstructure.create());
+  private final Optional<Superstructure> superstructure =
+      FLAGS.SUPERSTRUCTURE_DISABLED ? Optional.empty() : Optional.of(Superstructure.create());
 
   // Command scheduler pointer
   private final CommandScheduler scheduler = CommandScheduler.getInstance();
@@ -117,12 +116,16 @@ public class Robot extends LoggedRobot {
     }
 
     // * CONFIGURE GAME BEHAVIOR
-    alignAndScoreCmd = new AlignAndScore(
-      swerve, 
-      superstructure.get(), 
-      operatorDashboard::getScoreTarget, 
-      operatorDashboard::getAlignTarget, 
-      () -> driverController.a().getAsBoolean());
+    alignAndScoreCmd =
+        new AlignAndScore(
+            swerve,
+            superstructure.get(),
+            operatorDashboard::getScoreTarget,
+            operatorDashboard::getAlignTarget,
+            () -> driverController.a().getAsBoolean(),
+            () -> -JoystickUtil.applyTeleopModifier(driverController::getLeftY),
+            () -> -JoystickUtil.applyTeleopModifier(driverController::getLeftX),
+            () -> -JoystickUtil.applyTeleopModifier(driverController::getRightX));
 
     swerve.setDefaultCommand(
         swerve.driveCmd(
@@ -131,14 +134,13 @@ public class Robot extends LoggedRobot {
             () -> -JoystickUtil.applyTeleopModifier(driverController::getRightX),
             () -> MathUtil.clamp(1.5 - driverController.getRightTriggerAxis(), 0.0, 1.0)));
 
-    driverController.leftTrigger(0.25)
-      .whileTrue(alignAndScoreCmd);
+    driverController.leftTrigger(0.25).whileTrue(alignAndScoreCmd);
   }
 
   @Override
   public void robotPeriodic() {
     Threads.setCurrentThreadPriority(true, 99);
-    
+
     Tracer.traceFunc("CommandScheduler", scheduler::run);
 
     Threads.setCurrentThreadPriority(false, 10);
@@ -149,7 +151,7 @@ public class Robot extends LoggedRobot {
     // Poll operator dashboard inputs
     operatorDashboard.poll();
 
-    // I love our rio 1.0
+    // I love our RIO 1.0
     if (gcTimer.hasElapsed(5)) {
       System.gc();
     }

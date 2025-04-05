@@ -21,14 +21,12 @@ public class Superstructure {
   private final Elevator elevator;
   private final Arm arm;
   private final Rollers rollers;
-  
+
   public static Superstructure create() {
     if (Robot.isReal()) {
-      return new Superstructure(
-          new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp());
+      return new Superstructure(new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp());
     } else {
-      return new Superstructure(
-          new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp());
+      return new Superstructure(new ElevatorIOComp(), new ArmIOComp(), new RollersIOComp());
     }
   }
 
@@ -59,7 +57,7 @@ public class Superstructure {
 
   /**
    * Scores coral to desired reef level
-   * 
+   *
    * @param level desired reef level as {@link ScoreTarget}
    * @return
    */
@@ -68,10 +66,9 @@ public class Superstructure {
   }
 
   /**
-   * Sets up superstructure in scoring position, 
-   * then waits until {@link BooleanSupplier} returns true
-   * before scoring
-   * 
+   * Sets up superstructure in scoring position, then waits until {@link BooleanSupplier} returns
+   * true before scoring
+   *
    * @param level desired reef level as {@link ScoreTarget}
    * @param scoreCondition {@link BooleanSupplier} that triggers scoring
    */
