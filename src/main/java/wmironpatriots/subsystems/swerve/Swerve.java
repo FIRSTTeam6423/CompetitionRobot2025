@@ -35,9 +35,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
@@ -45,7 +42,6 @@ import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOSim;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
-import wmironpatriots.subsystems.swerve.module.ModuleIOSim;
 import wmironpatriots.subsystems.vision.Vision.PoseEstimate;
 import wmironpatriots.utils.mechanismUtils.LoggedSubsystem;
 
@@ -61,8 +57,6 @@ public class Swerve implements LoggedSubsystem {
   private final ProfiledPIDController xLinearFeedback, yLinearFeedback;
   private final SysIdRoutine angularCharacterization, linearCharacterization, pivotCharacterization;
 
-  private final Optional<SelfControlledSwerveDriveSimulation> simulation;
-
   private final Field2d f2d;
   StructArrayPublisher<SwerveModuleState> swervePublisher =
       NetworkTableInstance.getDefault()
@@ -77,31 +71,11 @@ public class Swerve implements LoggedSubsystem {
 
   public Swerve() {
     // * INIT HARDWARE
-    if (Robot.isReal()) {
-      gyro = new GyroIOComp();
-      modules = new ModuleIOComp[MODULE_CONFIGS.length];
-      for (int i = 0; i < modules.length; i++) {
-        modules[i] = new ModuleIOComp(MODULE_CONFIGS[i]);
-      }
-
-      simulation = Optional.empty();
-    } else {
-      simulation =
-          Optional.of(
-              new SelfControlledSwerveDriveSimulation(
-                  new SwerveDriveSimulation(
-                      driveTrainSimulationConfig.get(), new Pose2d(3.28, 3.28, new Rotation2d()))));
-      simulation.get().getDriveTrainSimulation().removeAllFixtures();
-      SimulatedArena.getInstance()
-          .addDriveTrainSimulation(simulation.get().getDriveTrainSimulation());
-
-      gyro = new GyroIOSim(simulation.get().getDriveTrainSimulation().getGyroSimulation());
-      modules = new ModuleIOSim[MODULE_CONFIGS.length];
-      for (int i = 0; i < modules.length; i++) {
-        modules[i] =
-            new ModuleIOSim(
-                MODULE_CONFIGS[i], simulation.get().getDriveTrainSimulation().getModules()[i]);
-      }
+    // TODO check if hardware should be simulated
+    gyro = new GyroIOComp();
+    modules = new ModuleIOComp[MODULE_CONFIGS.length];
+    for (int i = 0; i < modules.length; i++) {
+      modules[i] = new ModuleIOComp(MODULE_CONFIGS[i]);
     }
 
     kinematics = new SwerveDriveKinematics(MODULE_LOCS);
@@ -235,11 +209,6 @@ public class Swerve implements LoggedSubsystem {
     return alignTarget.pose;
   }
 
-  @Override
-  public void simulationPeriodic() {
-    simulation.get().periodic();
-  }
-
   public void setAlignTarget(AlignTargets target) {
     this.alignTarget = target;
     f2d.getObject("AlignTarget").setPose(target.pose);
@@ -348,11 +317,6 @@ public class Swerve implements LoggedSubsystem {
    */
   public void resetOdo(Pose2d pose) {
     odo.resetPosition(gyro.getRotation2d(), getSwerveModulePoses(), pose);
-    simulation.ifPresent(
-        s -> {
-          s.setSimulationWorldPose(pose);
-          s.getDriveTrainSimulation().setRobotSpeeds(new ChassisSpeeds());
-        });
   }
 
   /** Stops all motor input for dt */
