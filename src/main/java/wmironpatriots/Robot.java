@@ -41,7 +41,7 @@ public class Robot extends LoggedCommandRobot {
     Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
     Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
 
-    // DO NOT REMOVE!
+    // ! DO NOT REMOVE
     // Signal Logger is set to auto enable when connected to FMS, causing massive delay
     SignalLogger.enableAutoLogging(false);
     SignalLogger.stop();
