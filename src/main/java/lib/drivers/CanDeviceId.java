@@ -1,10 +1,10 @@
 package lib.drivers;
 
-public class CanDevice {
+public class CanDeviceId {
   private final int id;
   private final String busName;
 
-  public CanDevice(int id, String busName) {
+  public CanDeviceId(int id, String busName) {
     this.id = id;
     this.busName = busName;
   }

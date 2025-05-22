@@ -8,7 +8,7 @@ package wmironpatriots;
 
 import com.ctre.phoenix6.CANBus;
 
-import lib.drivers.CanDevice;
+import lib.drivers.CanDeviceId;
 
 public class Constants {
   public static double LOOPTIME = 0.02;
@@ -22,26 +22,26 @@ public class Constants {
   public static class MATRIXID {
     // * CANIVORE LOOP
     public static final CANBus CANCHAN = new CANBus("CANchan"); // :3
-    public static final CanDevice PIGEON = new CanDevice(0, CANCHAN.getName());
-    public static final CanDevice BL_PIVOT = new CanDevice(1, CANCHAN.getName());
-    public static final CanDevice BL_DRIVE = new CanDevice(2, CANCHAN.getName());
-    public static final CanDevice FL_PIVOT = new CanDevice(3, CANCHAN.getName());
-    public static final CanDevice FL_DRIVE = new CanDevice(4, CANCHAN.getName());
-    public static final CanDevice FR_PIVOT = new CanDevice(5, CANCHAN.getName());
-    public static final CanDevice FR_DRIVE = new CanDevice(6, CANCHAN.getName());
-    public static final CanDevice BR_PIVOT = new CanDevice(7, CANCHAN.getName());
-    public static final CanDevice BR_DRIVE = new CanDevice(8, CANCHAN.getName());
-    public static final CanDevice BL_CANCODER = new CanDevice(9, CANCHAN.getName());
-    public static final CanDevice FL_CANCODER = new CanDevice(10, CANCHAN.getName());
-    public static final CanDevice FR_CANCODER = new CanDevice(11, CANCHAN.getName());
-    public static final CanDevice BR_CANCODER = new CanDevice(12, CANCHAN.getName());
-    public static final CanDevice ELEVATOR_PARENT = new CanDevice(14, CANCHAN.getName());
-    public static final CanDevice ELEVATOR_CHILD = new CanDevice(15, CANCHAN.getName());
+    public static final CanDeviceId PIGEON = new CanDeviceId(0, CANCHAN.getName());
+    public static final CanDeviceId BL_PIVOT = new CanDeviceId(1, CANCHAN.getName());
+    public static final CanDeviceId BL_DRIVE = new CanDeviceId(2, CANCHAN.getName());
+    public static final CanDeviceId FL_PIVOT = new CanDeviceId(3, CANCHAN.getName());
+    public static final CanDeviceId FL_DRIVE = new CanDeviceId(4, CANCHAN.getName());
+    public static final CanDeviceId FR_PIVOT = new CanDeviceId(5, CANCHAN.getName());
+    public static final CanDeviceId FR_DRIVE = new CanDeviceId(6, CANCHAN.getName());
+    public static final CanDeviceId BR_PIVOT = new CanDeviceId(7, CANCHAN.getName());
+    public static final CanDeviceId BR_DRIVE = new CanDeviceId(8, CANCHAN.getName());
+    public static final CanDeviceId BL_CANCODER = new CanDeviceId(9, CANCHAN.getName());
+    public static final CanDeviceId FL_CANCODER = new CanDeviceId(10, CANCHAN.getName());
+    public static final CanDeviceId FR_CANCODER = new CanDeviceId(11, CANCHAN.getName());
+    public static final CanDeviceId BR_CANCODER = new CanDeviceId(12, CANCHAN.getName());
+    public static final CanDeviceId ELEVATOR_PARENT = new CanDeviceId(14, CANCHAN.getName());
+    public static final CanDeviceId ELEVATOR_CHILD = new CanDeviceId(15, CANCHAN.getName());
 
     // * RIO LOOP
     public static final CANBus RIO = new CANBus("rio");
-    public static final CanDevice TAIL_ROLLER = new CanDevice(1, RIO.getName());
-    public static final CanDevice CHUTE_ROLLER = new CanDevice(2, RIO.getName());
-    public static final CanDevice TAIL_PIVOT = new CanDevice(13, RIO.getName());
+    public static final CanDeviceId TAIL_ROLLER = new CanDeviceId(1, RIO.getName());
+    public static final CanDeviceId CHUTE_ROLLER = new CanDeviceId(2, RIO.getName());
+    public static final CanDeviceId TAIL_PIVOT = new CanDeviceId(13, RIO.getName());
   }
 }
