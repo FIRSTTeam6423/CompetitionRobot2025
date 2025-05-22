@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lib.LoggedCommandRobot;
-
 import monologue.Monologue;
 
 public class Robot extends LoggedCommandRobot {
@@ -53,13 +52,15 @@ public class Robot extends LoggedCommandRobot {
         .onTrue(Commands.run(() -> browningOut.set(true)));
 
     // Log dashboard inforation periodically
-    addPeriodic(() -> {
-      SmartDashboard.putNumber("Battery Volts", RobotController.getBatteryVoltage());
-      SmartDashboard.putNumber("CPU Temps", RobotController.getCPUTemp());
-      SmartDashboard.putBoolean("RSL status", RobotController.getRSLState());
-      SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-    }, 0.1);
-  
+    addPeriodic(
+        () -> {
+          SmartDashboard.putNumber("Battery Volts", RobotController.getBatteryVoltage());
+          SmartDashboard.putNumber("CPU Temps", RobotController.getCPUTemp());
+          SmartDashboard.putBoolean("RSL status", RobotController.getRSLState());
+          SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+        },
+        0.1);
+
     // * HARDWARE INIT
     driver = new CommandXboxController(0);
     operator = new CommandXboxController(1);
