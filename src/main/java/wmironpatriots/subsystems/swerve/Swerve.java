@@ -39,7 +39,6 @@ import wmironpatriots.Constants.FLAGS;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
 import wmironpatriots.subsystems.swerve.gyro.GyroIOComp;
-import wmironpatriots.subsystems.swerve.gyro.GyroIOSim;
 import wmironpatriots.subsystems.swerve.module.Module;
 import wmironpatriots.subsystems.swerve.module.ModuleIOComp;
 import wmironpatriots.subsystems.vision.Vision.PoseEstimate;

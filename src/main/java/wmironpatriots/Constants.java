@@ -8,7 +8,7 @@ package wmironpatriots;
 
 import com.ctre.phoenix6.CANBus;
 
-import lib.CanDevice;
+import lib.drivers.CanDevice;
 
 public class Constants {
   public static double LOOPTIME = 0.02;

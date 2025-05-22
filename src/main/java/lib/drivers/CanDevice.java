@@ -1,4 +1,4 @@
-package lib;
+package lib.drivers;
 
 public class CanDevice {
   private final int id;
