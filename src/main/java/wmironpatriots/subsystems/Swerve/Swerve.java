@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -13,6 +14,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import wmironpatriots.Constants;
 import wmironpatriots.Robot;
+import wmironpatriots.subsystems.Swerve.gyro.GyroHardware;
+import wmironpatriots.subsystems.Swerve.gyro.GyroHardwareComp;
+import wmironpatriots.subsystems.Swerve.gyro.GyroHardwareNone;
 import wmironpatriots.subsystems.Swerve.module.Module;
 import wmironpatriots.subsystems.Swerve.module.ModuleHardwareComp;
 import lib.swerve.ChassisVelocity;
@@ -26,30 +30,36 @@ public class Swerve implements Subsystem {
       for (int i = 0; i < modules.length; i++) {
         modules[i] = new Module(new ModuleHardwareComp(moduleConfigs[i]));
       }
+
+      return new Swerve(new GyroHardwareComp(), modules);
     } else {
       // ! PLACEHOLDER FOR SIM HARDWARE INIT
       for (int i = 0; i < modules.length; i++) {
         modules[i] = new Module(new ModuleHardwareComp(moduleConfigs[i]));
       }
-    }
 
-    return new Swerve();
+      return new Swerve(new GyroHardwareNone(), modules);
+    }
   }
 
   private final Module[] modules;
+  private final GyroHardware gyro;
+
+  private Rotation2d simulatedHeading = Rotation2d.kZero;
 
   private final SwerveDriveKinematics kinematics = SwerveConstants.KINEMATICS;
   private final SwerveDrivePoseEstimator odometry;
 
-  public Swerve(Module... modules) {
+  public Swerve(GyroHardware gyro, Module... modules) {
     this.modules = modules;
+    this.gyro = gyro;
 
-    odometry = new SwerveDrivePoseEstimator(kinematics, Rotation2d.kZero, getSwerveModulePositions(), new Pose2d());
+    odometry = new SwerveDrivePoseEstimator(kinematics, getGyroRotation2d(), getSwerveModulePositions(), new Pose2d());
   }
 
   @Override
   public void periodic() {
-    odometry.update(Rotation2d.kZero, getSwerveModulePositions());
+    odometry.update(getGyroRotation2d(), getSwerveModulePositions());
 
     for (Module module : modules) {
       module.periodic();
@@ -58,6 +68,17 @@ public class Swerve implements Subsystem {
     if (DriverStation.isDisabled()) {
       stop();
     }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    var angularRate = getVelocity().getRobotRelative().omegaRadiansPerSecond;
+    simulatedHeading = 
+      simulatedHeading.rotateBy(
+        Rotation2d.fromRadians(
+          !Double.isNaN(angularRate)
+            ? angularRate * Constants.LOOPTIME.in(Seconds)
+            : 0));
   }
 
   /**
@@ -91,10 +112,24 @@ public class Swerve implements Subsystem {
   }
 
   /**
-   * @return {@link Rotation2d} representing the chassis's yaw from last gyro reset
+   * @return {@link Rotation2d} representing gyro heading since boot
+   */
+  public Rotation2d getGyroRotation2d() {
+    return Robot.isReal() ? gyro.getRotation3d().toRotation2d() : simulatedHeading;
+  }
+
+  /**
+   * @return {@link Pose2d} representing the odometry estimated position
+   */
+  public Pose2d getPose2d() {
+    return odometry.getEstimatedPosition();
+  }
+
+  /**
+   * @return {@link Rotation2d} representing the chassis's yaw from last heading reset
    */
   public Rotation2d getHeadingRotation2d() {
-    return new Rotation2d();
+    return getPose2d().getRotation();
   }
 
   /**
