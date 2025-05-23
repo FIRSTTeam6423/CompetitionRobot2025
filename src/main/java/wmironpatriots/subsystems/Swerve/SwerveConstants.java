@@ -6,6 +6,7 @@
 
 package wmironpatriots.subsystems.Swerve;
 
+import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
@@ -21,6 +22,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import lib.drivers.CanDeviceId;
+import wmironpatriots.Constants.MATRIXID;
 
 /** Represents drivetrain characterization */
 public class SwerveConstants {
@@ -37,21 +40,21 @@ public class SwerveConstants {
    */
   public static record ModuleConfig(
       int index,
-      int pivotId,
-      int driveId,
-      int encoderId,
+      CanDeviceId pivotId,
+      CanDeviceId driveId,
+      CanDeviceId encoderId,
       double encoderOffsetRevs,
       boolean pivotInverted,
       boolean driveInverted) {}
 
-  public static final Mass MASS = Kilograms.of(0);
-  public static final MomentOfInertia MOI = KilogramSquareMeters.of(0);
+  public static final Mass MASS = Kilograms.of(54.8847);
+  public static final MomentOfInertia MOI = KilogramSquareMeters.of(5.503);
 
-  public static final Distance BUMPER_WIDTH = Meters.of(0);
-  public static final Distance TRACK_WIDTH = Meters.of(0);
-  public static final Distance RADIUS = Meters.of(0);
+  public static final Distance BUMPER_WIDTH = Meters.of(0.0889);
+  public static final Distance TRACK_WIDTH = Meters.of(0.596201754);
+  public static final Distance RADIUS = Meters.of(Math.hypot(TRACK_WIDTH.in(Meters) / 2.0, TRACK_WIDTH.in(Meters) / 2.0));
 
-  public static final LinearVelocity MAX_LINEAR_SPEED = MetersPerSecond.of(0);
+  public static final LinearVelocity MAX_LINEAR_SPEED = FeetPerSecond.of(16.5);
   public static final AngularVelocity MAX_ANGULAR_RATE =
       RadiansPerSecond.of(MAX_LINEAR_SPEED.in(MetersPerSecond) / RADIUS.in(Meters));
 
@@ -65,7 +68,41 @@ public class SwerveConstants {
 
   public static final Translation2d[] MODULE_OFFSETS = new Translation2d[4];
 
-  public static final ModuleConfig[] MODULE_CONFIGS = new ModuleConfig[4];
+   public static final ModuleConfig[] MODULE_CONFIGS =
+      new ModuleConfig[] {
+        new ModuleConfig(
+            0,
+            MATRIXID.FL_PIVOT,
+            MATRIXID.FL_DRIVE,
+            MATRIXID.FL_CANCODER,
+            -0.16,
+            false,
+            false),
+        new ModuleConfig(
+            1, 
+            MATRIXID.FR_PIVOT, 
+            MATRIXID.FR_DRIVE, 
+            MATRIXID.FR_CANCODER, 
+            0.01,
+            true, 
+            false),
+        new ModuleConfig(
+            2, 
+            MATRIXID.BL_PIVOT, 
+            MATRIXID.BL_DRIVE, 
+            MATRIXID.BL_CANCODER, 
+            0.36, 
+            true, 
+            false),
+        new ModuleConfig(
+            3,
+            MATRIXID.BR_PIVOT,
+            MATRIXID.BR_DRIVE,
+            MATRIXID.BR_CANCODER,
+            -0.26,
+            true,
+            false),
+      };
 
   public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(MODULE_OFFSETS);
 }

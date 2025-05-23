@@ -54,10 +54,10 @@ public class ModuleHardwareComp implements ModuleHardware {
   public ModuleHardwareComp(ModuleConfig moduleConfig) {
     index = moduleConfig.index();
 
-    pivot = new TalonFX(moduleConfig.pivotId());
-    drive = new TalonFX(moduleConfig.pivotId());
+    pivot = new TalonFX(moduleConfig.pivotId().getId(), moduleConfig.pivotId().getBusName());
+    drive = new TalonFX(moduleConfig.driveId().getId(), moduleConfig.driveId().getBusName());
 
-    cancoder = new CANcoder(moduleConfig.encoderId());
+    cancoder = new CANcoder(moduleConfig.encoderId().getId(), moduleConfig.encoderId().getBusName());
 
     // Pivot Configs
     pivotCfg = TalonFxUtil.getDefaultTalonFxCfg();
@@ -77,7 +77,7 @@ public class ModuleHardwareComp implements ModuleHardware {
     pivotCfg.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
 
     pivotCfg.ClosedLoopGeneral.ContinuousWrap = true;
-    pivotCfg.Feedback.FeedbackRemoteSensorID = moduleConfig.encoderId();
+    pivotCfg.Feedback.FeedbackRemoteSensorID = moduleConfig.encoderId().getId();
     pivotCfg.Feedback.FeedbackRotorOffset = moduleConfig.encoderOffsetRevs();
     pivotCfg.Feedback.RotorToSensorRatio = 0.0; // TODO
     pivotCfg.Feedback.SensorToMechanismRatio = 0.0;
