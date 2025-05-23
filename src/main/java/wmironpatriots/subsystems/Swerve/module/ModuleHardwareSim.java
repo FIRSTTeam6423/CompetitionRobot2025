@@ -5,3 +5,8 @@
 // MIT license file in the root directory of this project
 
 package wmironpatriots.subsystems.Swerve.module;
+
+public class ModuleHardwareSim {
+
+  public ModuleHardwareSim() {}
+}
