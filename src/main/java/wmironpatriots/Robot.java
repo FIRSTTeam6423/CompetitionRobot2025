@@ -19,9 +19,16 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lib.drivers.LoggedCommandRobot;
 import monologue.Monologue;
+import wmironpatriots.commands.factories.SwerveCommandFactory;
+import wmironpatriots.subsystems.Swerve.Swerve;
 
 public class Robot extends LoggedCommandRobot {
-  private final CommandXboxController driver, operator;
+  private final CommandXboxController driver = new CommandXboxController(0);
+  private final CommandXboxController operator = new CommandXboxController(1);
+
+  private final Swerve swerve = Swerve.create();
+
+  private final SwerveCommandFactory swerveCmdFactory = new SwerveCommandFactory(swerve);
 
   private final Alert browningOut;
 
@@ -60,10 +67,20 @@ public class Robot extends LoggedCommandRobot {
           SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
         },
         0.1);
+    
+    configureBindings();
+    configureGameBehavior();
+  }
 
-    // * HARDWARE INIT
-    driver = new CommandXboxController(0);
-    operator = new CommandXboxController(1);
+  public void configureBindings() {}
+
+  public void configureGameBehavior() {
+    inTeleoperated.whileTrue(
+      swerveCmdFactory.teleopDrive(
+        driver::getLeftY, 
+        driver::getLeftY, 
+        driver::getRightX)
+    );
   }
 
   /** Command for driver controller rumble */
