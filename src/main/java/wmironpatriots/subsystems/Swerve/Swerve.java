@@ -5,12 +5,12 @@ import static edu.wpi.first.units.Units.Seconds;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import wmironpatriots.Constants;
 import wmironpatriots.Robot;
@@ -55,6 +55,8 @@ public class Swerve implements Subsystem {
     this.gyro = gyro;
 
     odometry = new SwerveDrivePoseEstimator(kinematics, getGyroRotation2d(), getSwerveModulePositions(), new Pose2d());
+
+    setDefaultCommand(stop());
   }
 
   @Override
@@ -85,30 +87,37 @@ public class Swerve implements Subsystem {
    * Converts a robot centric velocity into {@link SwerveModuleState} setpoint for each module
    * 
    * @param velocity {@link ChassisVelocity} representing desired robot centric velocity setpoint
+   * @return {@link Command}
    */
-  public void setVelocitySetpoint(ChassisVelocity velocity) {
-    // https://github.com/wpilibsuite/allwpilib/issues/7332
-    var states = kinematics.toSwerveModuleStates(velocity.getRobotRelative());
-    SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_LINEAR_SPEED);
+  public Command setChassisVelocity(ChassisVelocity velocity) {
+    return run(() -> {
+      // https://github.com/wpilibsuite/allwpilib/issues/7332
+      var states = kinematics.toSwerveModuleStates(velocity.getRobotRelative());
+      SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_LINEAR_SPEED);
 
-    var speeds = kinematics.toChassisSpeeds(states);
-    speeds = ChassisSpeeds.discretize(speeds, Constants.LOOPTIME.in(Seconds));
-    
-    states = kinematics.toSwerveModuleStates(speeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_LINEAR_SPEED);
+      var speeds = kinematics.toChassisSpeeds(states);
+      speeds = ChassisSpeeds.discretize(speeds, Constants.LOOPTIME.in(Seconds));
+      
+      states = kinematics.toSwerveModuleStates(speeds);
+      SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_LINEAR_SPEED);
 
-    for (int i = 0; i < modules.length; i++) {
-      modules[i].setSetpoints(states[i]);
-    }
+      for (int i = 0; i < modules.length; i++) {
+        modules[i].setSetpoints(states[i]);
+      }
+    });
   }
   
   /**
-   * Stop all swerve modules
+   * Stops all swerve motors 
+   * 
+   * @return {@link Command}
    */
-  public void stop() {
-    for (Module module : modules) {
-      module.stop();
-    }
+  public Command stop() {
+    return runOnce(() -> {
+      for (Module module : modules) {
+        module.stop();
+      }
+    }).withName("Stop");
   }
 
   /**
