@@ -14,7 +14,7 @@ import edu.wpi.first.units.measure.Time;
 import lib.drivers.CanDeviceId;
 
 public class Constants {
-  public static Time LOOPTIME = Seconds.of(0.02)
+  public static Time LOOPTIME = Seconds.of(0.02);
 
   /** Flags for runtime */
   public static class FLAGS {
