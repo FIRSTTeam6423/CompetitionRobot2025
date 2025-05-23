@@ -7,7 +7,6 @@
 package lib.utils;
 
 import java.lang.reflect.InvocationTargetException;
-
 import monologue.Monologue;
 
 // TODO make this less stupid :)

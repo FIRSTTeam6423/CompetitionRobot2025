@@ -67,7 +67,7 @@ public class Robot extends LoggedCommandRobot {
           SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
         },
         0.1);
-    
+
     configureBindings();
     configureGameBehavior();
   }
@@ -76,11 +76,7 @@ public class Robot extends LoggedCommandRobot {
 
   public void configureGameBehavior() {
     inTeleoperated.whileTrue(
-      swerveCmdFactory.teleopDrive(
-        driver::getLeftY, 
-        driver::getLeftY, 
-        driver::getRightX)
-    );
+        swerveCmdFactory.teleopDrive(driver::getLeftY, driver::getLeftY, driver::getRightX));
   }
 
   /** Command for driver controller rumble */

@@ -1,3 +1,9 @@
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
 package wmironpatriots.subsystems.Swerve;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
@@ -46,27 +52,16 @@ public class SwerveConstants {
   public static final Distance RADIUS = Meters.of(0);
 
   public static final LinearVelocity MAX_LINEAR_SPEED = MetersPerSecond.of(0);
-  public static final AngularVelocity MAX_ANGULAR_RATE = RadiansPerSecond.of(MAX_LINEAR_SPEED.in(MetersPerSecond) / RADIUS.in(Meters));
+  public static final AngularVelocity MAX_ANGULAR_RATE =
+      RadiansPerSecond.of(MAX_LINEAR_SPEED.in(MetersPerSecond) / RADIUS.in(Meters));
 
-  public static final ProfiledPIDController LINEAR_VELOCITY_FEEDBACK_CONTROLLER = 
-    new ProfiledPIDController(
-      0.0, 
-      0.0, 
-      0.0, 
-      new TrapezoidProfile.Constraints(
-        0.0, 
-        0.0));
+  public static final ProfiledPIDController LINEAR_VELOCITY_FEEDBACK_CONTROLLER =
+      new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
 
-  public static final ProfiledPIDController ANGULAR_RATE_FEEDBACK_CONTROLLER = 
-    new ProfiledPIDController(
-      0.0, 
-      0.0, 
-      0.0, 
-      new TrapezoidProfile.Constraints(
-        0.0, 
-        0.0));
+  public static final ProfiledPIDController ANGULAR_RATE_FEEDBACK_CONTROLLER =
+      new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
 
-  public static final Translation2d[] MODULE_OFFSETS = new Translation2d[4]; 
+  public static final Translation2d[] MODULE_OFFSETS = new Translation2d[4];
 
   public static final ModuleConfig[] MODULE_CONFIGS = new ModuleConfig[4];
 

@@ -9,7 +9,6 @@ package wmironpatriots;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.CANBus;
-
 import edu.wpi.first.units.measure.Time;
 import lib.drivers.CanDeviceId;
 

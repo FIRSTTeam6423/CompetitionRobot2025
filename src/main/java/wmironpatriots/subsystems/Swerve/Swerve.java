@@ -1,3 +1,9 @@
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
 package wmironpatriots.subsystems.Swerve;
 
 import static edu.wpi.first.units.Units.Seconds;
@@ -12,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import lib.swerve.ChassisVelocity;
 import wmironpatriots.Constants;
 import wmironpatriots.Robot;
 import wmironpatriots.subsystems.Swerve.gyro.GyroHardware;
@@ -19,7 +26,6 @@ import wmironpatriots.subsystems.Swerve.gyro.GyroHardwareComp;
 import wmironpatriots.subsystems.Swerve.gyro.GyroHardwareNone;
 import wmironpatriots.subsystems.Swerve.module.Module;
 import wmironpatriots.subsystems.Swerve.module.ModuleHardwareComp;
-import lib.swerve.ChassisVelocity;
 
 public class Swerve implements Subsystem {
   public static Swerve create() {
@@ -54,7 +60,9 @@ public class Swerve implements Subsystem {
     this.modules = modules;
     this.gyro = gyro;
 
-    odometry = new SwerveDrivePoseEstimator(kinematics, getGyroRotation2d(), getSwerveModulePositions(), new Pose2d());
+    odometry =
+        new SwerveDrivePoseEstimator(
+            kinematics, getGyroRotation2d(), getSwerveModulePositions(), new Pose2d());
 
     setDefaultCommand(stop());
   }
@@ -75,49 +83,50 @@ public class Swerve implements Subsystem {
   @Override
   public void simulationPeriodic() {
     var angularRate = getVelocity().getRobotRelative().omegaRadiansPerSecond;
-    simulatedHeading = 
-      simulatedHeading.rotateBy(
-        Rotation2d.fromRadians(
-          !Double.isNaN(angularRate)
-            ? angularRate * Constants.LOOPTIME.in(Seconds)
-            : 0));
+    simulatedHeading =
+        simulatedHeading.rotateBy(
+            Rotation2d.fromRadians(
+                !Double.isNaN(angularRate) ? angularRate * Constants.LOOPTIME.in(Seconds) : 0));
   }
 
   /**
    * Converts a robot centric velocity into {@link SwerveModuleState} setpoint for each module
-   * 
+   *
    * @param velocity {@link ChassisVelocity} representing desired robot centric velocity setpoint
    * @return {@link Command}
    */
   public Command setChassisVelocity(ChassisVelocity velocity) {
-    return run(() -> {
-      // https://github.com/wpilibsuite/allwpilib/issues/7332
-      var states = kinematics.toSwerveModuleStates(velocity.getRobotRelative());
-      SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_LINEAR_SPEED);
+    return run(
+        () -> {
+          // https://github.com/wpilibsuite/allwpilib/issues/7332
+          var states = kinematics.toSwerveModuleStates(velocity.getRobotRelative());
+          SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_LINEAR_SPEED);
 
-      var speeds = kinematics.toChassisSpeeds(states);
-      speeds = ChassisSpeeds.discretize(speeds, Constants.LOOPTIME.in(Seconds));
-      
-      states = kinematics.toSwerveModuleStates(speeds);
-      SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_LINEAR_SPEED);
+          var speeds = kinematics.toChassisSpeeds(states);
+          speeds = ChassisSpeeds.discretize(speeds, Constants.LOOPTIME.in(Seconds));
 
-      for (int i = 0; i < modules.length; i++) {
-        modules[i].setSetpoints(states[i]);
-      }
-    });
+          states = kinematics.toSwerveModuleStates(speeds);
+          SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_LINEAR_SPEED);
+
+          for (int i = 0; i < modules.length; i++) {
+            modules[i].setSetpoints(states[i]);
+          }
+        });
   }
-  
+
   /**
-   * Stops all swerve motors 
-   * 
+   * Stops all swerve motors
+   *
    * @return {@link Command}
    */
   public Command stop() {
-    return runOnce(() -> {
-      for (Module module : modules) {
-        module.stop();
-      }
-    }).withName("Stop");
+    return runOnce(
+            () -> {
+              for (Module module : modules) {
+                module.stop();
+              }
+            })
+        .withName("Stop");
   }
 
   /**
@@ -142,7 +151,8 @@ public class Swerve implements Subsystem {
   }
 
   /**
-   * @return {@link ChassisVelocity} representing the measured chassis velocity derived from module states
+   * @return {@link ChassisVelocity} representing the measured chassis velocity derived from module
+   *     states
    */
   public ChassisVelocity getVelocity() {
     var moduleStates = new SwerveModuleState[modules.length];
@@ -161,12 +171,13 @@ public class Swerve implements Subsystem {
     for (int i = 0; i < moduleStates.length; i++) {
       moduleStates[i] = modules[i].getSwerveModuleState();
     }
-    
+
     return moduleStates;
   }
 
   /**
-   * @return {@link SwerveModulePosition} array representing the measured drive distance and angle of modules
+   * @return {@link SwerveModulePosition} array representing the measured drive distance and angle
+   *     of modules
    */
   public SwerveModulePosition[] getSwerveModulePositions() {
     var modulePoses = new SwerveModulePosition[modules.length];
@@ -176,5 +187,4 @@ public class Swerve implements Subsystem {
 
     return modulePoses;
   }
-
 }
