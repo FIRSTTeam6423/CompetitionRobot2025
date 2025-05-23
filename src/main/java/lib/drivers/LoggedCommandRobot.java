@@ -16,6 +16,7 @@ import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 
+/** Inspired by https://github.com/wpilibsuite/allwpilib/pull/5939 */
 public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
   private final Timer gcTimer = new Timer();
   protected final CommandScheduler scheduler = CommandScheduler.getInstance();
