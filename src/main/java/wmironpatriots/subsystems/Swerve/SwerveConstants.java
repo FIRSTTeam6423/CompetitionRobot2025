@@ -61,6 +61,8 @@ public class SwerveConstants {
   public static final ProfiledPIDController ANGULAR_RATE_FEEDBACK_CONTROLLER =
       new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
 
+  public static final Distance WHEEL_RADIUS = Meters.of(0.0);
+
   public static final Translation2d[] MODULE_OFFSETS = new Translation2d[4];
 
   public static final ModuleConfig[] MODULE_CONFIGS = new ModuleConfig[4];
