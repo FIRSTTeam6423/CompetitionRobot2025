@@ -6,12 +6,15 @@
 
 package wmironpatriots;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.ctre.phoenix6.CANBus;
 
+import edu.wpi.first.units.measure.Time;
 import lib.drivers.CanDeviceId;
 
 public class Constants {
-  public static double LOOPTIME = 0.02;
+  public static Time LOOPTIME = Seconds.of(0.02)
 
   /** Flags for runtime */
   public static class FLAGS {
