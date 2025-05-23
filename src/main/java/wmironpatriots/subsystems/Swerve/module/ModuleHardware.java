@@ -4,7 +4,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
 
-package wmironpatriots.subsystems.drive.module;
+package wmironpatriots.subsystems.Swerve.module;
 
 /** Generalized hardware methods for a swerve-module's hardware */
 public interface ModuleHardware {

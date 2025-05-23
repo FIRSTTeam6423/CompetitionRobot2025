@@ -4,7 +4,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
 
-package wmironpatriots.subsystems.drive.module;
+package wmironpatriots.subsystems.Swerve.module;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -20,8 +20,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
-import lib.devicesUtils.TalonFxUtil;
-import wmironpatriots.subsystems.drive.module.Module.ModuleConfig;
+import lib.utils.TalonFxUtil;
+import wmironpatriots.subsystems.Swerve.SwerveConstants.ModuleConfig;
 
 /**
  * Represents a Swerve module with the following specifications:
@@ -52,19 +52,19 @@ public class ModuleHardwareComp implements ModuleHardware {
   private final BaseStatusSignal drivePose, driveSpeed, driveVolts, driveCurrent, driveTorque;
   private final BaseStatusSignal cancoderPose;
 
-  public ModuleHardwareComp(ModuleConfig cfg) {
-    index = cfg.index();
+  public ModuleHardwareComp(ModuleConfig moduleConfig) {
+    index = moduleConfig.index();
 
-    pivot = new TalonFX(cfg.pivotId());
-    drive = new TalonFX(cfg.pivotId());
+    pivot = new TalonFX(moduleConfig.pivotId());
+    drive = new TalonFX(moduleConfig.pivotId());
 
-    cancoder = new CANcoder(cfg.encoderId());
+    cancoder = new CANcoder(moduleConfig.encoderId());
 
     // Pivot Configs
     pivotCfg = TalonFxUtil.getDefaultTalonFxCfg();
 
     pivotCfg.MotorOutput.Inverted =
-        cfg.pivotInverted()
+        moduleConfig.pivotInverted()
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
     pivotCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -78,8 +78,8 @@ public class ModuleHardwareComp implements ModuleHardware {
     pivotCfg.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
 
     pivotCfg.ClosedLoopGeneral.ContinuousWrap = true;
-    pivotCfg.Feedback.FeedbackRemoteSensorID = cfg.encoderId();
-    pivotCfg.Feedback.FeedbackRotorOffset = cfg.encoderOffsetRevs();
+    pivotCfg.Feedback.FeedbackRemoteSensorID = moduleConfig.encoderId();
+    pivotCfg.Feedback.FeedbackRotorOffset = moduleConfig.encoderOffsetRevs();
     pivotCfg.Feedback.RotorToSensorRatio = 0.0; // TODO
     pivotCfg.Feedback.SensorToMechanismRatio = 0.0;
     pivotCfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
@@ -96,7 +96,7 @@ public class ModuleHardwareComp implements ModuleHardware {
     driveCfg = TalonFxUtil.getDefaultTalonFxCfg();
 
     driveCfg.MotorOutput.Inverted =
-        cfg.driveInverted()
+        moduleConfig.driveInverted()
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
     driveCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -123,9 +123,9 @@ public class ModuleHardwareComp implements ModuleHardware {
     // CANcoder configs
     cancoderCfg = new CANcoderConfiguration();
 
-    cancoderCfg.MagnetSensor.MagnetOffset = cfg.encoderOffsetRevs();
+    cancoderCfg.MagnetSensor.MagnetOffset = moduleConfig.encoderOffsetRevs();
     cancoderCfg.MagnetSensor.SensorDirection =
-        cfg.pivotInverted()
+        moduleConfig.pivotInverted()
             ? SensorDirectionValue.CounterClockwise_Positive
             : SensorDirectionValue.Clockwise_Positive;
 

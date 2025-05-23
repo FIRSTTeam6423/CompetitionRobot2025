@@ -1,31 +1,11 @@
-package wmironpatriots.subsystems.drive.module;
+package wmironpatriots.subsystems.Swerve.module;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import wmironpatriots.subsystems.drive.module.ModuleHardware.LoggableState;
+import wmironpatriots.subsystems.Swerve.module.ModuleHardware.LoggableState;
 
 public class Module {
-  /**
-   * Represents the constants of a single module
-   *
-   * @param index Module identifier
-   * @param pivotId Pivot motor CAN ID
-   * @param driveId Drive motor CAN ID
-   * @param encoderId Encoder CAN/PWM ID
-   * @param encoderOffsetRevs Encoder measurement offset in Revs
-   * @param pivotInverted Is pivot motor inverted?
-   * @param driveInverted Is drive motor inverted?
-   */
-  public static record ModuleConfig(
-      int index,
-      int pivotId,
-      int driveId,
-      int encoderId,
-      double encoderOffsetRevs,
-      boolean pivotInverted,
-      boolean driveInverted) {}  
-
   private final ModuleHardware hardware;
 
   public LoggableState loggableState =
@@ -35,7 +15,7 @@ public class Module {
     this.hardware = hardware;
   }
 
-  /** Periodic logic of Swerve Module */
+  /** Periodic Swerve Module logic */
   public void periodic() {
     loggableState = hardware.getLoggableState();
   }
