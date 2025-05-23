@@ -34,7 +34,9 @@ import wmironpatriots.subsystems.Swerve.SwerveConstants.ModuleConfig;
  * <p>CANcoder absolute encoder
  */
 public class ModuleHardwareComp implements ModuleHardware {
-  private final TalonFX pivot, drive;
+  private final int index;
+
+  protected final TalonFX pivot, drive;
   private final CANcoder cancoder;
 
   private final TalonFXConfiguration pivotCfg, driveCfg;
@@ -44,8 +46,6 @@ public class ModuleHardwareComp implements ModuleHardware {
   private final TorqueCurrentFOC currentReq = new TorqueCurrentFOC(0.0);
   private final PositionTorqueCurrentFOC poseReq = new PositionTorqueCurrentFOC(0.0);
   private final VelocityTorqueCurrentFOC velReq = new VelocityTorqueCurrentFOC(0.0);
-
-  private final int index;
 
   private final BaseStatusSignal pivotPose, pivotVolts, pivotCurrent, pivotTorque;
   private final BaseStatusSignal drivePose, driveSpeed, driveVolts, driveCurrent, driveTorque;
