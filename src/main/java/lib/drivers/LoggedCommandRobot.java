@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lib.utils.Tracer;
 import monologue.Logged;
 import monologue.Monologue;
@@ -20,6 +21,10 @@ import monologue.Monologue.MonologueConfig;
 public abstract class LoggedCommandRobot extends TimedRobot implements Logged {
   private final Timer gcTimer = new Timer();
   protected final CommandScheduler scheduler = CommandScheduler.getInstance();
+
+  public final Trigger disabled = new Trigger(() -> DriverStation.isDisabled());
+  public final Trigger inTeleoperated = new Trigger(() -> DriverStation.isTeleopEnabled());
+  public final Trigger inAutonomous = new Trigger(() -> DriverStation.isAutonomous());
 
   private Command autonCommand;
 
