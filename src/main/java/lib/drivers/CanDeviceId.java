@@ -6,6 +6,7 @@
 
 package lib.drivers;
 
+/** Represents a CAN device's identification (inspired by FRC 254) */
 public class CanDeviceId {
   private final int id;
   private final String busName;
