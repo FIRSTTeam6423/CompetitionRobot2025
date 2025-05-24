@@ -11,6 +11,7 @@ public interface ModuleHardware {
   /**
    * Represents a set of measured values from module hardware
    *
+   * @param index
    * @param pivotIsOk Is pivot motor measuring correctly?
    * @param pivotRevs Position measurement of pivot motor in revolutions (relative encoder)
    * @param pivotSetpointPoseRevs Position setpoint of pivot motor in revolutions
@@ -28,6 +29,7 @@ public interface ModuleHardware {
    * @param cancoderRevs Position measurement of pivot motor in revolutions
    */
   public static record LoggableState(
+      int index,
       boolean pivotIsOk,
       double pivotRevs,
       double pivotSetpointPoseRevs,

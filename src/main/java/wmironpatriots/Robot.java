@@ -75,8 +75,12 @@ public class Robot extends LoggedCommandRobot {
   public void configureBindings() {}
 
   public void configureGameBehavior() {
+    swerve.setDefaultCommand(swerveCmdFactory.defaultCommand());
+
     inTeleoperated.whileTrue(
-        swerveCmdFactory.teleopDrive(driver::getLeftY, driver::getLeftY, driver::getRightX));
+        swerveCmdFactory
+            .teleopDrive(driver::getLeftX, driver::getLeftY, driver::getRightX)
+            .repeatedly());
   }
 
   /** Command for driver controller rumble */

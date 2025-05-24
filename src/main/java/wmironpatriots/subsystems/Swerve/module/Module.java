@@ -9,13 +9,14 @@ package wmironpatriots.subsystems.Swerve.module;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import lib.utils.LogUtils;
 import wmironpatriots.subsystems.Swerve.module.ModuleHardware.LoggableState;
 
 public class Module {
   private final ModuleHardware hardware;
 
   public LoggableState loggableState =
-      new LoggableState(false, 0, 0, 0, 0, 0, false, 0, 0, 0, 0, 0, 0, false, 0);
+      new LoggableState(0, false, 0, 0, 0, 0, 0, false, 0, 0, 0, 0, 0, 0, false, 0);
 
   public Module(ModuleHardware hardware) {
     this.hardware = hardware;
@@ -24,6 +25,7 @@ public class Module {
   /** Periodic Swerve Module logic */
   public void periodic() {
     loggableState = hardware.getLoggableState();
+    LogUtils.logRecord("Swerve/Module" + loggableState.index(), loggableState);
   }
 
   /**

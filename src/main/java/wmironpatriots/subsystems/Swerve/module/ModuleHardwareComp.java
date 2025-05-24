@@ -57,7 +57,8 @@ public class ModuleHardwareComp implements ModuleHardware {
     pivot = new TalonFX(moduleConfig.pivotId().getId(), moduleConfig.pivotId().getBusName());
     drive = new TalonFX(moduleConfig.driveId().getId(), moduleConfig.driveId().getBusName());
 
-    cancoder = new CANcoder(moduleConfig.encoderId().getId(), moduleConfig.encoderId().getBusName());
+    cancoder =
+        new CANcoder(moduleConfig.encoderId().getId(), moduleConfig.encoderId().getBusName());
 
     // Pivot Configs
     pivotCfg = TalonFxUtil.getDefaultTalonFxCfg();
@@ -148,6 +149,7 @@ public class ModuleHardwareComp implements ModuleHardware {
   @Override
   public LoggableState getLoggableState() {
     return new LoggableState(
+        index,
         BaseStatusSignal.refreshAll(pivotPose, pivotVolts, pivotCurrent, pivotTorque).isOK(),
         pivotPose.getValueAsDouble(),
         poseReq.Position,

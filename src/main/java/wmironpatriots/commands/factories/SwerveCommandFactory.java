@@ -6,16 +6,25 @@
 
 package wmironpatriots.commands.factories;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.DoubleSupplier;
-import lib.swerve.ChassisVelocity;
 import wmironpatriots.subsystems.Swerve.Swerve;
+import wmironpatriots.subsystems.Swerve.SwerveConstants;
 
 public class SwerveCommandFactory {
   private final Swerve swerve;
 
   public SwerveCommandFactory(Swerve swerve) {
     this.swerve = swerve;
+  }
+
+  public Command defaultCommand() {
+    return Commands.runOnce(() -> swerve.stop(), swerve);
   }
 
   /**
@@ -30,11 +39,19 @@ public class SwerveCommandFactory {
       DoubleSupplier xSpeedMagnitude,
       DoubleSupplier ySpeedMagnitude,
       DoubleSupplier angularRateMagnitude) {
-    return swerve.setChassisVelocity(
-        ChassisVelocity.fromFieldRelativeSpeeds(
-            xSpeedMagnitude.getAsDouble(),
-            ySpeedMagnitude.getAsDouble(),
-            angularRateMagnitude.getAsDouble(),
-            swerve.getHeadingRotation2d().getRadians()));
+    return Commands.run(
+        () ->
+            swerve.setChassisSpeeds(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    xSpeedMagnitude.getAsDouble()
+                        * SwerveConstants.MAX_LINEAR_SPEED.in(MetersPerSecond)
+                        * -1,
+                    ySpeedMagnitude.getAsDouble()
+                        * SwerveConstants.MAX_LINEAR_SPEED.in(MetersPerSecond),
+                    angularRateMagnitude.getAsDouble()
+                        * SwerveConstants.MAX_ANGULAR_RATE.in(RadiansPerSecond)
+                        * -1,
+                    swerve.getHeadingRotation2d())),
+        swerve);
   }
 }

@@ -7,6 +7,7 @@
 package wmironpatriots.subsystems.Swerve;
 
 import static edu.wpi.first.units.Units.FeetPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
@@ -52,7 +53,8 @@ public class SwerveConstants {
 
   public static final Distance BUMPER_WIDTH = Meters.of(0.0889);
   public static final Distance TRACK_WIDTH = Meters.of(0.596201754);
-  public static final Distance RADIUS = Meters.of(Math.hypot(TRACK_WIDTH.in(Meters) / 2.0, TRACK_WIDTH.in(Meters) / 2.0));
+  public static final Distance RADIUS =
+      Meters.of(Math.hypot(TRACK_WIDTH.in(Meters) / 2.0, TRACK_WIDTH.in(Meters) / 2.0));
 
   public static final LinearVelocity MAX_LINEAR_SPEED = FeetPerSecond.of(16.5);
   public static final AngularVelocity MAX_ANGULAR_RATE =
@@ -64,44 +66,26 @@ public class SwerveConstants {
   public static final ProfiledPIDController ANGULAR_RATE_FEEDBACK_CONTROLLER =
       new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
 
-  public static final Distance WHEEL_RADIUS = Meters.of(0.0);
+  public static final Distance WHEEL_RADIUS = Inches.of(3);
 
-  public static final Translation2d[] MODULE_OFFSETS = new Translation2d[4];
+  public static final Translation2d[] MODULE_OFFSETS =
+      new Translation2d[] {
+        new Translation2d(TRACK_WIDTH.in(Meters) / 2.0, TRACK_WIDTH.in(Meters) / 2.0),
+        new Translation2d(TRACK_WIDTH.in(Meters) / 2.0, -TRACK_WIDTH.in(Meters) / 2.0),
+        new Translation2d(-TRACK_WIDTH.in(Meters) / 2.0, TRACK_WIDTH.in(Meters) / 2.0),
+        new Translation2d(-TRACK_WIDTH.in(Meters) / 2.0, -TRACK_WIDTH.in(Meters) / 2.0)
+      };
 
-   public static final ModuleConfig[] MODULE_CONFIGS =
+  public static final ModuleConfig[] MODULE_CONFIGS =
       new ModuleConfig[] {
         new ModuleConfig(
-            0,
-            MATRIXID.FL_PIVOT,
-            MATRIXID.FL_DRIVE,
-            MATRIXID.FL_CANCODER,
-            -0.16,
-            false,
-            false),
+            0, MATRIXID.FL_PIVOT, MATRIXID.FL_DRIVE, MATRIXID.FL_CANCODER, -0.16, false, false),
         new ModuleConfig(
-            1, 
-            MATRIXID.FR_PIVOT, 
-            MATRIXID.FR_DRIVE, 
-            MATRIXID.FR_CANCODER, 
-            0.01,
-            true, 
-            false),
+            1, MATRIXID.FR_PIVOT, MATRIXID.FR_DRIVE, MATRIXID.FR_CANCODER, 0.01, true, false),
         new ModuleConfig(
-            2, 
-            MATRIXID.BL_PIVOT, 
-            MATRIXID.BL_DRIVE, 
-            MATRIXID.BL_CANCODER, 
-            0.36, 
-            true, 
-            false),
+            2, MATRIXID.BL_PIVOT, MATRIXID.BL_DRIVE, MATRIXID.BL_CANCODER, 0.36, true, false),
         new ModuleConfig(
-            3,
-            MATRIXID.BR_PIVOT,
-            MATRIXID.BR_DRIVE,
-            MATRIXID.BR_CANCODER,
-            -0.26,
-            true,
-            false),
+            3, MATRIXID.BR_PIVOT, MATRIXID.BR_DRIVE, MATRIXID.BR_CANCODER, -0.26, true, false),
       };
 
   public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(MODULE_OFFSETS);

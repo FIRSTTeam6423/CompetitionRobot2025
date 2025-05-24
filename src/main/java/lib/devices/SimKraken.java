@@ -1,3 +1,9 @@
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
 package lib.devices;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -8,7 +14,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.ChassisReference;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.Notifier;
@@ -33,32 +38,33 @@ public class SimKraken {
   private Notifier simNotifier = null;
   private double lastUpdateTimestamp = 0.0;
 
-  public SimKraken(CanDeviceId talonId, TalonFXConfiguration talonConfig, double JKgMetersSquared, double gearing) {
+  public SimKraken(
+      CanDeviceId talonId,
+      TalonFXConfiguration talonConfig,
+      double JKgMetersSquared,
+      double gearing) {
     talon = new TalonFX(talonId.getId(), talonId.getBusName());
     talon.getConfigurator().apply(talonConfig);
 
     // Configure sim state to follow the same orientation as talon config
-    this.talon.getSimState().Orientation = 
-      talonConfig.MotorOutput.Inverted == InvertedValue.CounterClockwise_Positive
-        ? ChassisReference.CounterClockwise_Positive
-        : ChassisReference.Clockwise_Positive;
+    this.talon.getSimState().Orientation =
+        talonConfig.MotorOutput.Inverted == InvertedValue.CounterClockwise_Positive
+            ? ChassisReference.CounterClockwise_Positive
+            : ChassisReference.Clockwise_Positive;
 
-    motorSim = new DCMotorSim(
-      LinearSystemId.createDCMotorSystem(
-        motor, 
-        JKgMetersSquared, 
-        gearing), 
-      motor, 
-      0.0,
-      0.0);
+    motorSim =
+        new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(motor, JKgMetersSquared, gearing), motor, 0.0, 0.0);
 
-      this.gearing = gearing;
+    this.gearing = gearing;
 
-      // Run sim at a faster rate so PID gains behave better
-      simNotifier = new Notifier(() -> {
-        updateSimState();
-      });
-      simNotifier.startPeriodic(0.005);
+    // Run sim at a faster rate so PID gains behave better
+    simNotifier =
+        new Notifier(
+            () -> {
+              updateSimState();
+            });
+    simNotifier.startPeriodic(0.005);
   }
 
   public void setAppliedVolts(double volts, boolean focEnabled) {
@@ -77,23 +83,21 @@ public class SimKraken {
     talon.stopMotor();
   }
 
-
-
   private double addFriction(double motorVoltage, double frictionVoltage) {
-        if (Math.abs(motorVoltage) < frictionVoltage) {
-            motorVoltage = 0.0;
-        } else if (motorVoltage > 0.0) {
-            motorVoltage -= frictionVoltage;
-        } else {
-            motorVoltage += frictionVoltage;
-        }
-        return motorVoltage;
+    if (Math.abs(motorVoltage) < frictionVoltage) {
+      motorVoltage = 0.0;
+    } else if (motorVoltage > 0.0) {
+      motorVoltage -= frictionVoltage;
+    } else {
+      motorVoltage += frictionVoltage;
     }
+    return motorVoltage;
+  }
 
   /** Updates simulated motor */
   private void updateSimState() {
     var simState = talon.getSimState();
-    double simVolts = addFriction(simState.getMotorVoltage(), 0.25); 
+    double simVolts = addFriction(simState.getMotorVoltage(), 0.25);
 
     motorSim.setInput(simVolts);
     double timestamp = RobotController.getFPGATime();
